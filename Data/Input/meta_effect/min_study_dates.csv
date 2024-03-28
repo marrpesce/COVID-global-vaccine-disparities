@@ -1,0 +1,421 @@
+﻿study ID,first author,publication_date,earliest_date,obs
+1,Amit,18/02/2021,,
+2,Immunisation and Countermeasures Division National Infection Service PHE,22/02/2021,,
+3,Dagan,24/02/2021,,
+4,Hyams,01/11/2021,,
+5,Mousten-Helms,09/03/2021,,
+6,Tande,11/03/2021,,
+7,Britton,15/03/2021,,
+8,Yelin,17/03/2021,,
+9,Public Health England,17/03/2021,,
+10,Shrotri,23/06/2021,,
+11,Thompson,29/03/2021,,
+12,Bouton,30/03/2021,,
+13,Regev-Yochay,07/07/2021,09/04/2021,[Update to April 9 preprint]
+14,Andrejko,20/07/2021,25/05/2021,[update to May 25 preprint]
+15,Glampson,17/09/2021,,
+16,Bjork,29/09/2021,21/04/2021,[Update to Apr 21 preprint]
+17,Mason,18/10/2021,22/04/2021,[Update to Apr 22 preprint]
+18,Hall,23/04/2021,21/02/2021,[Update to Feb 21 preprint]
+19,Vasileiou,23/04/2021,,
+20,Pritchard,09/06/2021,23/04/2021,[Update to Apr 23 preprint]
+21,Goldberg,30/03/2022,24/04/2021,[Update to Apr 24 2021 preprint]
+22,Tenforde,28/04/2021,,
+23,Gras-Valenti,29/04/2021,,
+24,Fabiani,29/04/2021,,
+25,Corchado-Garcia ,02/11/2021,30/04/2021,[Update to April 30 preprint]
+26,Haas,05/05/2021,24/03/2021,[Update to Mar 24 preprint]
+27,Abu-Raddad,08/07/2021,,
+28,Angel,06/05/2021,,
+29,Lopez-Bernal,13/05/2021,01/03/2021,[Update to Mar 1 preprint]
+30,Pilishvili ,14/05/2021,,
+31,Ismail,12/05/2021,,
+32,Ranzani,20/08/2021,21/07/2021,[update to Jul 21 preprint]
+33,PHE,20/05/2021,,
+34,Chung,20/08/2021,26/07/2021,[Update to July 26 preprint]
+35,Martinez-Bas,27/05/2021,,
+36,Khan,31/05/2021,,
+37,Salo,04/03/2022,,
+38,Thompson,30/06/2021,30/06/2021,[updated on June 30 2021]
+39,Emborg,30/06/2021,,[Update of Houston-Melms below]
+40,Skowornski,09/07/2021,,
+41,Flacco,10/06/2021,,
+42,Sheikh,14/06/2021,,
+43,Stowe,14/06/2021,,
+44,Azamgarhi,17/06/2021,,
+45,Young-Xu,06/10/2021,14/07/2021,[Update to Jul 14 preprint]
+46,Pawlowski,17/06/2021,18/02/2021,[Update to Feb. 18  2021 preprint]
+47,Saciuk,30/12/2021,27/06/2021,[Update to June 27 2021 preprint]
+48,Baum,18/11/2021,28/06/2021,[Update to June 28 preprint]
+49,Nasreen,07/02/2022,30/09/2021,[Published version of September 30 preprint]
+50,Jara,07/07/2021,,
+51,Tenforde,06/08/2021,08/07/2021,[Update to July 8 preprint]
+52,Chemaitelly,09/07/2021,,
+53,Goldshtein,12/07/2021,,
+54,Bertollini,13/07/2021,,
+55,John,13/07/2021,,
+56,Whitaker,02/01/2022,09/07/2021,[Update to July 9 2021 preprint]
+57,Prunas,27/01/2022,16/07/2021,[Update to July 16  2021 preprint]
+58,Butt,07/10/2021,22/06/2021,[Update to June 22 preprint]
+59,Balicer,07/09/2021,12/07/2021,[Update to July 12 preprint]
+60,Layan,03/03/2022,16/07/2021,July 16 2021 preprint]
+61,Butt,20/07/2021,,
+62,Lopez Bernal,21/07/2021,,
+63,Kim,08/09/2021,22/07/2021,[Update to July 22 preprint]
+64,Hitchings,28/10/2021,22/07/2021,[Update to July 22 preprint]
+65,Carazo,30/08/2021,22/07/2021,[Update to July 22 preprint]
+67,Amirthalingam,10/12/2021,28/07/2021,[Published version of July 28 pre-print]
+68,Gram,17/12/2021,28/07/2021,[Published version of July 28 pre-print]
+69,Alali,29/07/2021,,
+70,Lef√®vre,31/07/2021,,
+71,de Gier,05/08/2021,,
+72,Puranik,09/08/2021,,
+73,Chemaitelly,09/08/2021,,
+74,Tang,02/11/2021,11/08/2021,[Update to Aug 11 preprint]
+75,Nanduri,18/08/2021,,
+76,Chin,27/01/2022,18/08/2021,[Published version of August 18  2021 preprint]
+77,Tenforde,04/11/2021,18/08/2021,[Update to Aug 18 MMWR)
+78,Pouwels,14/10/2021,18/08/2021,[Update to Aug 18 preprint]
+79,Prasad,19/08/2021,,
+80,Tartof,16/10/2021,23/08/2021,[Update to Aug 23 preprint]
+81,Golberg,27/10/2021,25/08/2021,[Update to Aug 25 preprint]
+82,Chemaitelly ,06/10/2021,27/08/2021,[Update to Aug 27 preprint]
+83,Nunes,23/09/2021,,
+84,Katz,10/12/2021,02/09/2021,[Published version of September 2 pre-print]
+85,Giansante,02/09/2021,,
+86,Bruxvoort,24/11/2021,02/09/2021,[Update to September 2 2021 Preprint]
+87,Barlow,03/09/2021,,
+88,Tande,06/09/2021,,
+89,Iliaki,18/10/2021,06/09/2021,[Update to September 6 preprint]
+90,Thompson,08/09/2021,,
+91,Dagan,07/09/2021,,
+92,Grannis,10/09/2021,,
+93,Polinski,17/03/2022,10/09/2021,[Published version of previous September 10 2021 preprint]
+94,Bajema,10/09/2021,,
+95,Andrews,12/01/2022,14/09/2021,[Update to September 14 2021 preprint]
+96,Glatman-Freedman,16/09/2021,,
+97,Self,17/09/2021,,
+98,Skowronski,27/01/2022,,
+99,Pilishvili,22/09/2021,,
+100,Meyer,09/09/2021,23/09/2021,[Update to September 23 2021 preprint]
+101,Glatman-Freedman,27/09/2021,,
+102,Eyre,05/01/2022,29/09/2021,[Update to Sept 29  2021 preprint]
+103,Martinez-Baz,30/09/2021,,
+104,Bruxvoort,15/12/2021,01/10/2021,[Update to October 1 2021 preprint]
+105,Liu,24/05/2022,07/10/2021,[Published version of October 7 2021 preprint]
+106,Ranzani,18/10/2021,,
+107,Arregoces,19/10/2021,,
+108,Olson,19/10/2021,,
+109,Irizarry,17/11/2021,20/10/2021,[Updated version of Robles-Fontan et al (October 20 2021)]
+110,Chin,20/10/2021,,
+111,Ranzani,09/02/2022,20/10/2021,[Update to (October 20 2021 preprint]
+112,Nordstrom,04/02/2022,25/10/2021,[Published version of October 25 preprint]
+113,Lin,10/03/2022,26/10/2021,[Update to October 26 2021 preprint]
+114,Skowronski,19/04/2022,26/10/2021,[Update to Oct 26 2021 preprint]
+115,Nordstrom,18/10/2021,,
+116,Reis,20/10/2021,,
+117,Sheikh,20/10/2021,,
+118,Embi,30/12/2021,05/11/2021,[Updated version of Embi et al November 5 2021]
+119,Poukka,31/01/2022,08/11/2021,[Published version of November 8 2021]
+120,Al Hosani,18/03/2022,27/10/2021,[Published version of October 27 2021 preprint]
+121,Ng,01/11/2021,,
+122,Paixao,05/04/2022,12/11/2021,[Update to November 12 preprint]
+123,Desai,23/11/2021,,
+124,Thiruvengadam,25/11/2021,,
+125,Hall,16/02/2022,01/12/2021,[Update to December 1 2021 preprint]
+126,Voko,24/11/2021,,
+127,Wu,02/12/2021,,
+128,Muhsen,28/10/2021,,
+129,Yassi,06/12/2021,,
+130,UKHSA,27/01/2022,14/01/2022,[Update to Jan 14 2022 briefing] [March 2  2022 publication by Andrews et al with VE estimated till January 12 2022 can be accessed here]
+131,Bajema,10/12/2021,10/09/2021,Updated analysis of reference #94
+132,Powell,21/03/2022,18/02/2022,[Update to February 18  2022 preprint]
+133,Berec,08/07/2022,12/12/2021,[Published version of December 12th preprint]
+134,Machado,13/09/2021,14/12/2021,[Update to December 14 2021 preprint]
+135,Florea,28/04/2022,24/11/2021,Updated interim analysis of reference #86
+136,Young-Xu,15/12/2021,06/10/2021,Updated analysis of reference #45
+137,Castillo-Arregoces,16/12/2021,,
+138,McLean,18/02/2022,16/12/2021,Published version of pre-print from December 16 2021
+139,Abu-Raddad,21/01/2022,16/12/2021,Published version of December 16 2021
+140,Bekker,19/03/2022,20/12/2021,[Published version of December 20 2021]
+141,Tartof,14/02/2022,21/12/2021,[Updated version of previous December 21st preprint]
+142,Lewis,21/12/2021,,
+143,Ioannou,21/12/2021,,
+144,Hansen,23/12/2021,,
+146,Katikireddi,20/12/2021,,
+147,Amir,21/12/2021,,
+148,Ostropolets,23/08/2022,25/12/2021,[Update to December 25 2021 preprint]
+149,Alali,07/12/2021,,
+150,Mendola,23/12/2021,,
+151,Collie,29/12/2021,,
+152,Lutrick,31/12/2021,,
+153,Chung,01/01/2022,,
+155,Cerqueira-Silva ,31/03/2022,27/12/2021,(Update to December 27 2021 preprint]
+156,Petra≈°,22/12/2021,,
+157,Prunas,09/12/2022,05/01/2022,[Update to January 5 2022 preprint]
+158,Zambrano,07/01/2022,,
+159,Tseng,21/02/2022,21/01/2022,[update from January 21 preprint]
+160,Chiew,28/09/2022,28/09/2022,[Update to January 8 2022 preprint]
+161,Olson,12/01/2022,,
+162,Gazit,24/11/2021,,
+163,Suah,21/03/2022,16/01/2022,[Update to (January 16 2022 preprint]
+164,Young-Xu,03/08/2022,13/03/2022,[Update to March 13 2022 preprint]
+165,Tartof,22/04/2022,18/01/2022,[Update to January 18 2022 preprint]
+166,Amodio,11/03/2022,13/01/2022,[Published version od January 13 2022 preprint]
+167,Thompson,21/01/2022,,
+168,Bedston,21/01/2022,,
+169,Botton,24/01/2022,,
+170,Spensley,26/01/2022,,
+171,Willet,26/01/2022,,
+172,Belayachi,07/12/2022,27/01/2022,[Update to January 27 2021 preprint]
+173,Tenforde,28/01/2022,,
+174,Lytras,14/06/2022,29/01/2022,[Published version of January 29 2022 preprint]
+175,Roberts,26/07/2022,31/01/2022,[Published version of January 31 2022 preprint]
+176,Sritipsukho,03/02/2022,,
+177,Suryatma,04/02/2022,03/02/2022,[Update to February 3 preprint]
+178,Lauring,09/03/2022,07/02/2022,[February 7 2022]
+179,Chemaitelly,02/06/2022,13/03/2022,[Published version of March 13 2022 preprint]
+180,Cerqueira-Silva,09/02/2022,,
+181,Butt,09/02/2022,,
+183,Hayek,27/01/2022,,
+184,Goldin,08/02/2022,,
+185,Ferdinands,11/02/2022,,
+186,Jara,20/04/2023,15/02/2022,[Update to February 15 2022 preprint]
+187,Halasa,22/06/2022,15/02/2022,[Update to February 15 2022 preprint]
+188,Gazit,15/02/2022,,
+189,Filon,15/02/2022,,
+190,Wu,10/01/2022,,
+191,Mallow,09/02/2022,,
+192,Shen,23/02/2022,,
+193,Cura-Bilbao,02/02/2022,,
+194,Smid,15/10/2022,25/02/2022,[Published version of Feb 25 2022 preprint]
+195,Klein,01/03/2022,,
+196,Wright,25/02/2022,,
+197,Perry,03/03/2022,,
+198,Oliver,09/03/2022,,
+199,Oliveira,03/03/2022,,
+200,Ashmawy,24/04/2023,11/03/2022,[Update to March 11 2022 preprint)
+201,Fowlkes,11/03/2022,,
+202,Shrotri,12/03/2022,,
+203,Baum,05/11/2022,06/07/2022,[Update to July 6 2022 preprint
+204,Jara,23/05/2022,15/03/2022,[Published version of March 15 2022 preprint]
+205,Rearte,15/03/2022,,
+206,Can,19/03/2022,,
+207,Altarawneh,15/06/2022,31/03/2022,[Update to March 31 2022 study]
+208,Kaura,12/03/2022,,
+209,Horne,20/07/2022,23/03/2022,[Published version of March 23 2022 preprint]
+210,Stowe,30/09/2022,01/04/2022,[Update to April 1 2022 preprint]
+211,Tenforde,25/03/2022,,
+212,Veneti,07/03/2023,25/03/2022,[Update to March 25 2022 preprint]
+213,Wang,23/11/2022,25/03/2022,[Published version of March 25 2022 preprint]
+214,Natarajan,29/03/2022,,
+215,Hansen,30/03/2022,,
+216,Price,30/03/2022,,
+217,Marra,30/03/2022,,
+218,Starrfelt,30/03/2022,30/03/2022,[Published version of March 30 2022 preprint]
+219,Pardo-Seco,29/03/2022,,
+220,Nordstrom,31/03/2022,,
+221,Ranzani,16/08/2022,16/08/2022,Published version of August 16 2022 preprint
+222,Florentino,08/08/2022,05/04/2022,[Update to April 5 2022 preprint]
+223,Yoon,06/04/2022,,
+224,Kwon,06/04/2022,,
+225,Paraguay Ministry of Health and Social Welfare,22/03/2022,,
+226,Buchan,07/04/2022,,
+227,Kim,29/07/2022,10/04/2022,[Update to April 10 2022 preprint
+228,Kildegard,11/04/2022,,
+229,Institute of Public Health,12/04/2022,,
+230,Plumb,12/04/2022,,
+231,Dale,12/04/2022,,
+232,Cerqueira-Silva,01/07/2022,13/04/2022,[Update to April 13 2022 preprint]
+233,Nasreen,17/08/2022,13/04/2022,[Published version of April 13 2022 preprint]
+234,Richardson,19/06/2022,17/04/2022,[Update to April 17 2022 preprint]
+235,Voko,22/07/2022,18/04/2022,[Published version of April 18 2022 preprint]
+236,Gram,01/09/2022,20/04/2022,[Published verson of April 20 2022 preprint]
+237,Lind,25/04/2022,25/04/2022,[Update to April 25 2022 preprint]
+238,Sanchez Ruiz,01/04/2022,,
+239,Widdifield,14/04/2022,,
+240,Cerqueira-Silva,11/01/2023,14/04/2022,[Update to April 14 2022 preprint]
+241,Gonzalez,19/04/2022,19/04/2022,[Published version of April 19 preprint]
+242,Eick-Cost,20/04/2022,,
+243,Castillo,21/04/2022,,
+244,Sharma,27/04/2022,,
+246,Florentino,13/08/2022,29/04/2022,[Update to April 29 2022 preprint]
+247,Kirsebom,12/12/2022,01/05/2022,[Update to May 1 2022 preprint]
+248,Carazo,14/10/2022,03/05/2022,[Update from May 3 2022 preprint]
+249,Ma,03/05/2022,,
+250,Rennert,10/01/2023,07/05/2022,[Published version of May 7 2022 preprint]
+251,Simwanza,12/09/2022,08/06/2022,[Update to June 8 2022 preprint]
+252,Zahradka,03/05/2022,,
+253,Martellucci,22/04/2022,,
+254,Braeye,11/05/2022,,
+255,Lan,12/05/2022,,
+256,Tenforde,17/05/2022,,
+257,Fano,18/05/2022,,
+258,Paranthaman,20/05/2022,,
+259,Tsundue,24/05/2022,,
+260,Amir,09/09/2022,25/05/2022,[Update to May 25  2022 preprint]
+261,Chin,26/10/2022,27/05/2022,[Previous preprint version Chin et al (May 27 2022)
+262,Carlsen,01/06/2022,,
+263,Grewal,06/07/2022,,
+264,Spicer,26/05/2022,,
+265,Richterman,06/06/2022,,
+266,Lin,08/06/2022,,
+267,Lewis,08/06/2022,,
+270,Al Kaabi,09/06/2022,,
+271,Gray,09/06/2022,29/12/2021,[Published version of December 29 2021 preprint; see reference #17 in Table 2]
+272,Adams,11/10/2022,14/06/2022,Published updated analysis of June 14 2022 preprint
+273,Magro,22/06/2022,,
+274,Moline,27/06/2022,,
+275,Carazo,21/09/2022,27/06/2022,[Published version of June 27 preprint]
+276,Cohen-Stavi,29/06/2022,,
+277,Ionescu,16/01/2023,28/06/2022,[Published version of June 28 2022 preprint]
+278,Tartof,07/10/2022,30/06/2022,Published version of June 30 2022 preprint
+279,Paternina-Caicedo,01/07/2022,,
+280,Tonnara,04/07/2022,,
+281,Kerr,09/07/2022,,
+282,Stephenson,11/07/2022,,
+283,Guedalia,15/11/2022,11/07/2022,[Published version of July 11 2022 prperint]
+284,Link-Gelles,15/07/2022,,
+285,Cerqueira-Silva,18/07/2022,,
+286,Hatfield,20/07/2022,,
+287,Tan,20/07/2022,,
+288,Mazagatos,26/07/2022,,
+289,Chemaitelly,02/11/2022,26/07/2022,Published version of July 26 2022 preprint
+290,Mayr,22/06/2022,,
+291,Piche-Renaud,03/03/2023,01/08/2022,[Update to August 1 2022 preprint]
+292,Arashiro,03/08/2022,,
+293,Tartof,03/08/2022,,
+294,Pinto-Alvarez,13/10/2022,06/08/2022,[Update to August 6 2022 preprint]
+295,Zambrano,04/08/2022,,
+296,El Adam,15/04/2022,,
+297,Lewis,27/07/2022,,
+298,Cheng,11/08/2022,,
+299,Risk,16/08/2022,,
+300,Kim,17/08/2022,,
+301,Yan,18/08/2022,,
+302,Powell,22/08/2022,22/08/2022,[Published version of August 22 2022 preprint]
+303,Wan,17/08/2022,,
+304,Tsang,12/12/2022,25/08/2022,"[Update to August 25, 2022 preprint]"
+305,Cocchio,20/08/2022,,
+306,Lim,24/08/2022,,
+307,Lind,21/11/2022,26/08/2022,[Update to August 26 2022 preprint]
+308,Suphanchaimat,05/07/2022,,
+309,Barraza,05/08/2022,,
+310,Penayo,01/06/2022,,
+311,Monge,02/09/2022,,
+312,Huang,20/10/2022,09/09/2022,[Update to September 9 2022 preprint]
+313,Chico-Sanchez,31/08/2022,,
+314,Mallah,10/09/2022,,
+315,Chatzilena,07/12/2022,12/09/2022,[Published version of September 12 2022 preprint]
+316,Collie,14/09/2022,,
+317,Martin,10/09/2022,,
+318,Chung,07/09/2022,,
+319,Xu,05/12/2022,20/09/2022,[Published version of September 20 2022 preprint]
+321,Copur,28/09/2022,,
+322,Schrag,26/09/2022,,
+323,Ferdinands,03/10/2022,,
+324,Link-Gelles,05/10/2022,05/10/2022,[Published version of October 5 2022 preprint]
+325,Grewal,03/12/2022,30/09/2022,[Published version of September 30 2022 preprint]
+326,Lin,26/09/2022,,
+327,Rudan,28/09/2022,,
+328,Lewis,28/09/2022,,
+329,Buchan,22/09/2022,,
+330,Risk,08/10/2022,,
+331,Mimura,08/10/2022,,
+332,Wan,17/10/2022,,
+333,Chambers,19/10/2022,,
+334,Consonni,19/10/2022,,
+335,Zerbo,28/02/2023,18/10/2022,[Published version of October 18 2022 preprint]
+336,Embi,22/05/2023,21/10/2022,[published version of October 21 2022 preprint]
+337,Britton,21/10/2022,,
+338,Surie,21/10/2022,,
+339,Collie,24/10/2022,,
+340,Nordstrom,21/02/2023,24/10/2022,[Published version of October 24 2022 preprint]
+341,Tartof,25/10/2022,,
+342,Moghnieh,22/09/2022,,
+343,Grewal,07/03/2023,01/11/2022,[Published version of Nov 1 2022 preprint]
+344,Chemaitelly,07/03/2023,,
+345,Clemens,13/10/2022,,
+346,Jorgensen,08/02/2023,08/11/2022,[Published version of November 8 2022 preprint]
+347,Van Ewijk,10/11/2022,,
+348,Turbyfill,15/11/2022,,
+349,Castelli,30/11/2022,,
+350,Fu,22/09/2023,10/12/2022,[Published version of December 10 2022 preprint]
+351,Cegolon,30/11/2022,,
+352,Khanam,02/12/2022,,
+353,Nittayasoot,12/12/2022,,
+354,Carazo,14/07/2023,27/12/2022,[Published version of December 27 2022]
+356,Horne,05/01/2023,,
+357,Lewis,31/12/2022,,
+358,Dalton,06/01/2023,,
+359,Jang,09/01/2023,,
+360,Peebles,10/01/2023,,
+361,Tartof,11/01/2023,,
+363,Alkadi,26/12/2022,,
+364,Heidarzadeh,23/12/2022,,
+365,Lin,16/06/2023,19/01/2023,[Update to Jan 19 2023 preprint]
+366,Battacharya,06/01/2023,,
+367,Ellingson,26/01/2023,,
+368,Niesen,28/04/2022,,
+369,Toh,27/01/2023,,
+370,Tartof,28/01/2023,,
+371,Sritipsukho,30/01/2023,,
+372,Weng,01/02/2023,,
+374,Bello Chavolla,02/02/2023,02/02/2023,[Published version of February 02 2023 preprint]
+375,Jorgensen,27/02/2023,,
+376,Yan,28/02/2023,,
+378,Glatman-Freedman,02/03/2023,,
+380,Tamandjou Tchuem,27/02/2023,,
+381,Rojas-Botero,08/09/2023,22/03/2023,[Published version of March 22 2023 preprint]
+382,Bouillon,13/06/2022,,
+383,Lipshuetz,23/03/2023,,
+384,Lutz,27/03/2023,,
+385,Klein,07/04/2023,,
+386,Huang,12/04/2023,,
+387,Altarawneh,27/07/2023,22/04/2023,[Update to April 22 2023 preprint]
+388,Braeye,05/04/2023,,
+389,DeCuir,28/04/2023,,
+390,Qassim,19/07/2023,29/04/2023,[Published version of April 29 2023 preprint]
+391,Huang,01/05/2023,,
+392,Yan,03/05/2023,,
+393,Finci,12/10/2023,05/05/2023,[Published version of May 5 2023 preprint]
+394,Surie,29/06/2023,05/05/2023,[Update to May 5  2023 preprint]
+395,Langlete,10/05/2023,,
+396,Park,15/05/2023,,
+397,Yung,15/05/2023,,
+398,Ng,26/05/2023,,
+399,Monteiro,10/08/2023,07/06/2023,[Published version of June 7  2023 preprint]
+401,Bozio,18/02/2023,,
+403,Wu,09/01/2024,01/06/2023,[Published version of June 2023 preprint]
+404,Spicer,12/05/2023,,
+405,Lowthian,22/06/2023,,
+406,Aglipay,28/06/2023,,
+408,Cegolon,14/07/2023,,
+409,Tamada,22/07/2023,,
+410,Liu,29/07/2023,,
+411,Rosa,26/07/2023,,
+412,Franchi,01/08/2023,,
+413,Whitaker,12/08/2023,,
+414,Link-Gelles,17/08/2023,,
+415,Zerbo,25/08/2023,,
+416,Ogilvie,08/09/2023,,
+417,Copland,07/09/2023,,
+418,Paternina-Caicedo,09/09/2023,,
+419,Chen,14/09/2023,,
+420,Irala,15/09/2023,,
+421,Tartof,15/09/2023,,
+422,Mimura,23/09/2023,,
+423,Patel,29/09/2023,,
+424,Chemaitelly,04/10/2023,,
+426,Hernandez-Avila,19/10/2023,,
+427,Lee,24/11/2023,25/08/2023,[Update to August 25  2023 preprint]
+428,Yiu,10/10/2023,,
+429,Tartof,25/10/2023,,
+430,Razafimandimby,30/10/2023,,
+431,Goh,10/11/2023,,
+432,Culpan,15/11/2023,,
+433,Szekanecz,02/11/2023,,
+437,Arashiro,19/12/2023,,
+438,Qin,12/12/2023,,
+439,Birk,29/12/2023,,
+440,Ye,14/12/2023,,

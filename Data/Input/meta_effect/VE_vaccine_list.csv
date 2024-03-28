@@ -1,0 +1,40 @@
+primary series vaccine,clean_vaccine,vac_type
+BBIBP-CorV (Beijing CNBG),Beijing/Sinopharm BBIBP-CorV,Inactivated
+Hayat-Vax (Julphar),Beijing/Sinopharm BBIBP-CorV,Inactivated
+BBV152 (Bharat),Bharat Covaxin/BBV152,Inactivated
+BIV1-CovIran,Shifa Pharmed COVIran,Inactivated
+CoronaVac (Sinovac),Sinovac CoronaVac,Inactivated
+AZD1222 (AstraZeneca) vs. BNT162b2 (Pfizer BioNTech),Comparative,Multiple
+NVX-CoV2373 (Novavax) vs. BNT162b2 (Pfizer BioNTech),Comparative,Multiple
+AZD1222 (AstraZeneca) & any mRNA - heterologous,Heterologous platforms,Multiple
+AZD1222 (AstraZeneca) & BNT162b2 (Pfizer BioNTech) - heterologous,Heterologous platforms,Multiple
+AZD1222 (AstraZeneca) & BNT162b2 (Pfizer BioNTech) -heterologous,Heterologous platforms,Multiple
+AZD1222 (AstraZeneca) + any mRNA - heterologous,Heterologous platforms,Multiple
+CoronaVac (Sinovac) & AZD1222 (AstraZeneca) - heterologous,Heterologous platforms,Multiple
+CoronaVac (Sinovac) & BNT162b2 (Pfizer BioNTech) - heterologous,Heterologous platforms,Multiple
+BNT162b2 (Pfizer BioNTech),BioNTech/Pfizer BNT162b2,mRNA
+BNT162b2 (Pfizer BioNTech) in mothers during pregnancy,BioNTech/Pfizer BNT162b2,mRNA
+BNT162b2 (Pfizer BioNTech) vs. Ad26.COV2.S (Janssen),Comparative,Multiple
+BNT162b2 (Pfizer BioNTech) vs. AZD1222 (AstraZeneca),Comparative,Multiple
+BNT162b2 (Pfizer BioNTech) vs. CoronaVac (Sinovac),Comparative,Multiple
+mRNA-1273 (Moderna) vs. BNT162b2 (Pfizer BioNTech),Comparative,mRNA
+mRNA-1273 (Moderna),Moderna mRNA-1273,mRNA
+BNT162b2 (Pfizer BioNTech) or mRNA-1273 (Moderna),Multiple or heterologous RNA,mRNA
+BNT162b2 (Pfizer BioNTech) or mRNA-1273 (Moderna) (ascertained by electronic medical records),Multiple or heterologous RNA,mRNA
+BNT162b2 (Pfizer BioNTech) or mRNA-1273 (Moderna) (ascertained by immunization information system),Multiple or heterologous RNA,mRNA
+BNT162b2 (Pfizer BioNTech) or mRNA-1273 (Moderna) received in first trimester,Multiple or heterologous RNA,mRNA
+BNT162b2 (Pfizer BioNTech) or mRNA-1273 (Moderna) received in second trimester,Multiple or heterologous RNA,mRNA
+BNT162b2 (Pfizer BioNTech) or mRNA-1273 (Moderna) received in third trimester,Multiple or heterologous RNA,mRNA
+Heterologous mRNA,Multiple or heterologous RNA,mRNA
+mRNA (heterologous),Multiple or heterologous RNA,mRNA
+Any mRNA,Multiple or heterologous RNA,mRNA
+Any mRNA - heterologous,Multiple or heterologous RNA,mRNA
+Any mRNA - homologous or heterologous,Multiple or heterologous RNA,mRNA
+any mRNA in mothers before pregnancy,Multiple or heterologous RNA,mRNA
+any mRNA in mothers during pregnancy,Multiple or heterologous RNA,mRNA
+BNT162b2 (Pfizer BioNTech) & mRNA-1273 (Moderna),Multiple or heterologous RNA,mRNA
+Ad5-nCOV (CanSino),Cansino Ad5-nCoV,Vectored
+Gam-COVID-Vac (Gamaleya),Gamaleya Gam-COVID-Vac/Sputnik V,Vectored
+Ad26.COV2.S (Janssen),Janssen Ad26.COV2.S,Vectored
+AZD1222 (AstraZeneca),Oxford/AstraZeneca ChAdOx1-S,Vectored
+AZD1222 (Covishield),Oxford/AstraZeneca ChAdOx1-S,Vectored

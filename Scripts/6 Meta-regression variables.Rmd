@@ -1,0 +1,132 @@
+---
+title: "6 Preparation of variables for meta-regression"
+author: "Martina Pesce & Edward P. K. Parker"
+date: "2023-10-05"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+#### Inputs
+- Processed/COVID19VE_ineq_merged_filtered_eligible_selected.xlsx: Database of study groups eligible for meta-regression
+
+#### Outputs
+- Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.xlsx: Meta-regression database with additional variables
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r, data and lib}
+library(tidyverse)
+library(readr)
+
+VEmetareg_data <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected.csv") %>% 
+  filter(
+    include == "yes"
+  )
+n_distinct(VEmetareg_data$Study_id_f)
+#53
+
+```
+
+
+
+```{r, VE/LCL/UCL adjustment}
+# Adjustment of VE/ CI before being transformed to RR
+  # (VE | Upper CIs | Lower CI) = 100
+  # When VE=100. I will transform it to 99.5%
+  # When the Upper CI is 100%. I will transform to 99.9%
+  # When the Lower CI is 100%. I will transform to 97.5%
+
+VEmetareg_data <- VEmetareg_data %>% 
+  mutate(
+  VE1= case_when(
+        as.numeric(.$VE)==100 ~ 99.5,
+        as.numeric(.$VE)== -100 ~ -99.5,
+        as.numeric(.$VE) > 100 | as.numeric(.$VE) < -100 ~ NA,  
+        TRUE ~ as.numeric(.$VE)),
+  LCL.1= case_when(
+        as.numeric(.$LCL)==100 ~ 97.5,
+        as.numeric(.$LCL)== -100 ~ -97.5,
+        as.numeric(.$LCL) > 100 | as.numeric(.$LCL) < -100 ~ NA,  
+        TRUE ~ as.numeric(.$LCL)),
+  UCL.1= case_when(
+        as.numeric(.$UCL)==100 ~ 99.9,
+        as.numeric(.$UCL)== -100 ~ -99.9,
+        as.numeric(.$UCL) > 100 | .$UCL < -100 ~ NA,  
+        TRUE ~ as.numeric(.$UCL))  
+  )
+  
+
+
+```
+
+
+```{r, eff to rr}
+#All effect sizes and CI will be transformed to RR -> RR= 1- (VE/100)
+
+#What should I do with values higher than 100 and lower than 0
+VEmetareg_data <- VEmetareg_data %>% 
+  mutate(
+    RR = case_when(
+      VE1 >= 0 ~ 1 - (VE1 / 100),
+      VE1 < 0 ~ 1 / (1 + VE1 / 100),
+      TRUE ~ NA
+    ),
+    RR.LCL = case_when(
+      UCL.1 >= 0 ~ 1 - (UCL.1 / 100),
+      UCL.1 < 0 ~ 1 / (1 + UCL.1 / 100),
+      TRUE ~ NA
+    ),
+    RR.UCL = case_when(
+      LCL.1 >= 0 ~ 1 - (LCL.1 / 100),
+      LCL.1 < 0 ~ 1 / (1 + LCL.1 / 100),
+      TRUE ~ NA
+    )
+  )
+    
+
+
+```
+
+
+```{r,rr to log-rr}
+# Calculate the ln-risk ratio and SE
+VEmetareg_data <- VEmetareg_data %>% 
+  mutate(
+    ln.RR = log(RR),
+    SE.ln.RR = case_when(
+      LCL.1 = is.na(LCL.1) & UCL.1 != is.na(UCL.1) ~ (ln.RR - log(RR.LCL))/1.96,
+      UCL.1 = is.na(UCL.1) & LCL.1 != is.na(LCL.1) ~ (ln.RR - log(RR.UCL))/1.96,
+      LCL.1 != is.na(LCL.1) & UCL.1 != is.na(UCL.1) ~ (log(RR.UCL) - log(RR.LCL)) / 3.92,
+      TRUE ~ NA
+    )
+  ) 
+
+
+VEmetareg_data <- VEmetareg_data %>% 
+  filter(ln.RR !="NA" & SE.ln.RR != "NA")
+
+```
+
+
+
+```{r, write}
+#Save data for metaregression
+
+write.csv(VEmetareg_data, "Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv")
+```
+
+
+```{r, session info}
+
+print(sessionInfo())
+
+```
+
+
+
+

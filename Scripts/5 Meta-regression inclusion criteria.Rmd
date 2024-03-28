@@ -1,0 +1,494 @@
+---
+title: "5 Meta-regression inclusion criteria"
+author: "Martina Pesce & Edward P. K. Parker"
+date: "2023-10-05"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+#### Inputs
+- Processed/COVID19VE_ineq_merged.csv: merged VE/income data
+- Input/meta_effect/population_included.xlsx: database of eligible population groups
+- Input/meta_effect/VE_population_list.csv: population groups eligible for inclusion
+
+#### Outputs
+- Final/VEmetareg_data.csv: Database of study groups eligible for meta-regression
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r, data and lib}
+
+# Libraries
+library(tidyverse)
+library(readr)
+library(readxl)
+library(xlsx)
+
+
+# Data
+VEmetareg_data <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv") %>%
+  select(`study ID`:variant_clean, -owid_who)
+VE_populations <- read_csv("Data/Input/meta_effect/VE_population_list.csv") 
+
+```
+
+#### Selection of potentially VE estimates
+
+```{r, inclusion criteria}
+#Studies populations included in View-Hub primary series
+nrow(VEmetareg_data)  #3597 estimates
+n_distinct(VEmetareg_data$Study_id_f) #422 studies
+
+## Step 1: exclude studies of infection
+VEmetareg_data <- VEmetareg_data %>% 
+  filter(outcome_final=="severe" | outcome_final=="death") 
+nrow(VEmetareg_data)  #1641 estimates
+n_distinct(VEmetareg_data$Study_id_f) #249 studies
+
+## Step 2: exclude non-eligible populations (including studies restricted to previously infected)
+# write csv files to generate VE_population_list.csv inputs
+#write.csv(unique(VEmetareg_data$population_category), "populations.csv")
+table(VEmetareg_data$historyofCOVID)
+
+
+# check all population categories included, then merge
+all(VE_populations$population_category %in% VEmetareg_data$population_category)
+VEmetareg_data <- VEmetareg_data %>% left_join(VE_populations, by=c("population_category")) 
+
+#Excluded:
+excluded_pop <- VEmetareg_data %>% 
+  filter(include_population!="yes" |
+        historyofCOVID == "confirmed prior infection" |
+        historyofCOVID == "Omicron prior infection" |
+        historyofCOVID == "pre-Omicron prior infection" |
+        historyofCOVID == "previously infected only"
+        ) %>% 
+  select(include_population, inclusion_notes, historyofCOVID, Study_id_f) %>% 
+  unique()
+
+
+# filter
+VEmetareg_data <- VEmetareg_data %>% 
+  filter(include_population=="yes" &
+        historyofCOVID != "confirmed prior infection" &
+        historyofCOVID != "Omicron prior infection" &
+        historyofCOVID != "pre-Omicron prior infection" &
+        historyofCOVID != "previously infected only"
+        )
+nrow(VEmetareg_data)  #1229 estimates
+n_distinct(VEmetareg_data$Study_id_f) #177 studies
+
+included_studies<-VEmetareg_data %>% 
+  select(Study_id_f, include_population) %>% 
+  unique() 
+
+excluded_studies<- left_join(excluded_pop, included_studies, by= "Study_id_f") %>% 
+  filter(is.na(include_population.y))
+#table(excluded_studies$inclusion_notes)
+
+
+
+## Step 3: complete, vaccine-specific primary series of any COVID-19 vaccine
+table(VEmetareg_data$dose)
+table(VEmetareg_data$clean_vaccine)
+
+VEmetareg_data <- VEmetareg_data %>%
+  filter( dose == "final" & 
+    clean_vaccine != "Multiple or heterologous RNA" &
+    clean_vaccine != "Heterologous platforms")
+nrow(VEmetareg_data) #833
+n_distinct(VEmetareg_data$Study_id_f) #129
+
+## Step 4: cohort/case-control design
+table(VEmetareg_data$`study design`)
+VEmetareg_data <- VEmetareg_data %>%
+  filter(
+    `study design` != "Screening method"
+    )
+nrow(VEmetareg_data) #832
+n_distinct(VEmetareg_data$Study_id_f) #128
+
+## Step 5: variant-specific estimates
+table(VEmetareg_data$variant_clean)
+
+VEmetareg_data <- VEmetareg_data %>%
+  filter(
+    variant_clean != "delta/omicron" &
+    variant_clean != "other combinations"
+    )
+
+nrow(VEmetareg_data) #484
+n_distinct(VEmetareg_data$Study_id_f) #75
+
+## Step 6: exclude products with <10 unique studies
+table(VEmetareg_data$clean_vaccine)
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Beijing/Sinopharm BBIBP-CorV")$Study_id_f) # 6
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Bharat Covaxin/BBV152")$Study_id_f) # 3
+n_distinct(subset(VEmetareg_data, clean_vaccine=="BioNTech/Pfizer BNT162b2")$Study_id_f) # 53
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Cansino Ad5-nCoV")$Study_id_f) # 2
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Gamaleya Gam-COVID-Vac/Sputnik V")$Study_id_f) # 6
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Janssen Ad26.COV2.S")$Study_id_f) # 15
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Moderna mRNA-1273")$Study_id_f) # 27
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Oxford/AstraZeneca ChAdOx1-S")$Study_id_f) # 28
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Sinovac CoronaVac")$Study_id_f) # 12
+
+VEmetareg_data <- VEmetareg_data %>%
+  filter(
+    clean_vaccine == "BioNTech/Pfizer BNT162b2" |
+    clean_vaccine == "Janssen Ad26.COV2.S" |
+    clean_vaccine == "Moderna mRNA-1273" |
+    clean_vaccine == "Oxford/AstraZeneca ChAdOx1-S" |
+    clean_vaccine == "Sinovac CoronaVac"
+    )
+nrow(VEmetareg_data) #436
+n_distinct(VEmetareg_data$Study_id_f) #72
+
+## Step 7: exclude variants with <10 unique studies
+table(VEmetareg_data$variant_clean)
+n_distinct(subset(VEmetareg_data, variant_clean=="alpha")$Study_id_f) # 15
+n_distinct(subset(VEmetareg_data, variant_clean=="beta")$Study_id_f) # 4
+n_distinct(subset(VEmetareg_data, variant_clean=="delta")$Study_id_f) # 40
+n_distinct(subset(VEmetareg_data, variant_clean=="gamma")$Study_id_f) # 6
+n_distinct(subset(VEmetareg_data, variant_clean=="mu")$Study_id_f) # 4
+n_distinct(subset(VEmetareg_data, variant_clean=="omicron")$Study_id_f) # 31
+n_distinct(subset(VEmetareg_data, variant_clean=="original")$Study_id_f) # 1
+
+VEmetareg_data <- VEmetareg_data %>%
+  filter(
+    variant_clean == "alpha" |
+    variant_clean == "delta" |
+    variant_clean == "omicron"
+    )
+nrow(VEmetareg_data) #380
+n_distinct(VEmetareg_data$Study_id_f) #65
+
+# sort 
+VEmetareg_data <- VEmetareg_data %>% arrange(outcome_final, variant_clean, clean_vaccine, Study_id_f)
+
+# Save filtered VE database
+write.csv(VEmetareg_data, "Data/Processed/COVID19VE_ineq_merged_filtered.csv")
+```
+
+Four vaccines (BNT162b2, Ad26.COV2.S, mRNA-1273, ChAdOx1-S, and  CoronaVac) and 3 variants (alpha, delta, omicron) met initial eligibility threshold for meta-regression
+
+
+```{r}
+# vaccine study distribution
+table_vacc <- VEmetareg_data %>%
+  distinct(Study_id_f, clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(clean_vaccine, total_study) %>%
+  mutate(n = n(),
+         `n(%)` = paste0(round(n / total_study * 100, 2), "%" , " (", n, "/",total_study, ")" )) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, `n(%)`) %>% 
+  distinct()
+
+#variant of interest
+table_VoI1 <- VEmetareg_data %>%
+  distinct(Study_id_f, variant_clean) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(variant_clean, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0(round(n / total_study * 100, 2), "%" , " (", n, "/",total_study, ")" )) %>% 
+  ungroup() %>% 
+  select(variant_clean, `n(%)`) %>% 
+  distinct()
+
+table_VoI2 <- VEmetareg_data %>%
+  distinct(Study_id_f, clean_vaccine, variant_clean) %>% 
+  group_by(clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(clean_vaccine, variant_clean,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0(round(n / total_study * 100, 2), "%" , " (", n, "/",total_study, ")" )) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, variant_clean, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = clean_vaccine, values_from = `n(%)`)
+
+  
+combined_VoI <- left_join(table_VoI1, table_VoI2)
+
+#outcome
+table_outcome1 <- VEmetareg_data %>%
+  distinct(Study_id_f, outcome_final) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(outcome_final, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0(round(n / total_study * 100, 2), "%" , " (", n, "/",total_study, ")" )) %>% 
+  ungroup() %>% 
+  select(outcome_final, `n(%)`) %>% 
+  distinct()
+
+table_outcome2 <- VEmetareg_data %>%
+  distinct(Study_id_f, clean_vaccine, outcome_final) %>% 
+  group_by(clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(clean_vaccine, outcome_final,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0(round(n / total_study * 100, 2), "%" , " (", n, "/",total_study, ")" )) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, outcome_final, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = clean_vaccine, values_from = `n(%)`)
+
+  
+combined_outcome <- left_join(table_outcome1, table_outcome2)
+
+
+#GNI
+table_GNI1 <- VEmetareg_data %>%
+  distinct(Study_id_f, q_GNI_per_c_WB) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(q_GNI_per_c_WB, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0(round(n / total_study * 100, 2), "%" , " (", n, "/",total_study, ")" )) %>% 
+  ungroup() %>% 
+  select(q_GNI_per_c_WB, `n(%)`) %>% 
+  distinct()
+
+table_GNI2 <- VEmetareg_data %>%
+  distinct(Study_id_f, clean_vaccine, q_GNI_per_c_WB) %>% 
+  group_by(clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(clean_vaccine, q_GNI_per_c_WB,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0(round(n / total_study * 100, 2), "%" , " (", n, "/",total_study, ")" )) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, q_GNI_per_c_WB, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = clean_vaccine, values_from = `n(%)`)
+
+  
+combined_GNI <- left_join(table_GNI1, table_GNI2)
+
+```
+
+
+#### Model-specific eligibility checks
+```{r}
+model_check <- VEmetareg_data %>%
+    group_by(outcome_final, variant_clean, clean_vaccine) %>%
+    filter (! duplicated(Study_id_f)) %>%
+    summarise(
+      n_GNI_Q1 = sum(q_GNI_per_c_WB==1),
+      n_GNI_Q2 = sum(q_GNI_per_c_WB==2),
+      n_GNI_Q3 = sum(q_GNI_per_c_WB==3),
+      n_GNI_Q4 = sum(q_GNI_per_c_WB==4),
+      sum = n(),
+      sum_nonQ4 = sum(q_GNI_per_c_WB!=4)
+    )
+model_check$sufficient_n = model_check$sum>=10
+model_check$n_nonQ4_over_2 = model_check$sum_nonQ4>=2
+model_check$eligible = model_check$sufficient_n==TRUE & model_check$n_nonQ4_over_2==TRUE
+write.csv(model_check, "Data/Processed/VE_model_check.csv")
+#sum(VEmetareg_data$clean_vaccine=="Sinovac CoronaVac" & VEmetareg_data$variant_clean=="alpha")
+
+# criteria met for 7 models in total
+# delta/severe - all vaccines
+# omicron/severe - BNT162b2, mRNA-1273, and ChAdOx1-S    
+
+# apply filters
+n_distinct(subset(VEmetareg_data, clean_vaccine =="Sinovac CoronaVac")$Study_id_f) # 7
+n_distinct(subset(VEmetareg_data, variant_clean =="alpha")$Study_id_f) # 15
+n_distinct(subset(VEmetareg_data, outcome_final !="severe")$Study_id_f) # 19
+n_distinct(subset(VEmetareg_data, variant_clean == "omicron" & clean_vaccine == "Janssen Ad26.COV2.S")$Study_id_f) #5
+
+VEmetareg_data <- VEmetareg_data %>%
+  filter(
+    clean_vaccine != "Sinovac CoronaVac" &
+    outcome_final == "severe" &
+    variant_clean != "alpha" &
+    !(variant_clean == "omicron" & clean_vaccine == "Janssen Ad26.COV2.S")
+    )
+nrow(VEmetareg_data) #225
+n_distinct(VEmetareg_data$Study_id_f) #53
+
+# create max_duration_follow_up_days 
+VEmetareg_data$max_follow_up_days = str_replace_all(VEmetareg_data$`max duration follow-up`, " weeks","")
+VEmetareg_data$max_follow_up_days = str_replace_all(VEmetareg_data$max_follow_up_days, "~","")
+VEmetareg_data$max_follow_up_days = as.numeric(VEmetareg_data$max_follow_up_days)*7
+
+#Create variable number of subgroup by study for identifying studies with 2 or more subgroups
+ VEmetareg_data <- VEmetareg_data %>%
+    group_by(outcome_final, variant_clean, clean_vaccine, Study_id_f) %>% 
+  mutate(
+    n_estimates = n()
+  ) %>% 
+  ungroup()
+
+# Save filtered VE database
+write.csv(VEmetareg_data, "Data/Processed/COVID19VE_ineq_merged_filtered_eligible.csv")
+
+# Manual addition of 5 variables:
+#min_period_days - derived from timing_of_dose_days
+#max_period_days - derived from timing_of_dose_days and `max duration follow-up`
+#include - selection for studies with multiple estimates
+#justification - reasons for selections
+#sensitivity - binary flag for subpopulations >=60
+```
+
+
+```{r}
+# sensitivity analysis
+sensitivity_analysis <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected.csv") %>% 
+  filter(sensitivity=="1" & include=="yes")
+
+sensitivity_model_check <- sensitivity_analysis %>%
+    group_by(outcome_final, variant_clean, clean_vaccine) %>%
+    filter (! duplicated(Study_id_f)) %>%
+    summarise(
+      n_GNI_Q1 = sum(q_GNI_per_c_WB==1),
+      n_GNI_Q2 = sum(q_GNI_per_c_WB==2),
+      n_GNI_Q3 = sum(q_GNI_per_c_WB==3),
+      n_GNI_Q4 = sum(q_GNI_per_c_WB==4),
+      sum = n(),
+      sum_nonQ4 = sum(q_GNI_per_c_WB!=4)
+    )
+sensitivity_model_check$sufficient_n = sensitivity_model_check$sum>=10
+sensitivity_model_check$n_nonQ4_over_2 = sensitivity_model_check$sum_nonQ4>=2
+sensitivity_model_check$eligible = sensitivity_model_check$sufficient_n==TRUE & sensitivity_model_check$n_nonQ4_over_2==TRUE
+
+write.csv(sensitivity_model_check, "Data/Processed/VE_sensitivity_model_check.csv")
+
+# criteria met for 7 models in total
+# delta/severe - all vaccines
+# omicron/severe - BNT162b2, mRNA-1273, and ChAdOx1-S 
+```
+
+
+
+```{r}
+#Supplementary table 4
+metareg_selected <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected.csv") %>% 
+  filter(include=="yes")
+
+# vaccine study distribution
+table_vacc <- metareg_selected %>%
+  distinct(Study_id_f, clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(clean_vaccine, total_study) %>%
+  mutate(n = n(),
+         `n(%)` = paste0(n," (",round(n / total_study * 100, 0), "%)")) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, `n(%)`) %>% 
+  distinct()
+table_vacc
+
+#variant of interest
+table_VoI1 <- metareg_selected %>%
+  distinct(Study_id_f, variant_clean) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(variant_clean, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0(n," (",round(n / total_study * 100, 0), "%)")) %>% 
+  ungroup() %>% 
+  select(variant_clean, `n(%)`) %>% 
+  distinct()
+
+table_VoI2 <- metareg_selected %>%
+  distinct(Study_id_f, clean_vaccine, variant_clean) %>% 
+  group_by(clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(clean_vaccine, variant_clean,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0(n," (",round(n / total_study * 100, 0), "%)")) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, variant_clean, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = clean_vaccine, values_from = `n(%)`)
+
+  
+combined_VoI <- left_join(table_VoI1, table_VoI2)
+combined_VoI
+
+#outcome
+table_outcome1 <- metareg_selected %>%
+  distinct(Study_id_f, outcome_final) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(outcome_final, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0(n," (",round(n / total_study * 100, 0), "%)")) %>% 
+  ungroup() %>% 
+  select(outcome_final, `n(%)`) %>% 
+  distinct()
+
+table_outcome2 <- metareg_selected %>%
+  distinct(Study_id_f, clean_vaccine, outcome_final) %>% 
+  group_by(clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(clean_vaccine, outcome_final,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0(n," (",round(n / total_study * 100, 0), "%)")) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, outcome_final, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = clean_vaccine, values_from = `n(%)`)
+
+  
+combined_outcome <- left_join(table_outcome1, table_outcome2)
+combined_outcome
+
+#GNI
+table_GNI1 <- metareg_selected %>%
+  distinct(Study_id_f, q_GNI_per_c_WB) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(q_GNI_per_c_WB, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0(n," (",round(n / total_study * 100, 0), "%)")) %>% 
+  ungroup() %>% 
+  select(q_GNI_per_c_WB, `n(%)`) %>% 
+  distinct()
+
+table_GNI2 <- metareg_selected %>%
+  distinct(Study_id_f, clean_vaccine, q_GNI_per_c_WB) %>% 
+  group_by(clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(clean_vaccine, q_GNI_per_c_WB,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0(n," (",round(n / total_study * 100, 0), "%)")) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, q_GNI_per_c_WB, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = clean_vaccine, values_from = `n(%)`)
+
+  
+combined_GNI <- left_join(table_GNI1, table_GNI2)
+combined_GNI
+```
+

@@ -1,0 +1,105 @@
+---
+title: "7 Meta-regression results"
+author: "Martina Pesce & Edward P. K. Parker"
+date: "2023-10-12"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+#### Inputs
+- Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.xlsx: Processed meta-regression data
+
+#### Outputs
+- Meta-regression model results and plots for selected vaccine
+
+
+#Janssen
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(tidyverse)
+library(metafor)
+library(dmetar)
+library(forestplot)
+library(patchwork)
+library("scales")
+
+VEmetareg <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv") %>% 
+  filter(include=="yes")
+
+# summarise study counts
+VEmetareg %>% group_by(variant_clean, clean_vaccine, q_GNI_per_c_WB) %>%
+  summarise(n = sum(!is.na(`study ID`)))
+# 1 for mRNA-1273 omicron 2/3 and mRNA-1273 delta 1
+
+# Recode levels
+VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Janssen Ad26.COV2.S"] = "Ad26.COV2.S"
+VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="BioNTech/Pfizer BNT162b2"] = "BNT162b2"
+VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Oxford/AstraZeneca ChAdOx1-S"] = "ChAdOx1-S"
+VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Moderna mRNA-1273"] = "mRNA-1273"
+VEmetareg$clean_vaccine = factor(VEmetareg$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273", "Ad26.COV2.S"))
+
+metareg_collated <- rbind(
+  read_csv("Data/Processed/meta_summary_Ad26.COV2.S.csv"),
+  read_csv("Data/Processed/meta_summary_BNT162b2.csv"),
+  read_csv("Data/Processed/meta_summary_ChAdOx1-S.csv"),
+  read_csv("Data/Processed/meta_summary_mRNA-1273.csv")
+) 
+metareg_collated$clean_vaccine = factor(metareg_collated$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273", "Ad26.COV2.S"))
+
+metareg_collated$`N studies` = ">1"
+metareg_collated$`N studies`[metareg_collated$VoI == "omicron" & 
+                          metareg_collated$clean_vaccine == "mRNA-1273" & 
+                          metareg_collated$GNI %in% c(2,3)] = "1"
+metareg_collated$`N studies`[metareg_collated$VoI == "delta" & 
+                          metareg_collated$clean_vaccine == "mRNA-1273" & 
+                          metareg_collated$GNI %in% c(2)] = "1"
+
+## set variant levels
+metareg_collated$VoI = factor(metareg_collated$VoI, levels=c("omicron", "delta"))
+VEmetareg$variant_clean = factor(VEmetareg$variant_clean, levels=c("omicron", "delta"))
+
+## reverse log10 transformation
+reverselog_trans <- function(base = exp(1)) {
+    trans <- function(x) -log(x, base)
+    inv <- function(x) base^(-x)
+    trans_new(paste0("reverselog-", format(base)), trans, inv, 
+              log_breaks(base = base), 
+              domain = c(1e-100, Inf))
+}
+
+ggplot() +
+  geom_point(data = metareg_collated, aes(x = VoI, y = pred, color = as.factor(GNI), shape = `N studies`),
+    position = position_dodge(width = 0.8), size=2.5) +
+  geom_errorbar(
+    data = metareg_collated,
+    aes(x = VoI, y = pred, color = as.factor(GNI), ymin = ci.lb, ymax = ci.ub),
+    width = 0, position = position_dodge(width = 0.8)) +
+  geom_point(data = VEmetareg,
+    aes(x = variant_clean,y = RR, size = 1 / SE.ln.RR ^ 2, color = as.factor(q_GNI_per_c_WB)),
+    alpha = 0.3, position = position_jitterdodge(jitter.width=0.3)) +
+  labs(x = "", y = "Vaccine effectiveness") +
+  scale_shape_manual(values=c(15, 0)) +
+  theme_minimal() +
+  theme(legend.position = "right") +
+  scale_color_manual(
+    name = "GNI quartile", 
+     values = c("#44BB99","#AAAA00","#EE8866"),
+    labels =  c("2 (lower\nincome)" ,"3","4 (higher\nincome)")
+  ) +
+  guides(size = "none", colour = guide_legend(reverse = TRUE), shape = guide_legend(reverse = TRUE), ) + 
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") +
+  coord_flip() +
+  facet_grid(.~clean_vaccine) +
+  scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 1), labels = c(99,90,50,0), trans = reverselog_trans(10)) +
+  theme(axis.text.x=element_text(angle = 45, hjust = 1), 
+        axis.text.y = element_text(size=10),
+        strip.text = element_text(size=10))
+```
+

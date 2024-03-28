@@ -1,0 +1,84 @@
+variant_context,variant_clean
+delta,delta
+delta & delta plus (AY.4.2),delta
+delta & omicron,delta/omicron
+delta & omicron BA.1,delta/omicron
+"delta & omicron BA.1, BA.2",delta/omicron
+"delta & omicron BA.1, BA.3",delta/omicron
+"delta & omicron BA.1, BA.4",delta/omicron
+"delta & omicron BA.1, BA.5",delta/omicron
+"delta & omicron BA.1, BA.6",delta/omicron
+"delta & omicron BA.1, BA.7",delta/omicron
+"delta & omicron BA.2, BA.5",delta/omicron
+omicron or delta,delta/omicron
+omicron,omicron
+omicron (all lineages),omicron
+omicron BA.1,omicron
+omicron BA.1 or BA.2,omicron
+omicron BA.1 or BA.2 or BA.4 or BA.5,omicron
+"omicron BA.1, BA.2",omicron
+"omicron BA.1, BA.2, BA.2.12.1, BA.5",omicron
+"omicron BA.1, BA.2, BA.4, BA.5",omicron
+"omicron BA.1, BA.2, BA.4/BA.5",omicron
+"omicron BA.1, BA.2, BA.4/BA.5, BQ.1",omicron
+"omicron BA.1, BA.2, BA.5",omicron
+"omicron BA.1, BA.2, BA.5, BQ.1",omicron
+omicron BA.1/BA.2,omicron
+omicron BA.2,omicron
+"omicron BA.2, BA.2.75, BA.4/BA.5",omicron
+"omicron BA.2, BA.4/BA.5",omicron
+"omicron BA.2, BA.5, XBB, XBB.1.5",omicron
+"omicron BA.2.75, XBB",omicron
+omicron BA.2/BA.2.12.1,omicron
+omicron BA.2/BA.2.12.1/BA.4/BA.5,omicron
+omicron BA.4 or BA.5,omicron
+"omicron BA.4, BA.5",omicron
+"omicron BA.4, BA.5, XBB, XBB.1.5, XBB.1.16",omicron
+omicron BA.4/BA.5,omicron
+"omicron BA.4/BA.5, BA.2.75, XBB",omicron
+"omicron BA.4/BA.5, BQ.1, XBB",omicron
+omicron BA.5,omicron
+"omicron BA.5, BQ.1",omicron
+"omicron BQ, XBB",omicron
+omicron XBB,omicron
+"omicron XBB, XBB.1.5",omicron
+original,original
+alpha,alpha
+alpha & beta,other combinations
+alpha & delta,other combinations
+"alpha & delta & omicron BA.1, BA.2",other combinations
+alpha & gamma,other combinations
+"alpha, beta & delta",other combinations
+"alpha, beta & gamma",other combinations
+"alpha, delta, & omicron",other combinations
+"alpha, delta, & omicron BA.1",other combinations
+"alpha, delta, non-VOC",other combinations
+"alpha, gamma & delta",other combinations
+"alpha, gamma, & delta",other combinations
+B.1.427/ B.1.429 & alpha,other combinations
+beta,beta
+beta & delta,other combinations
+beta & gamma,other combinations
+"beta, delta, & kappa",other combinations
+epsilon & alpha & delta,other combinations
+gamma,gamma
+gamma & delta,other combinations
+"gamma, delta & omicron",other combinations
+mu,mu
+"mu, delta, & omicron",other combinations
+non-delta,other combinations
+non-VOC,original
+non-VOC & alpha,other combinations
+non-VOC & delta,other combinations
+"non-VOC, alpha, & delta",other combinations
+"non-VOC, alpha, beta, & delta",other combinations
+"non-VOC, alpha, beta, gamma, & delta",other combinations
+"non-VOC, alpha, delta, & omicron",other combinations
+"non-VOC, alpha, gamma & delta",other combinations
+"non-VOC, alpha, gamma, & delta",other combinations
+"non-VOC, gamma, & delta",other combinations
+original & alpha,other combinations
+"original, alpha & beta",other combinations
+"pre-delta (non-VOC, alpha)",other combinations
+"pre-delta & delta & omicron BA.1, BA.2",other combinations
+unknown,unknown

@@ -1,0 +1,158 @@
+---
+title: "1 Creation of GNI Database"
+author: "Martina Pesce & Edward P. K. Parker"
+date: "2023-10-02"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+#### Inputs
+- Input/inequalities databases/GNI per capita (ppp)/GNI_per_c.csv: country-level GNI per capita
+- Input/inequalities databases/income_group (World Bank).xlsx: World Bank regions and income groups
+
+#### Outputs
+- Processed/Ineq_merged.csv: Combined country-level income data
+
+#### Notes
+GNI per capita represents the primary covariate of interest. This indicator provides per capita values for gross national income (GNI. Formerly GNP) expressed in current international dollars converted by purchasing power parity (PPP) conversion factor (World Bank). 
+World Bank income groups provide additional descriptive information.
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+#libraries
+
+library(readxl)
+library(countrycode)
+library(tidyverse)
+```
+
+# Inequalities Data
+
+```{r import ineq database}
+# Remove the first 4 lines of metadata
+skip_lines <- 4
+
+# Read the CSV file, skipping the metadata lines 
+
+#GNI
+GNI_per_c_WB <- read.csv("Data/Input/inequalities databases/GNI per capita (ppp)/GNI_per_c.csv", skip = skip_lines) %>%
+  select(-c(X2020,X2021,X2022)) # remove years post COVID emergence
+
+#World bank quartiles
+Income_group_WB <- read_excel("Data/Input/inequalities databases/income_group (World Bank).xlsx")
+```
+
+```{r}
+# Select latest GNI data 
+GNI_per_c_WB_ok = GNI_per_c_WB %>%
+  select(-`Country.Code`, -`Indicator.Name`, -`Indicator.Code`) %>% 
+  # extract annual GNI data by country
+  pivot_longer(cols = starts_with("X"), names_to = "year", values_to = "inequity_value", values_drop_na = TRUE) %>%
+  mutate(year = as.integer(str_remove(year, "X")),
+       inequity_value = as.numeric(inequity_value)) %>%
+  # group data by country and select latest data
+  group_by(`Country.Name`) %>%
+  filter(year == max(year, na.rm = TRUE)) %>%
+  ungroup() %>%
+  select(`Country.Name`, inequity_value, year)
+
+# rename final two columns with values from parameters 2/3
+names(GNI_per_c_WB_ok)[2:3] = c("GNI_per_c_WB", "year_GNI")
+
+# List countries without GNI data
+GNI_per_c_WB$Country.Name[!(GNI_per_c_WB$Country.Name) %in% GNI_per_c_WB_ok$Country.Name] #n = 20
+
+#  [1] "Andorra"                   "American Samoa"            "Channel Islands"           "Cuba"                   
+#  [5] "Faroe Islands"             "Gibraltar"                 "Greenland"                 "Guam"                   
+#  [9] "Isle of Man"               "Not classified"            "Liechtenstein"             "St. Martin (French part)"
+# [13] "Monaco"                    "Northern Mariana Islands"  "New Caledonia"             "Korea, Dem. People's Rep."
+# [17] "French Polynesia"          "Syrian Arab Republic"      "British Virgin Islands"    "Virgin Islands (U.S.)" 
+```
+
+```{r FINAL inequalities}
+# MERGE AND COUNTRY CODE
+merge_ineq <- GNI_per_c_WB %>%
+  select(Country.Name, Country.Code)
+
+# Cross-check that country names in derived datasets are all represented in combined data
+all(GNI_per_c_WB_ok$Country.Name %in% merge_ineq$Country.Name)
+
+merge_ineq <- left_join(merge_ineq, GNI_per_c_WB_ok, by = "Country.Name")%>%
+  mutate(iso3c = countrycode(Country.Name, origin = "country.name", destination = "iso3c"))
+
+merge_ineq <- left_join(merge_ineq, Income_group_WB, by=c("Country.Code" = "Code")) %>%
+  select(-`Lending category`)
+
+# Summarise and filter
+nrow(merge_ineq) # 266 countries or regions in World Bank data
+
+# Filter regions (e.g. 'Africa Easter and Southern', 'Arab World')
+merge_ineq <- merge_ineq %>% filter(!is.na(Economy))
+nrow(merge_ineq) # 217 countries
+
+# Filter countries without GNI data
+merge_ineq <- merge_ineq %>% filter(!is.na(GNI_per_c_WB))
+nrow(merge_ineq) # 198 countries
+
+#Create quartiles
+merge_ineq <- merge_ineq %>%
+  filter(Country.Name != "Micronesia, Fed. Sts." & Country.Name != "Marshall Islands" & Country.Name != "Puerto Rico") %>% 
+  mutate(
+    q_GNI_per_c_WB = ntile(GNI_per_c_WB, 4)
+  )   
+
+# Check that all countries have quartile assigned
+sum(is.na(merge_ineq$q_GNI_per_c_WB)) # 0
+```
+
+```{r}
+# Summarise year of GNI data
+table(merge_ineq$year_GNI) # data pre 2019 for 5/195 (3%)
+
+# Show countries with pre-2019 data
+subset(merge_ineq, year_GNI!=2019)[,c("Country.Name", "year_GNI")]
+```
+
+```{r}
+#Table q_GNI_per_c_WB vs. income group (WB)
+table <- merge_ineq %>% 
+  group_by(q_GNI_per_c_WB, `Income group`) %>% 
+  summarise(count=n()) %>% 
+  pivot_wider(
+    names_from = `Income group`,
+    values_from = count
+  )
+
+#GNI summary by quartile
+summary_GNI <- merge_ineq %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarize(
+    n = length(q_GNI_per_c_WB),
+    median_value = round(median(GNI_per_c_WB, na.rm=TRUE),0),
+    q25 = round(quantile(GNI_per_c_WB, 0.25, na.rm=TRUE),0),
+    q75 = round(quantile(GNI_per_c_WB, 0.75, na.rm=TRUE),0)
+  )
+```
+
+
+```{r, write inequalities data}
+#Save inequalities data
+
+write.csv(merge_ineq, "Data/Processed/Ineq_merged.csv")
+
+
+```
+
+# Session info
+```{r, session info}
+print(sessionInfo())
+```
+

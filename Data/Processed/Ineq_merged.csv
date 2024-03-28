@@ -1,0 +1,196 @@
+"","Country.Name","Country.Code","GNI_per_c_WB","year_GNI","iso3c","Economy","Region","Income group","q_GNI_per_c_WB"
+"1","Aruba","ABW",40570,2019,"ABW","Aruba","Latin America & Caribbean","High income",4
+"2","Afghanistan","AFG",2200,2019,"AFG","Afghanistan","South Asia","Low income",1
+"3","Angola","AGO",6260,2019,"AGO","Angola","Sub-Saharan Africa","Lower middle income",2
+"4","Albania","ALB",14220,2019,"ALB","Albania","Europe & Central Asia","Upper middle income",2
+"5","United Arab Emirates","ARE",75180,2019,"ARE","United Arab Emirates","Middle East & North Africa","High income",4
+"6","Argentina","ARG",22100,2019,"ARG","Argentina","Latin America & Caribbean","Upper middle income",3
+"7","Armenia","ARM",15120,2019,"ARM","Armenia","Europe & Central Asia","Upper middle income",3
+"8","Antigua and Barbuda","ATG",22500,2019,"ATG","Antigua and Barbuda","Latin America & Caribbean","High income",3
+"9","Australia","AUS",50180,2019,"AUS","Australia","East Asia & Pacific","High income",4
+"10","Austria","AUT",59540,2019,"AUT","Austria","Europe & Central Asia","High income",4
+"11","Azerbaijan","AZE",14470,2019,"AZE","Azerbaijan","Europe & Central Asia","Upper middle income",2
+"12","Burundi","BDI",760,2019,"BDI","Burundi","Sub-Saharan Africa","Low income",1
+"13","Belgium","BEL",56280,2019,"BEL","Belgium","Europe & Central Asia","High income",4
+"14","Benin","BEN",3260,2019,"BEN","Benin","Sub-Saharan Africa","Lower middle income",1
+"15","Burkina Faso","BFA",2080,2019,"BFA","Burkina Faso","Sub-Saharan Africa","Low income",1
+"16","Bangladesh","BGD",5930,2019,"BGD","Bangladesh","South Asia","Lower middle income",2
+"17","Bulgaria","BGR",24460,2019,"BGR","Bulgaria","Europe & Central Asia","Upper middle income",3
+"18","Bahrain","BHR",48830,2019,"BHR","Bahrain","Middle East & North Africa","High income",4
+"19","Bahamas, The","BHS",34970,2019,"BHS","Bahamas, The","Latin America & Caribbean","High income",4
+"20","Bosnia and Herzegovina","BIH",15870,2019,"BIH","Bosnia and Herzegovina","Europe & Central Asia","Upper middle income",3
+"21","Belarus","BLR",19510,2019,"BLR","Belarus","Europe & Central Asia","Upper middle income",3
+"22","Belize","BLZ",8770,2019,"BLZ","Belize","Latin America & Caribbean","Upper middle income",2
+"23","Bermuda","BMU",86290,2019,"BMU","Bermuda","North America","High income",4
+"24","Bolivia","BOL",8710,2019,"BOL","Bolivia","Latin America & Caribbean","Lower middle income",2
+"25","Brazil","BRA",14890,2019,"BRA","Brazil","Latin America & Caribbean","Upper middle income",3
+"26","Barbados","BRB",15790,2019,"BRB","Barbados","Latin America & Caribbean","High income",3
+"27","Brunei Darussalam","BRN",65730,2019,"BRN","Brunei Darussalam","East Asia & Pacific","High income",4
+"28","Bhutan","BTN",11180,2019,"BTN","Bhutan","South Asia","Lower middle income",2
+"29","Botswana","BWA",14930,2019,"BWA","Botswana","Sub-Saharan Africa","Upper middle income",3
+"30","Central African Republic","CAF",960,2019,"CAF","Central African Republic","Sub-Saharan Africa","Low income",1
+"31","Canada","CAN",49140,2019,"CAN","Canada","North America","High income",4
+"32","Switzerland","CHE",71070,2019,"CHE","Switzerland","Europe & Central Asia","High income",4
+"33","Chile","CHL",24650,2019,"CHL","Chile","Latin America & Caribbean","High income",3
+"34","China","CHN",16610,2019,"CHN","China","East Asia & Pacific","Upper middle income",3
+"35","Cote d'Ivoire","CIV",5200,2019,"CIV","Côte d’Ivoire","Sub-Saharan Africa","Lower middle income",1
+"36","Cameroon","CMR",3830,2019,"CMR","Cameroon","Sub-Saharan Africa","Lower middle income",1
+"37","Congo, Dem. Rep.","COD",1040,2019,"COD","Congo, Dem. Rep.","Sub-Saharan Africa","Low income",1
+"38","Congo, Rep.","COG",3430,2019,"COG","Congo, Rep.","Sub-Saharan Africa","Lower middle income",1
+"39","Colombia","COL",15530,2019,"COL","Colombia","Latin America & Caribbean","Upper middle income",3
+"40","Comoros","COM",3450,2019,"COM","Comoros","Sub-Saharan Africa","Lower middle income",1
+"41","Cabo Verde","CPV",6970,2019,"CPV","Cabo Verde","Sub-Saharan Africa","Lower middle income",2
+"42","Costa Rica","CRI",21260,2019,"CRI","Costa Rica","Latin America & Caribbean","Upper middle income",3
+"43","Curacao","CUW",25750,2019,"CUW","Curaçao","Latin America & Caribbean","High income",3
+"44","Cayman Islands","CYM",55930,2019,"CYM","Cayman Islands","Latin America & Caribbean","High income",4
+"45","Cyprus","CYP",41660,2019,"CYP","Cyprus","Europe & Central Asia","High income",4
+"46","Czechia","CZE",41530,2019,"CZE","Czechia","Europe & Central Asia","High income",4
+"47","Germany","DEU",59260,2019,"DEU","Germany","Europe & Central Asia","High income",4
+"48","Djibouti","DJI",4820,2019,"DJI","Djibouti","Middle East & North Africa","Lower middle income",1
+"49","Dominica","DMA",12720,2019,"DMA","Dominica","Latin America & Caribbean","Upper middle income",2
+"50","Denmark","DNK",61830,2019,"DNK","Denmark","Europe & Central Asia","High income",4
+"51","Dominican Republic","DOM",18070,2019,"DOM","Dominican Republic","Latin America & Caribbean","Upper middle income",3
+"52","Algeria","DZA",11820,2019,"DZA","Algeria","Middle East & North Africa","Lower middle income",2
+"53","Ecuador","ECU",11520,2019,"ECU","Ecuador","Latin America & Caribbean","Upper middle income",2
+"54","Egypt, Arab Rep.","EGY",11230,2019,"EGY","Egypt, Arab Rep.","Middle East & North Africa","Lower middle income",2
+"55","Eritrea","ERI",1610,2011,"ERI","Eritrea","Sub-Saharan Africa","Low income",1
+"56","Spain","ESP",43160,2019,"ESP","Spain","Europe & Central Asia","High income",4
+"57","Estonia","EST",38230,2019,"EST","Estonia","Europe & Central Asia","High income",4
+"58","Ethiopia","ETH",2260,2019,"ETH","Ethiopia","Sub-Saharan Africa","Low income",1
+"59","Finland","FIN",52070,2019,"FIN","Finland","Europe & Central Asia","High income",4
+"60","Fiji","FJI",12670,2019,"FJI","Fiji","East Asia & Pacific","Upper middle income",2
+"61","France","FRA",51580,2019,"FRA","France","Europe & Central Asia","High income",4
+"62","Gabon","GAB",13870,2019,"GAB","Gabon","Sub-Saharan Africa","Upper middle income",2
+"63","United Kingdom","GBR",49370,2019,"GBR","United Kingdom","Europe & Central Asia","High income",4
+"64","Georgia","GEO",14930,2019,"GEO","Georgia","Europe & Central Asia","Upper middle income",3
+"65","Ghana","GHA",5340,2019,"GHA","Ghana","Sub-Saharan Africa","Lower middle income",2
+"66","Guinea","GIN",2520,2019,"GIN","Guinea","Sub-Saharan Africa","Lower middle income",1
+"67","Gambia, The","GMB",2140,2019,"GMB","Gambia, The","Sub-Saharan Africa","Low income",1
+"68","Guinea-Bissau","GNB",2010,2019,"GNB","Guinea-Bissau","Sub-Saharan Africa","Low income",1
+"69","Equatorial Guinea","GNQ",12410,2019,"GNQ","Equatorial Guinea","Sub-Saharan Africa","Upper middle income",2
+"70","Greece","GRC",30860,2019,"GRC","Greece","Europe & Central Asia","High income",3
+"71","Grenada","GRD",14510,2019,"GRD","Grenada","Latin America & Caribbean","Upper middle income",3
+"72","Guatemala","GTM",8870,2019,"GTM","Guatemala","Latin America & Caribbean","Upper middle income",2
+"73","Guyana","GUY",13240,2019,"GUY","Guyana","Latin America & Caribbean","High income",2
+"74","Hong Kong SAR, China","HKG",65240,2019,"HKG","Hong Kong SAR, China","East Asia & Pacific","High income",4
+"75","Honduras","HND",5390,2019,"HND","Honduras","Latin America & Caribbean","Lower middle income",2
+"76","Croatia","HRV",31610,2019,"HRV","Croatia","Europe & Central Asia","High income",3
+"77","Haiti","HTI",3240,2019,"HTI","Haiti","Latin America & Caribbean","Lower middle income",1
+"78","Hungary","HUN",33630,2019,"HUN","Hungary","Europe & Central Asia","High income",4
+"79","Indonesia","IDN",11980,2019,"IDN","Indonesia","East Asia & Pacific","Upper middle income",2
+"80","India","IND",6820,2019,"IND","India","South Asia","Lower middle income",2
+"81","Ireland","IRL",69600,2019,"IRL","Ireland","Europe & Central Asia","High income",4
+"82","Iran, Islamic Rep.","IRN",14710,2019,"IRN","Iran, Islamic Rep.","Middle East & North Africa","Lower middle income",3
+"83","Iraq","IRQ",10680,2019,"IRQ","Iraq","Middle East & North Africa","Upper middle income",2
+"84","Iceland","ISL",59540,2019,"ISL","Iceland","Europe & Central Asia","High income",4
+"85","Israel","ISR",40250,2019,"ISR","Israel","Middle East & North Africa","High income",4
+"86","Italy","ITA",46190,2019,"ITA","Italy","Europe & Central Asia","High income",4
+"87","Jamaica","JAM",10380,2019,"JAM","Jamaica","Latin America & Caribbean","Upper middle income",2
+"88","Jordan","JOR",9960,2019,"JOR","Jordan","Middle East & North Africa","Lower middle income",2
+"89","Japan","JPN",43970,2019,"JPN","Japan","East Asia & Pacific","High income",4
+"90","Kazakhstan","KAZ",24030,2019,"KAZ","Kazakhstan","Europe & Central Asia","Upper middle income",3
+"91","Kenya","KEN",4720,2019,"KEN","Kenya","Sub-Saharan Africa","Lower middle income",1
+"92","Kyrgyz Republic","KGZ",5000,2019,"KGZ","Kyrgyz Republic","Europe & Central Asia","Lower middle income",1
+"93","Cambodia","KHM",4380,2019,"KHM","Cambodia","East Asia & Pacific","Lower middle income",1
+"94","Kiribati","KIR",4350,2019,"KIR","Kiribati","East Asia & Pacific","Lower middle income",1
+"95","St. Kitts and Nevis","KNA",31850,2019,"KNA","St. Kitts and Nevis","Latin America & Caribbean","High income",3
+"96","Korea, Rep.","KOR",43780,2019,"KOR","Korea, Rep.","East Asia & Pacific","High income",4
+"97","Kuwait","KWT",55930,2019,"KWT","Kuwait","Middle East & North Africa","High income",4
+"98","Lao PDR","LAO",7700,2019,"LAO","Lao PDR","East Asia & Pacific","Lower middle income",2
+"99","Lebanon","LBN",17420,2019,"LBN","Lebanon","Middle East & North Africa","Lower middle income",3
+"100","Liberia","LBR",1360,2019,"LBR","Liberia","Sub-Saharan Africa","Low income",1
+"101","Libya","LBY",23750,2019,"LBY","Libya","Middle East & North Africa","Upper middle income",3
+"102","St. Lucia","LCA",15160,2019,"LCA","St. Lucia","Latin America & Caribbean","Upper middle income",3
+"103","Sri Lanka","LKA",13820,2019,"LKA","Sri Lanka","South Asia","Lower middle income",2
+"104","Lesotho","LSO",2990,2019,"LSO","Lesotho","Sub-Saharan Africa","Lower middle income",1
+"105","Lithuania","LTU",38520,2019,"LTU","Lithuania","Europe & Central Asia","High income",4
+"106","Luxembourg","LUX",79560,2019,"LUX","Luxembourg","Europe & Central Asia","High income",4
+"107","Latvia","LVA",32400,2019,"LVA","Latvia","Europe & Central Asia","High income",3
+"108","Macao SAR, China","MAC",113540,2019,"MAC","Macao SAR, China","East Asia & Pacific","High income",4
+"109","Morocco","MAR",8440,2019,"MAR","Morocco","Middle East & North Africa","Lower middle income",2
+"110","Moldova","MDA",14290,2019,"MDA","Moldova","Europe & Central Asia","Upper middle income",2
+"111","Madagascar","MDG",1590,2019,"MDG","Madagascar","Sub-Saharan Africa","Low income",1
+"112","Maldives","MDV",19300,2019,"MDV","Maldives","South Asia","Upper middle income",3
+"113","Mexico","MEX",19630,2019,"MEX","Mexico","Latin America & Caribbean","Upper middle income",3
+"114","North Macedonia","MKD",17180,2019,"MKD","North Macedonia","Europe & Central Asia","Upper middle income",3
+"115","Mali","MLI",2220,2019,"MLI","Mali","Sub-Saharan Africa","Low income",1
+"116","Malta","MLT",45150,2019,"MLT","Malta","Middle East & North Africa","High income",4
+"117","Myanmar","MMR",4860,2019,"MMR","Myanmar","East Asia & Pacific","Lower middle income",1
+"118","Montenegro","MNE",24060,2019,"MNE","Montenegro","Europe & Central Asia","Upper middle income",3
+"119","Mongolia","MNG",11550,2019,"MNG","Mongolia","East Asia & Pacific","Lower middle income",2
+"120","Mozambique","MOZ",1320,2019,"MOZ","Mozambique","Sub-Saharan Africa","Low income",1
+"121","Mauritania","MRT",5670,2019,"MRT","Mauritania","Sub-Saharan Africa","Lower middle income",2
+"122","Mauritius","MUS",25260,2019,"MUS","Mauritius","Sub-Saharan Africa","Upper middle income",3
+"123","Malawi","MWI",1560,2019,"MWI","Malawi","Sub-Saharan Africa","Low income",1
+"124","Malaysia","MYS",28090,2019,"MYS","Malaysia","East Asia & Pacific","Upper middle income",3
+"125","Namibia","NAM",10180,2019,"NAM","Namibia","Sub-Saharan Africa","Upper middle income",2
+"126","Niger","NER",1320,2019,"NER","Niger","Sub-Saharan Africa","Low income",1
+"127","Nigeria","NGA",5120,2019,"NGA","Nigeria","Sub-Saharan Africa","Lower middle income",1
+"128","Nicaragua","NIC",5370,2019,"NIC","Nicaragua","Latin America & Caribbean","Lower middle income",2
+"129","Netherlands","NLD",60460,2019,"NLD","Netherlands","Europe & Central Asia","High income",4
+"130","Norway","NOR",71400,2019,"NOR","Norway","Europe & Central Asia","High income",4
+"131","Nepal","NPL",4130,2019,"NPL","Nepal","South Asia","Lower middle income",1
+"132","Nauru","NRU",17960,2019,"NRU","Nauru","East Asia & Pacific","High income",3
+"133","New Zealand","NZL",44790,2019,"NZL","New Zealand","East Asia & Pacific","High income",4
+"134","Oman","OMN",32880,2019,"OMN","Oman","Middle East & North Africa","High income",4
+"135","Pakistan","PAK",5280,2019,"PAK","Pakistan","South Asia","Lower middle income",2
+"136","Panama","PAN",30750,2019,"PAN","Panama","Latin America & Caribbean","High income",3
+"137","Peru","PER",12790,2019,"PER","Peru","Latin America & Caribbean","Upper middle income",2
+"138","Philippines","PHL",10010,2019,"PHL","Philippines","East Asia & Pacific","Lower middle income",2
+"139","Palau","PLW",19520,2019,"PLW","Palau","East Asia & Pacific","Upper middle income",3
+"140","Papua New Guinea","PNG",3940,2019,"PNG","Papua New Guinea","East Asia & Pacific","Lower middle income",1
+"141","Poland","POL",33510,2019,"POL","Poland","Europe & Central Asia","High income",4
+"142","Portugal","PRT",36330,2019,"PRT","Portugal","Europe & Central Asia","High income",4
+"143","Paraguay","PRY",13770,2019,"PRY","Paraguay","Latin America & Caribbean","Upper middle income",2
+"144","West Bank and Gaza","PSE",7660,2019,"PSE","West Bank and Gaza","Middle East & North Africa","Upper middle income",2
+"145","Qatar","QAT",92300,2019,"QAT","Qatar","Middle East & North Africa","High income",4
+"146","Romania","ROU",32600,2019,"ROU","Romania","Europe & Central Asia","High income",3
+"147","Russian Federation","RUS",29120,2019,"RUS","Russian Federation","Europe & Central Asia","Upper middle income",3
+"148","Rwanda","RWA",2210,2019,"RWA","Rwanda","Sub-Saharan Africa","Low income",1
+"149","Saudi Arabia","SAU",47310,2019,"SAU","Saudi Arabia","Middle East & North Africa","High income",4
+"150","Sudan","SDN",4090,2019,"SDN","Sudan","Sub-Saharan Africa","Low income",1
+"151","Senegal","SEN",3480,2019,"SEN","Senegal","Sub-Saharan Africa","Lower middle income",1
+"152","Singapore","SGP",89630,2019,"SGP","Singapore","East Asia & Pacific","High income",4
+"153","Solomon Islands","SLB",2700,2019,"SLB","Solomon Islands","East Asia & Pacific","Lower middle income",1
+"154","Sierra Leone","SLE",1700,2019,"SLE","Sierra Leone","Sub-Saharan Africa","Low income",1
+"155","El Salvador","SLV",8930,2019,"SLV","El Salvador","Latin America & Caribbean","Upper middle income",2
+"156","San Marino","SMR",57320,2019,"SMR","San Marino","Europe & Central Asia","High income",4
+"157","Somalia","SOM",1180,2019,"SOM","Somalia","Sub-Saharan Africa","Low income",1
+"158","Serbia","SRB",18360,2019,"SRB","Serbia","Europe & Central Asia","Upper middle income",3
+"159","South Sudan","SSD",1040,2015,"SSD","South Sudan","Sub-Saharan Africa","Low income",1
+"160","Sao Tome and Principe","STP",4170,2019,"STP","São Tomé and Príncipe","Sub-Saharan Africa","Lower middle income",1
+"161","Suriname","SUR",17260,2019,"SUR","Suriname","Latin America & Caribbean","Upper middle income",3
+"162","Slovak Republic","SVK",32740,2019,"SVK","Slovak Republic","Europe & Central Asia","High income",3
+"163","Slovenia","SVN",41340,2019,"SVN","Slovenia","Europe & Central Asia","High income",4
+"164","Sweden","SWE",58060,2019,"SWE","Sweden","Europe & Central Asia","High income",4
+"165","Eswatini","SWZ",7970,2019,"SWZ","Eswatini","Sub-Saharan Africa","Lower middle income",2
+"166","Sint Maarten (Dutch part)","SXM",35180,2018,"SXM","Sint Maarten (Dutch part)","Latin America & Caribbean","High income",4
+"167","Seychelles","SYC",28650,2019,"SYC","Seychelles","Sub-Saharan Africa","High income",3
+"168","Turks and Caicos Islands","TCA",26150,2019,"TCA","Turks and Caicos Islands","Latin America & Caribbean","High income",3
+"169","Chad","TCD",1600,2019,"TCD","Chad","Sub-Saharan Africa","Low income",1
+"170","Togo","TGO",2170,2019,"TGO","Togo","Sub-Saharan Africa","Low income",1
+"171","Thailand","THA",18070,2019,"THA","Thailand","East Asia & Pacific","Upper middle income",3
+"172","Tajikistan","TJK",4320,2019,"TJK","Tajikistan","Europe & Central Asia","Lower middle income",1
+"173","Turkmenistan","TKM",15050,2019,"TKM","Turkmenistan","Europe & Central Asia","Upper middle income",3
+"174","Timor-Leste","TLS",5240,2019,"TLS","Timor-Leste","East Asia & Pacific","Lower middle income",2
+"175","Tonga","TON",7150,2019,"TON","Tonga","East Asia & Pacific","Upper middle income",2
+"176","Trinidad and Tobago","TTO",25700,2019,"TTO","Trinidad and Tobago","Latin America & Caribbean","High income",3
+"177","Tunisia","TUN",11250,2019,"TUN","Tunisia","Middle East & North Africa","Lower middle income",2
+"178","Turkiye","TUR",27240,2019,"TUR","Türkiye","Europe & Central Asia","Upper middle income",3
+"179","Tuvalu","TUV",6690,2019,"TUV","Tuvalu","East Asia & Pacific","Upper middle income",2
+"180","Tanzania","TZA",2720,2019,"TZA","Tanzania","Sub-Saharan Africa","Lower middle income",1
+"181","Uganda","UGA",2120,2019,"UGA","Uganda","Sub-Saharan Africa","Low income",1
+"182","Ukraine","UKR",13510,2019,"UKR","Ukraine","Europe & Central Asia","Lower middle income",2
+"183","Uruguay","URY",23070,2019,"URY","Uruguay","Latin America & Caribbean","High income",3
+"184","United States","USA",66120,2019,"USA","United States","North America","High income",4
+"185","Uzbekistan","UZB",7750,2019,"UZB","Uzbekistan","Europe & Central Asia","Lower middle income",2
+"186","St. Vincent and the Grenadines","VCT",14670,2019,"VCT","St. Vincent and the Grenadines","Latin America & Caribbean","Upper middle income",3
+"187","Venezuela, RB","VEN",16960,2011,"VEN","Venezuela, RB","Latin America & Caribbean",NA,3
+"188","Vietnam","VNM",10150,2019,"VNM","Vietnam","East Asia & Pacific","Lower middle income",2
+"189","Vanuatu","VUT",3470,2019,"VUT","Vanuatu","East Asia & Pacific","Lower middle income",1
+"190","Samoa","WSM",6350,2019,"WSM","Samoa","East Asia & Pacific","Lower middle income",2
+"191","Kosovo","XKX",12060,2019,NA,"Kosovo","Europe & Central Asia","Upper middle income",2
+"192","Yemen, Rep.","YEM",3280,2013,"YEM","Yemen, Rep.","Middle East & North Africa","Low income",1
+"193","South Africa","ZAF",14080,2019,"ZAF","South Africa","Sub-Saharan Africa","Upper middle income",2
+"194","Zambia","ZMB",3450,2019,"ZMB","Zambia","Sub-Saharan Africa","Lower middle income",1
+"195","Zimbabwe","ZWE",2260,2019,"ZWE","Zimbabwe","Sub-Saharan Africa","Lower middle income",1

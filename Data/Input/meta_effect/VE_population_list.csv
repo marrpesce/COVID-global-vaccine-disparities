@@ -1,0 +1,112 @@
+population_category,include_population,inclusion_notes
+> 60 years,yes,NA
+> 70 years,yes,NA
+> 80 years,yes,NA
+>= 15 years,yes,NA
+>= 40 years,yes,NA
+>= 50 years,yes,NA
+>= 50 years with >= 1 chronic non-respiratory condition,no,specific population
+>= 50 years with >= 1 chronic respiratory condition,no,specific population
+>= 60 years,yes,NA
+>= 65 years,yes,NA
+>= 70 years,yes,NA
+>= 75 years,yes,NA
+>= 80 years,yes,NA
+>= 85 years,yes,NA
+>=12 years with blood cancer,no,specific population
+>=12 years with diabetes mellitus,no,specific population
+>=18 years with a mental disorder,no,specific population
+>=18 years with any disability,no,specific population
+>=18 years with chronic kidney disease,no,specific population
+>=18 years with no disability,yes,NA
+>=18 years with substance abuse disorders,no,specific population
+">=18 years, Social Vulnerability Index Quartile 1",no,specific population
+">=18 years, Social Vulnerability Index Quartile 2",no,specific population
+">=18 years, Social Vulnerability Index Quartile 3",no,specific population
+">=18 years, Social Vulnerability Index Quartile 4",no,specific population
+>=50 years,yes,NA
+>=60 years,yes,NA
+>=65 years,yes,NA
+>=80 years,yes,NA
+12-15 years,no,infants/children
+12-16 years,no,infants/children
+12-17 years,no,infants/children
+12-18 years,no,infants/children
+12-20 years,no,infants/children
+12-59 years,yes,NA
+15-59 years,yes,NA
+16-17 years,no,infants/children
+16-18 years,no,infants/children
+18-39 years,yes,NA
+18-50 years,yes,NA
+18-60 years,yes,NA
+18-64 years,yes,NA
+18-64 years clinically vulnerable,no,specific population
+20-59 years,yes,NA
+3-11 years,no,infants/children
+3-17 years,no,infants/children
+3-5 years,no,infants/children
+40-59 years,yes,NA
+40-64 years,yes,NA
+45-74 years,yes,NA
+5-11 years,no,infants/children
+50-59 years,yes,NA
+50-69 years,yes,NA
+51-64 years,yes,NA
+6-11 years,no,infants/children
+6-16 years,no,infants/children
+60-69 years,yes,NA
+60-79 years,yes,NA
+60+ years,yes,NA
+65-79 years,yes,NA
+6m-5 years,no,infants/children
+70-79 years,yes,NA
+75-84 years,yes,NA
+80-83 years,yes,NA
+adolescents,no,infants/children
+childcare workers,no,specific population
+chronically ill,no,specific population
+clinically vulnerable 16-64 years,no,specific population
+close contacts,no,specific population
+contacts of index cases,no,specific population
+Contacts of index cases,no,specific population
+ED/UC encounters or hospitalization among adults with COVID-19 like illness,no,specific population
+general pop,yes,NA
+general pop with overrepsentation of clinical risk groups (30%),no,specific population
+general pop with prior SARS-CoV-2 infection,no,specific population
+HCW,no,specific population
+HCW aged 16-69 years,no,specific population
+HCW with low physical activity,no,specific population
+HCW years with high physical activity,no,specific population
+HCW years with moderate physical activity,no,specific population
+hemodialysis patients,no,specific population
+hospitalized adults,no,specific population
+hospitalized veterans,no,specific population
+immunocompetent adults,yes,NA
+Immunocompromised,no,specific population
+immunocompromised,no,specific population
+immunocompromised adults,no,specific population
+"immunocompromised, >= 16 years",no,specific population
+individuals with ankylosing spondylitis,no,specific population
+individuals with inflammatory bowel disease,no,specific population
+individuals with psoriasis,no,specific population
+individuals with rheumatoid arthritis,no,specific population
+infants,no,infants/children
+infants < 6 months,no,infants/children
+infants <6 months when timing of maternal vaccination was anytime up to 14 days before delivery,no,infants/children
+infants <6 months when timing of maternal vaccination was from 21 weeks' gestation up to 14 days before delivery,no,infants/children
+infants <6 months when timing of maternal vaccination was in first 20 weeks,no,infants/children
+infants of mothers vaccinated post-partum,no,infants/children
+LTCF residents,no,specific population
+LTCF staff,no,specific population
+military personnel,no,specific population
+patients with chronic kidney disease,no,specific population
+patients with cirrhosis,no,specific population
+pregnant persons,no,specific population
+priority groups,no,specific population
+transplant patients,no,specific population
+transplant recipients,no,specific population
+veterans,yes,NA
+veterans < 65 years,yes,specific population
+veterans >= 65 years,yes,specific population
+veterans 18+ years,yes,NA

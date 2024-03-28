@@ -1,0 +1,282 @@
+---
+title: "3 Creation of VE Database"
+author: "Martina Pesce & Edward P. K. Parker"
+date: "2023-10-02"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+#### Inputs
+- Input/WeeklySummary_COVID19_VE_Studies_20230622.xlsx: View-Hub VE database
+- Processed/Ineq_merged.csv: Combined country-level income data
+- Input/meta_effect/VE_vaccine_list.csv: clean vaccine names and platforms for VE data
+- Input/meta_effect/VE_variant_list.csv: clean variant names for VE data
+
+#### Outputs
+- Processed/COVID_VEcleaned.csv: Cleaned View-Hub VE data
+- Processed/COVID19VE_ineq_merged.csv: View-Hub VE data merged with country income data
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+#libraries
+
+library(readxl)
+library(xlsx)
+library(countrycode)
+library(tidyverse)
+library(lubridate)
+```
+
+```{r,import database}
+#Vaccine Effectiveness Weekly studies database (11-01-2024)
+
+COVID19VE <- read.xlsx("Data/Input/meta_effect/WeeklySummary_COVID19_VE_Studies_20240111_0.xlsx",sheetName = "Primary Series Studies", check.names=FALSE) 
+
+
+
+# Update non-standard strings to avoid later issues
+COVID19VE$timing_of_dose_days = str_replace_all(COVID19VE$timing_of_dose_days, "≤", ">=")
+COVID19VE$timing_of_dose_days = str_replace_all(COVID19VE$timing_of_dose_days, "≥", ">=")
+COVID19VE$population_detail = str_replace_all(COVID19VE$population_detail, "≥", ">=")
+COVID19VE$population_category = str_replace_all(COVID19VE$population_category, "≥", ">=")
+COVID19VE$`first author` = str_replace_all(COVID19VE$`first author`, "Šmíd", "Smid")
+COVID19VE$`first author` = str_replace_all(COVID19VE$`first author`, "Á", "A")
+COVID19VE$`first author` = str_replace_all(COVID19VE$`first author`, "á", "a")
+COVID19VE$`first author` = str_replace_all(COVID19VE$`first author`, "ó", "o")
+
+# Basic summary statistics
+nrow(COVID19VE) #3732 estimates
+length(unique(COVID19VE$`study ID`)) #434 unique studies
+
+# Income data
+Ineq_merged <- read_csv("Data/Processed/Ineq_merged_with_vaccine_data.csv") %>%
+  select(`Country.Name`:`Protein`)
+
+# Clean vaccine names, platforms, and variants for VE data
+clean_vaccines <- read_csv("Data/Input/meta_effect/VE_vaccine_list.csv") 
+clean_variants <- read_csv("Data/Input/meta_effect/VE_variant_list.csv") 
+```
+
+# View-Hub database
+
+```{r}
+#Explore country levels in VIEW-HUB database
+table(COVID19VE$country)
+```
+
+Studies involving multiple countries include either commas or numerals, with the exception of 'Hong Kong, SAR'.
+
+## Recode countries names
+
+```{r harmonize country names}
+COVID19VE <- COVID19VE %>%
+  mutate(country = ifelse(grepl("Israel ", country), "Israel", country)) %>% # Merge multiple spellings of Israel
+  mutate(country = ifelse(grepl("Hong Kong, SAR", country), "Hong Kong", country)) %>% # Update Hong Kong to remove comma 
+  mutate(country_clean = ifelse(grepl("[0-9,]", as.character(country)) | grepl("countries", as.character(country)), "Multiple", country)) # recode list of countries to multiple country
+
+# Additional cleaning steps
+COVID19VE$country_clean[grepl("Canada", as.character(COVID19VE$country))] = "Canada"
+COVID19VE$country_clean[grepl("Scotland", as.character(COVID19VE$country))] = "UK"
+COVID19VE$country_clean[grepl("UAE", as.character(COVID19VE$country))] = "United Arab Emirates"
+table(COVID19VE$country_clean)
+
+# Add ISO3 codes for merge
+COVID19VE <- COVID19VE %>%
+  mutate(iso3c = countrycode(country_clean, origin = "country.name", destination = "iso3c"))
+
+#Check iso3c NAs
+filter <- COVID19VE %>% filter(is.na(iso3c))
+all(filter$country_clean=="Multiple") # TRUE, so all filtered rows from multiple studies
+length(unique(filter$`study ID`)) #11 unique studies removed
+
+# Filter studies from multiple countries
+COVID19VE_country <- COVID19VE %>% 
+  filter(!is.na(iso3c)) %>%
+  # Divide country-specific estimates into separate IDs
+  mutate(
+    #Study ID = (1)240 two countries -> create a new ID for 240+Scotland=500 / 222+Scotland=501/ (2) fix error in Tartof study ID
+    Study_id_f = case_when(
+      `study ID` == 240 & country == "Scotland" ~ 500,
+      `study ID` == 222 & country == "Scotland" ~ 501,
+      `first author` == "Tartof" & `publication date` == "22Apr2022" ~ 165,
+      TRUE ~ `study ID`
+    )
+  )
+
+# Basic summary statistics
+nrow(COVID19VE_country) #3640 estimates
+length(unique(COVID19VE_country$Study_id_f)) #425 unique studies
+
+# Filter studies without income data
+COVID19VE_country[!(COVID19VE_country$iso3c %in% Ineq_merged$iso3c),] # 3 studies - 1 from Cuba (Más-Bermejo), 1 from Taiwan (Huang) and 1 from Puerto Rico (Irizarry)
+COVID19VE_country <- COVID19VE_country %>% filter(iso3c %in% Ineq_merged$iso3c)
+nrow(COVID19VE_country) #3597 estimates
+length(unique(COVID19VE_country$Study_id_f)) #422 unique studies
+```
+
+
+# Merge Systematic review with inequalities data.
+
+```{r merge}
+#Merge inequalities data with the VE data
+# exclude product/platform binary variables from merge to avoid confusion with VE estimates
+COVID19VE_ineq_merged <- left_join(COVID19VE_country, 
+                                   Ineq_merged %>% select(Country.Code:V70_dummy), 
+                                   by = "iso3c", na_matches = "never")
+```
+
+
+
+#Fix data problems
+```{r}
+# Write csv files to generate VE_vaccine_list.csv and VE_variant_list.csv inputs
+#write.csv(unique(COVID19VE_ineq_merged$`primary series vaccine`),"vaccine_list.csv")
+#write.csv(unique(COVID19VE_ineq_merged$variant_context),"variant_list.csv")
+unique(COVID19VE_ineq_merged$outcome_category)
+
+#fix a study that have 2 countries
+COVID19VE_ineq_merged <- COVID19VE_ineq_merged %>%
+  mutate(
+    #Fix outcome 
+    outcome_category = case_when(
+    `study ID` == 345 &
+        outcome_detail == "severe disease" ~ "severe",
+      TRUE ~ outcome_category  
+    ),
+    #Fix publication dates
+    `publication date` = case_when(
+      `publication date` == "Jun2022 (day not specified)" ~ "01Jun2022",
+      `publication date` == "Apr2022 (day not specified)" ~ "01Apr2022",
+      Study_id_f == 102  ~ "05Jan2022",
+      Study_id_f == 203 &
+        `publication date` == "06Jul2022" ~ "05Nov2022",
+      Study_id_f == 204  ~ "23May2022",
+      Study_id_f == 235  ~ "22Jul2022",
+      Study_id_f == 139  ~ "21Jan2022",
+      TRUE ~ `publication date`
+    ),
+    #  publication date to dmy
+    publication_date = dmy(paste0(
+      substring(`publication date`, 1, 2),
+      tolower(substring(`publication date`, 3, 5)),
+      substring(`publication date`, 6)
+    )),
+  # Regroup outcome
+  outcome_final = case_when(
+    outcome_category %in% c(
+    "asymptomatic",
+    "infection",
+    "infection ",
+    "infection in the first 2 months of life",
+    "infection in the first 4 months of life",
+    "infection in the first 6 months of life",
+    "infection during an infant's first 4 months of life",
+    "reinfection"
+  ) ~ "infection",
+      outcome_category %in% c(
+    "symptomatic",
+    "symptomatic or severe" # grouped with less severe (more common) outcome
+  ) ~ "symptomatic",
+  outcome_category %in% c(
+    "severe",
+    "hospitalization",
+    "hospitalization with MIS-C",
+    "MIS-C"
+  ) ~ "severe",
+  outcome_category %in% c("death", "death ") ~ "death",
+  TRUE ~ "X"
+    )
+  ) %>%
+  #Create publication semester
+  mutate(
+    semester = case_when(
+      publication_date < dmy("01-07-2021") ~ "2021 (Jan-Jun)",
+      publication_date >= dmy("01-07-2021") & publication_date < dmy("01-01-2022") ~ "2021 (Jul-Dec)",
+      publication_date >= dmy("01-01-2022") & publication_date < dmy("01-07-2022") ~ "2022 (Jan-Jun)",
+      publication_date >= dmy("01-07-2022") & publication_date < dmy("01-01-2023") ~ "2022 (Jul-Dec)",
+      publication_date >= dmy("01-01-2023") & publication_date < dmy("01-07-2023") ~ "2023 (Jan-Jun)",
+      publication_date >= dmy("01-07-2023") & publication_date < dmy("01-01-2024") ~ "2023 (Jul-Dec)",
+      publication_date >= dmy("01-01-2024") ~ "2024 (Jan-Jun)",
+      TRUE ~ NA_character_
+    )
+  ) 
+
+# add clean vaccine names
+all(clean_vaccines$`primary series vaccine` %in% COVID19VE_ineq_merged$`primary series vaccine`)
+COVID19VE_ineq_merged <- COVID19VE_ineq_merged %>% left_join(clean_vaccines, by=c("primary series vaccine")) 
+
+# add clean variant names
+all(clean_variants$variant_context %in% COVID19VE_ineq_merged$variant_context)
+COVID19VE_ineq_merged <- COVID19VE_ineq_merged %>% left_join(clean_variants, by=c("variant_context"))
+
+# Summarise
+nrow(COVID19VE_ineq_merged) #3597 estimates
+length(unique(COVID19VE_ineq_merged$Study_id_f)) #422 unique studies
+```
+
+```{r}
+# earliest publication date
+studies_min_pub_date <- read_csv("Data/Input/meta_effect/min_study_dates.csv") %>% 
+  select(`study ID`, earliest_date) 
+
+# Merge with COVID19VE_ineq_merged
+COVID19VE_ineq_merged <- left_join(COVID19VE_ineq_merged, studies_min_pub_date) %>% 
+  mutate(
+    earliest_date= case_when(
+    Study_id_f== "165" ~ "18/01/2022",
+    TRUE ~ earliest_date
+  ))
+
+
+
+#Creat earliest publication date
+COVID19VE_ineq_merged <- COVID19VE_ineq_merged %>% 
+  mutate(
+      min_pub_date = pmin(publication_date, dmy(earliest_date), na.rm = TRUE)
+  )
+
+# check
+
+check1 <- COVID19VE_ineq_merged  %>% 
+  filter(
+    Study_id_f == "165"
+  )%>% 
+  select(
+    Study_id_f, `first author`, `study ID`, publication_date, `publication date`, earliest_date, min_pub_date
+  )
+
+check <- COVID19VE_ineq_merged %>% 
+  select(`study ID`, `first author`, country_clean, q_GNI_per_c_WB, `publication date`, publication_date, earliest_date, min_pub_date) %>% 
+  distinct() %>% 
+  mutate(
+    dif_date= publication_date - min_pub_date
+  )
+sum(check$dif_date!=0)
+#137 dates fixed 
+
+
+
+```
+
+
+```{r, write}
+#Save data the .csv file for the descriptive analysis and metaregression
+
+write.csv(COVID19VE_ineq_merged, "Data/Processed/COVID19VE_ineq_merged.csv")
+
+```
+
+
+  
+# Session info
+```{r, session info}
+print(sessionInfo())
+```
+

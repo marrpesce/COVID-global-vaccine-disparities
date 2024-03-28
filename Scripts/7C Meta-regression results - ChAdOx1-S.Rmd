@@ -1,0 +1,494 @@
+---
+title: "7 Meta-regression results"
+author: "Martina Pesce & Edward P. K. Parker"
+date: "2023-10-12"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+#### Inputs
+- Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.xlsx: Processed meta-regression data
+
+#### Outputs
+- Meta-regression model results and plots for selected vaccine
+
+
+#Janssen
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# select vaccine
+selected_vaccine = "Oxford/AstraZeneca ChAdOx1-S" # values: "BioNTech/Pfizer BNT162b2" "Janssen Ad26.COV2.S" "Oxford/AstraZeneca ChAdOx1-S" "Moderna mRNA-1273"
+simple_name = "ChAdOx1-S" # for file outputs 
+
+# create logical for whether to run omicron analysis
+if (selected_vaccine == "Janssen Ad26.COV2.S") { janssen=TRUE } else { janssen=FALSE}
+```
+
+
+
+```{r}
+library(tidyverse)
+library(metafor)
+library(dmetar)
+library(forestplot)
+library(patchwork)
+
+VEmetareg_data_clean <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv") %>% 
+  filter(include=="yes") %>% 
+  mutate(publication_year = paste0( substring(`publication date`, nchar(`publication date`) - 3))) %>% 
+  mutate(
+    paper= paste0(
+  `first author`, " (",
+  publication_year, ")"
+)
+  ) %>% 
+  arrange(country_clean)
+  
+n_distinct(VEmetareg_data_clean$Study_id_f)
+
+# Update country names for plotting
+VEmetareg_data_clean$country_clean[VEmetareg_data_clean$country_clean=="Hong Kong"] = "Hong Kong SAR"
+
+# Simplify names for plotting
+VEmetareg_data_clean$population_category[VEmetareg_data_clean$population_category=="immunocompetent adults"] = "immunocomp. adults"
+
+# check values for vaccines, outcome, variant and quartile
+table(VEmetareg_data_clean$clean_vaccine)
+table(VEmetareg_data_clean$outcome_final) # all severe
+table(VEmetareg_data_clean$variant_clean) # delta or omicron
+table(VEmetareg_data_clean$q_GNI_per_c_WB) # 4, 3, 2
+
+studies_countries_models <- VEmetareg_data_clean %>%
+  group_by(variant_clean, clean_vaccine, q_GNI_per_c_WB) %>%
+  summarise(
+    countries= n_distinct(Country.Code),
+    studies= n_distinct(Study_id_f),
+    subgroup= n(),
+    median_min_period = round(median(as.numeric(min_period_days), na.rm = TRUE)/7, 0),
+    q25_min_period = round(quantile(as.numeric(min_period_days), 0.25, na.rm = TRUE)/7, 0),
+    q75_min_period = round(quantile(as.numeric(min_period_days), 0.75, na.rm = TRUE)/7, 0),
+    median_max_period = round(median(as.numeric(max_period_days), na.rm = TRUE)/7, 0),
+    q25_max_period = round(quantile(as.numeric(max_period_days), 0.25, na.rm = TRUE)/7, 0),
+    q75_max_period = round(quantile(as.numeric(max_period_days), 0.75, na.rm = TRUE)/7, 0)
+  ) %>%
+  mutate(
+    median_min = paste0(median_min_period, " (", q25_min_period, "-", q75_min_period, ")"),
+    median_max = paste0(median_max_period, " (", q25_max_period, "-", q75_max_period, ")")
+  ) %>%
+  select(-median_min_period, -q25_min_period, -q75_min_period, -median_max_period, -q25_max_period, -q75_max_period)
+write.csv(studies_countries_models, "Data/Processed/meta_summary_counts.csv")
+```
+
+## MODEL 1.A: delta, severe 
+
+
+```{r}
+#Filter: delta, severe 
+
+delta_severe <- VEmetareg_data_clean %>%
+  filter (clean_vaccine == selected_vaccine & variant_clean=="delta") %>% 
+  mutate(
+    subgroup = as.factor(1:nrow(.)),
+    Study_id_f = as.factor(Study_id_f),
+    q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels=c("4", "3", "2")),
+  )
+
+
+```
+
+
+# MODEL 1.B:omicron, severe 
+
+
+```{r}
+if (!janssen) {
+#Filter:omicron, severe 
+
+omicron_severe <- VEmetareg_data_clean %>%
+  filter (clean_vaccine == selected_vaccine & variant_clean=="omicron") %>% 
+  mutate(
+    subgroup = as.factor(1:nrow(.)),
+    Study_id_f = as.factor(Study_id_f),
+    q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels=c("4", "3", "2")),
+    country_clean =as.factor(country_clean)
+  )
+
+}
+```
+
+
+#GNI
+
+## Table 2. 
+
+Primary COVID-19 vaccine series’ early effectiveness against severe COVID-19 disease by the variant of interest context and inequalities between countries (GNI per capita). RR= GNI per capita quartile pooled Risk Ratio. 95% CI= 95% Confidence interval: statistical range within which a population parameter is expected to lie. 95% PI= 95% predictive interval: estimate of the range within which the effects of future studies are expected to fall based on the existing evidence. I²= proportion of effect variability not caused by sampling error. 𝜏²= Variance components. Level 2(w)= heterogeneity within countries. Level 3(b)=  heterogeneity between countries.
+
+
+```{r}
+### MODEL delta_severe: GNI
+delta_severe.GNI <-
+  rma.mv(
+    yi = ln.RR,
+    V = (SE.ln.RR)^2,
+    slab = `first author`,
+    data = delta_severe, 
+    mods = ~ q_GNI_per_c_WB, 
+    random = ~ 1 | iso3c /  subgroup,
+    test = "t",
+    method = "REML"
+  )
+
+
+#Estimate, CI, PI (RR)
+pred.delta_severe.GNI <- as.data.frame(predict(delta_severe.GNI, addx=TRUE, transf=exp) ) 
+pred.delta_severe.GNI <-  distinct(pred.delta_severe.GNI)
+pred.delta_severe.GNI$GNI = 4
+pred.delta_severe.GNI$GNI[pred.delta_severe.GNI$X.q_GNI_per_c_WB3==1] = 3
+pred.delta_severe.GNI$GNI[pred.delta_severe.GNI$X.q_GNI_per_c_WB2==1] = 2
+pred.delta_severe.GNI$VoI <- rep("delta", nrow(pred.delta_severe.GNI))
+# pred.delta_severe.GNI$subgroup <- 
+# pred.delta_severe.GNI$country <- 
+
+
+#i^2
+I2_lvl2.delta_severe.GNI<- mlm.variance.distribution(delta_severe.GNI)$results[2,2] #lvl 2 i^2
+I2_lvl3.delta_severe.GNI<- mlm.variance.distribution(delta_severe.GNI)$results[3,2] #lvl 3 i^2
+
+o2_lvl2.delta_severe.GNI <- sqrt(delta_severe.GNI$sigma2[2]) #within cluster sigma (level 2)
+o2_lvl3.delta_severe.GNI <- sqrt(delta_severe.GNI$sigma2[1]) #between cluster sigma (level 3)
+
+#moderator p-value
+QMp_value.delta_severe.GNI <- delta_severe.GNI$QMp
+#m1.GNI$k.w
+
+I_o_p_delta_severe.GNI <- data.frame(
+  QMp_value = QMp_value.delta_severe.GNI, 
+  I2_lvl2 = I2_lvl2.delta_severe.GNI,
+   I2_lvl3 = I2_lvl3.delta_severe.GNI,
+   o2_lvl2 = o2_lvl2.delta_severe.GNI,
+   o2_lvl3 = o2_lvl3.delta_severe.GNI
+ )
+
+Sum_delta_severe.GNI <- cbind.data.frame(pred.delta_severe.GNI, I_o_p_delta_severe.GNI) %>%
+  select(-starts_with("X.")) %>% 
+  mutate(RR_summary = 
+           paste0(
+             format(round(pred,2),nsmall=2)," (",
+             format(round(ci.lb,2),nsmall=2),"-",
+             format(round(ci.ub,2),nsmall=2),")"
+             ),
+         VE_summary = 
+           paste0(
+             format(round((1-pred)*100,0),nsmall=0)," (",
+             format(round((1-ci.ub)*100,0),nsmall=0),"-",
+             format(round((1-ci.lb)*100,0),nsmall=0),")"
+             )
+         ) 
+Sum_delta_severe.GNI # order is GNI2 - row 1, GNI 3 - row 2, GNI 4 - row 1
+
+# summary metrics for GNI quartile 2
+delta_rr_GNI_2 = Sum_delta_severe.GNI$pred[3]
+delta_lci_GNI_2 = Sum_delta_severe.GNI$ci.lb[3]
+delta_uci_GNI_2 = Sum_delta_severe.GNI$ci.ub[3]
+delta_RR_summary_GNI_2 = Sum_delta_severe.GNI$RR_summary[3]
+
+# summary metrics for GNI quartile 3
+delta_rr_GNI_3 = Sum_delta_severe.GNI$pred[2]
+delta_lci_GNI_3 = Sum_delta_severe.GNI$ci.lb[2]
+delta_uci_GNI_3 = Sum_delta_severe.GNI$ci.ub[2]
+delta_RR_summary_GNI_3 = Sum_delta_severe.GNI$RR_summary[2]
+
+# summary metrics for GNI quartile 4
+delta_rr_GNI_4 = Sum_delta_severe.GNI$pred[1]
+delta_lci_GNI_4 = Sum_delta_severe.GNI$ci.lb[1]
+delta_uci_GNI_4 = Sum_delta_severe.GNI$ci.ub[1]
+delta_RR_summary_GNI_4 = Sum_delta_severe.GNI$RR_summary[1]
+```
+
+
+
+
+```{r}
+if (!janssen) {
+### MODEL omicron_severe: GNI
+omicron_severe.GNI <-
+  rma.mv(
+    yi = ln.RR,
+    V = (SE.ln.RR)^2,
+    slab = `first author`,
+    data = omicron_severe, 
+    mods = ~ q_GNI_per_c_WB, 
+    random = ~ 1 | iso3c /  subgroup,
+    test = "t",
+    method = "REML"
+  )
+
+
+#Estimate, CI, PI (RR)
+pred.omicron_severe.GNI <- as.data.frame(predict(omicron_severe.GNI, addx=TRUE, transf=exp) ) 
+pred.omicron_severe.GNI <-  distinct(pred.omicron_severe.GNI)
+pred.omicron_severe.GNI$GNI = 4
+pred.omicron_severe.GNI$GNI[pred.omicron_severe.GNI$X.q_GNI_per_c_WB3==1] = 3
+pred.omicron_severe.GNI$GNI[pred.omicron_severe.GNI$X.q_GNI_per_c_WB2==1] = 2
+pred.omicron_severe.GNI$VoI <- rep("omicron", nrow(pred.omicron_severe.GNI))
+
+
+
+#i^2
+I2_lvl2.omicron_severe.GNI<- mlm.variance.distribution(omicron_severe.GNI)$results[2,2] #lvl 2 i^2
+I2_lvl3.omicron_severe.GNI<- mlm.variance.distribution(omicron_severe.GNI)$results[3,2] #lvl 3 i^2
+
+o2_lvl2.omicron_severe.GNI <- sqrt(omicron_severe.GNI$sigma2[2]) #within cluster sigma (level 2)
+o2_lvl3.omicron_severe.GNI <- sqrt(omicron_severe.GNI$sigma2[1]) #between cluster sigma (level 3)
+
+#moderator p-value
+QMp_value.omicron_severe.GNI <- omicron_severe.GNI$QMp
+#m1.GNI$k.w
+
+I_o_p_omicron_severe.GNI <- data.frame(
+  QMp_value = QMp_value.omicron_severe.GNI, 
+  I2_lvl2 = I2_lvl2.omicron_severe.GNI,
+   I2_lvl3 = I2_lvl3.omicron_severe.GNI,
+   o2_lvl2 = o2_lvl2.omicron_severe.GNI,
+   o2_lvl3 = o2_lvl3.omicron_severe.GNI
+ )
+
+Sum_omicron_severe.GNI <- cbind.data.frame(pred.omicron_severe.GNI, I_o_p_omicron_severe.GNI) %>%
+   select(-starts_with("X.")) %>% 
+    mutate(RR_summary = 
+           paste0(
+             format(round(pred,2),nsmall=2)," (",
+             format(round(ci.lb,2),nsmall=2),"-",
+             format(round(ci.ub,2),nsmall=2),")"
+             ),
+         VE_summary = 
+           paste0(
+             format(round((1-pred)*100,0),nsmall=0)," (",
+             format(round((1-ci.ub)*100,0),nsmall=0),"-",
+             format(round((1-ci.lb)*100,0),nsmall=0),")"
+             )
+         ) 
+Sum_omicron_severe.GNI # order is GNI2 - row 3, GNI 3 - row 1, GNI 4 - row 2
+
+# summary metrics for GNI quartile 2
+omicron_rr_GNI_2 = Sum_omicron_severe.GNI$pred[3]
+omicron_lci_GNI_2 = Sum_omicron_severe.GNI$ci.lb[3]
+omicron_uci_GNI_2 = Sum_omicron_severe.GNI$ci.ub[3]
+omicron_RR_summary_GNI_2 = Sum_omicron_severe.GNI$RR_summary[3]
+
+# summary metrics for GNI quartile 3
+omicron_rr_GNI_3 = Sum_omicron_severe.GNI$pred[1]
+omicron_lci_GNI_3 = Sum_omicron_severe.GNI$ci.lb[1]
+omicron_uci_GNI_3 = Sum_omicron_severe.GNI$ci.ub[1]
+omicron_RR_summary_GNI_3 = Sum_omicron_severe.GNI$RR_summary[1]
+
+# summary metrics for GNI quartile 4
+omicron_rr_GNI_4 = Sum_omicron_severe.GNI$pred[2]
+omicron_lci_GNI_4 = Sum_omicron_severe.GNI$ci.lb[2]
+omicron_uci_GNI_4 = Sum_omicron_severe.GNI$ci.ub[2]
+omicron_RR_summary_GNI_4 = Sum_omicron_severe.GNI$RR_summary[2]
+}
+```
+
+```{r}
+#Table severe (Omicron + Delta)
+
+#Data meta GNI
+if (!janssen) {
+  meta_GNI <- rbind(Sum_omicron_severe.GNI, Sum_delta_severe.GNI )
+} else {
+  meta_GNI <- Sum_delta_severe.GNI
+}
+
+meta_GNI$vaccine = selected_vaccine
+meta_GNI$clean_vaccine = simple_name
+write.csv(meta_GNI, paste0("Data/Processed/meta_summary_",simple_name,".csv"))
+```
+
+## Forest plots
+
+#### Delta 
+```{r}
+# Code country as character
+delta_severe$country_clean = as.character(delta_severe$country_clean)
+
+# Created collated RR (95% CI) values for table
+delta_severe$RR_full =
+  paste0(
+    format(round(delta_severe$RR,2),nsmall=2)," (",
+    format(round(delta_severe$RR.LCL,2),nsmall=2),"-",
+    format(round(delta_severe$RR.UCL,2),nsmall=2),")"
+    )
+
+# Create subgroups for each quartile
+delta_gni_2 = subset(delta_severe, q_GNI_per_c_WB==2)
+delta_gni_3 = subset(delta_severe, q_GNI_per_c_WB==3)
+delta_gni_4 = subset(delta_severe, q_GNI_per_c_WB==4)
+
+# Class numeric
+delta_gni_2$max_period_days <- as.numeric(delta_gni_2$max_period_days)
+delta_gni_3$max_period_days <- as.numeric(delta_gni_3$max_period_days)
+delta_gni_4$max_period_days <- as.numeric(delta_gni_4$max_period_days)
+
+# construct table
+titles = c("Study",
+           "GNI quartile 2",delta_gni_2$paper,"Summary",NA,
+           "GNI quartile 3",delta_gni_3$paper,"Summary",NA,
+           "GNI quartile 4",delta_gni_4$paper,"Summary")
+country = c("Country",NA,
+            delta_gni_2$country_clean,NA,NA,NA,
+            delta_gni_3$country_clean,NA,NA,NA,
+            delta_gni_4$country_clean,NA)
+population = c("Population",NA,
+               delta_gni_2$population_category,NA,NA,NA,
+               delta_gni_3$population_category,NA,NA,NA,
+               delta_gni_4$population_category,NA)
+follow_up = c("Max. follow-up (w)",NA,
+              round(delta_gni_2$max_period_days/7,0),NA,NA,NA,
+              round(delta_gni_3$max_period_days/7,0),NA,NA,NA,
+              round(delta_gni_4$max_period_days/7,0),NA)
+RRs = c("RR (95% CI)",NA,
+        delta_gni_2$RR_full,delta_RR_summary_GNI_2,NA,NA,
+        delta_gni_3$RR_full,delta_RR_summary_GNI_3,NA,NA,
+        delta_gni_4$RR_full,delta_RR_summary_GNI_4)
+tabletext = cbind(titles, country, population, follow_up, RRs)
+
+# exclude GNI quartile rows for janssen analsys
+if (janssen) {
+  tabletext = tabletext[-c(2,3,4),]
+}
+
+# list RRs
+m = c(NA,NA,
+      delta_gni_2$RR,delta_rr_GNI_2,NA,NA,
+      delta_gni_3$RR,delta_rr_GNI_3,NA,NA,
+      delta_gni_4$RR,delta_rr_GNI_4)
+l = c(NA,NA,
+      delta_gni_2$RR.LCL,delta_lci_GNI_2,NA,NA,
+      delta_gni_3$RR.LCL,delta_lci_GNI_3,NA,NA,
+      delta_gni_4$RR.LCL,delta_lci_GNI_4)
+u = c(NA,NA,
+      delta_gni_2$RR.UCL,delta_uci_GNI_2,NA,NA,
+      delta_gni_3$RR.UCL,delta_uci_GNI_3,NA,NA,
+      delta_gni_4$RR.UCL,delta_uci_GNI_4)
+
+if (janssen) {
+m = c(NA,NA,
+      delta_gni_3$RR,delta_rr_GNI_3,NA,NA,
+      delta_gni_4$RR,delta_rr_GNI_4)
+l = c(NA,NA,
+      delta_gni_3$RR.LCL,delta_lci_GNI_3,NA,NA,
+      delta_gni_4$RR.LCL,delta_lci_GNI_4)
+u = c(NA,NA,
+      delta_gni_3$RR.UCL,delta_uci_GNI_3,NA,NA,
+      delta_gni_4$RR.UCL,delta_uci_GNI_4)
+}
+
+# truncate variables for plotting
+m[m<0.01] = 0.01
+l[l<0.01] = 0.01
+u[u>1] = 1
+u[is.na(u)] = 1
+
+# generate forest plot
+forestplot(tabletext,m,l,u,
+    is.summary=c(TRUE,TRUE,!is.na(tabletext[3:nrow(tabletext),1]) & 
+                   (tabletext[3:nrow(tabletext),1]=="Summary" | 
+                      tabletext[3:nrow(tabletext),1]=="GNI quartile 3" |
+                      tabletext[3:nrow(tabletext),1]=="GNI quartile 4")),
+    zero=NA,
+    xlog=TRUE,
+    xticks=log(c(0.01,0.1,0.2,0.5,1)),
+    colgap=unit(5,"mm"),
+    txt_gp = fpTxtGp(ticks = gpar(cex=1), xlab = gpar(cex=1)),
+    xlab="RR"
+    )
+
+```
+
+#### Omicron
+```{r}
+if (!janssen) {
+# Code country as character
+omicron_severe$country_clean = as.character(omicron_severe$country_clean)
+
+# Created collated RR (95% CI) values for table
+omicron_severe$RR_full =
+  paste0(
+    format(round(omicron_severe$RR,2),nsmall=2)," (",
+    format(round(omicron_severe$RR.LCL,2),nsmall=2),"-",
+    format(round(omicron_severe$RR.UCL,2),nsmall=2),")"
+    )
+
+# Create subgroups for each quartile
+omicron_gni_2 = subset(omicron_severe, q_GNI_per_c_WB==2)
+omicron_gni_3 = subset(omicron_severe, q_GNI_per_c_WB==3)
+omicron_gni_4 = subset(omicron_severe, q_GNI_per_c_WB==4)
+
+# Class numeric
+omicron_gni_2$max_period_days <- as.numeric(omicron_gni_2$max_period_days)
+omicron_gni_3$max_period_days <- as.numeric(omicron_gni_3$max_period_days)
+omicron_gni_4$max_period_days <- as.numeric(omicron_gni_4$max_period_days)
+
+# construct table
+titles = c("Study",
+           "GNI quartile 2",omicron_gni_2$paper,"Summary",NA,
+           "GNI quartile 3",omicron_gni_3$paper,"Summary",NA,
+           "GNI quartile 4",omicron_gni_4$paper,"Summary")
+country = c("Country",NA,
+            omicron_gni_2$country_clean,NA,NA,NA,
+            omicron_gni_3$country_clean,NA,NA,NA,
+            omicron_gni_4$country_clean,NA)
+population = c("Population",NA,
+               omicron_gni_2$population_category,NA,NA,NA,
+               omicron_gni_3$population_category,NA,NA,NA,
+               omicron_gni_4$population_category,NA)
+follow_up = c("Max. follow-up (w)",NA,
+              round(omicron_gni_2$max_period_days/7,0),NA,NA,NA,
+              round(omicron_gni_3$max_period_days/7,0),NA,NA,NA,
+              round(omicron_gni_4$max_period_days/7,0),NA)
+RRs = c("RR (95% CI)",NA,
+        omicron_gni_2$RR_full,omicron_RR_summary_GNI_2,NA,NA,
+        omicron_gni_3$RR_full,omicron_RR_summary_GNI_3,NA,NA,
+        omicron_gni_4$RR_full,omicron_RR_summary_GNI_4)
+tabletext = cbind(titles, country, population, follow_up, RRs)
+
+# list RRs
+m = c(NA,NA,
+      omicron_gni_2$RR,omicron_rr_GNI_2,NA,NA,
+      omicron_gni_3$RR,omicron_rr_GNI_3,NA,NA,
+      omicron_gni_4$RR,omicron_rr_GNI_4)
+l = c(NA,NA,
+      omicron_gni_2$RR.LCL,omicron_lci_GNI_2,NA,NA,
+      omicron_gni_3$RR.LCL,omicron_lci_GNI_3,NA,NA,
+      omicron_gni_4$RR.LCL,omicron_lci_GNI_4)
+u = c(NA,NA,
+      omicron_gni_2$RR.UCL,omicron_uci_GNI_2,NA,NA,
+      omicron_gni_3$RR.UCL,omicron_uci_GNI_3,NA,NA,
+      omicron_gni_4$RR.UCL,omicron_uci_GNI_4)
+
+# truncate variables for plotting
+m[m<0.01] = 0.01
+l[l<0.01] = 0.01
+u[u>1] = 1
+u[is.na(u)] = 1
+
+# generate forest plot
+forestplot(tabletext,m,l,u,
+    is.summary=c(TRUE,TRUE,!is.na(tabletext[3:nrow(tabletext),1]) & 
+                   (tabletext[3:nrow(tabletext),1]=="Summary" | 
+                      tabletext[3:nrow(tabletext),1]=="GNI quartile 3" |
+                      tabletext[3:nrow(tabletext),1]=="GNI quartile 4")),
+    zero=NA,
+    xlog=TRUE,
+    xticks=log(c(0.01,0.1,0.2,0.5,1)),
+    colgap=unit(5,"mm"),
+    txt_gp = fpTxtGp(ticks = gpar(cex=1), xlab = gpar(cex=1)),
+    xlab="RR"
+    )
+}
+```
+

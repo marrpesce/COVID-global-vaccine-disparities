@@ -1,0 +1,8 @@
+"","outcome_final","variant_clean","clean_vaccine","n_GNI_Q1","n_GNI_Q2","n_GNI_Q3","n_GNI_Q4","sum","sum_nonQ4","sufficient_n","n_nonQ4_over_2","eligible"
+"1","severe","delta","BioNTech/Pfizer BNT162b2",0,0,2,3,5,2,FALSE,TRUE,FALSE
+"2","severe","delta","Janssen Ad26.COV2.S",0,0,1,0,1,1,FALSE,FALSE,FALSE
+"3","severe","delta","Moderna mRNA-1273",0,0,1,1,2,1,FALSE,FALSE,FALSE
+"4","severe","delta","Oxford/AstraZeneca ChAdOx1-S",0,0,2,2,4,2,FALSE,TRUE,FALSE
+"5","severe","omicron","BioNTech/Pfizer BNT162b2",0,0,0,4,4,0,FALSE,FALSE,FALSE
+"6","severe","omicron","Moderna mRNA-1273",0,0,0,1,1,0,FALSE,FALSE,FALSE
+"7","severe","omicron","Oxford/AstraZeneca ChAdOx1-S",0,0,0,4,4,0,FALSE,FALSE,FALSE

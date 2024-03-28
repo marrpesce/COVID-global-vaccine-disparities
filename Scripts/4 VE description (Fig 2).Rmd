@@ -1,0 +1,635 @@
+---
+title: "4 VE description (Fig 2)"
+author: "Martina Pesce & Edward P. K. Parker"
+date: "2023-11-30"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+#### Inputs
+- Processed/COVID19VE_ineq_merged.csv: View-Hub VE data merged with country income data
+- Processed/Ineq_merged.csv: Combined country-level income data
+- Input/Vaccine_data/owid-covid-data.csv: Our World in Data COVID-19 database
+- Input/Vaccine_data/owid_vaccine_plat.csv: Our World in Data COVID-19 vaccine platforms
+- Input/Vaccine_data/vaccination-data.csv: WHO COVID-19 vaccine database
+
+#### Outputs
+- Descriptive statistics on VE study distribution
+- Figure 2
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+```{r Libraries}
+#Libraries
+library(tidyverse)
+library(readr)
+library(rnaturalearth)
+library(sf)
+library(viridisLite)
+library(viridis)
+library(lubridate)
+library(countrycode)
+library(patchwork) 
+library(cowplot)
+```
+
+
+```{r Data base}
+#Databases
+
+#Eff database
+COVID19VE_ineq_merged <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv") 
+
+#Ineq database
+Ineq_merged <- read_csv("Data/Processed/Ineq_merged_with_vaccine_data.csv") 
+```
+
+# Panel 1. 
+
+## A. 
+
+### Data wrangling
+
+```{r data wrangling}
+#Create table with study counts and introduction dates by country
+Country_studies <- COVID19VE_ineq_merged %>%
+  group_by(Country.Code, country_clean) %>%
+  summarise(
+    min_VE_pub_date = min(as.Date(min_pub_date)),
+    n_VE_studies = n_distinct(Study_id_f),
+    perc_VE_studies = round(n_distinct(Study_id_f)/422*100,0)
+  )
+nrow(Country_studies) # 48 distinct countries with country-specific VE estimates
+nstudies = sum(Country_studies$n_VE_studies) 
+nstudies # 422 unique studies
+Country_studies %>% arrange(-n_VE_studies) %>% filter(n_VE_studies>10)
+
+#Create table with study counts and introduction dates by GNI quartile
+GNI_studies <- COVID19VE_ineq_merged %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarise(
+    min_VE_pub_date = min(as.Date(min_pub_date)),
+    n_VE_studies = n_distinct(Study_id_f),
+    perc_VE_studies = round(n_distinct(Study_id_f)/422*100,0)
+  )
+
+
+# Check all country iso codes represented in inequity data
+all(Country_studies$Country.Code %in% Ineq_merged$Country.Code)
+
+#Merge and create study categories
+Ineq_merged <- left_join(Ineq_merged, Country_studies, by="Country.Code") %>% 
+  mutate(
+      study_dummy = case_when(
+      !is.na(n_VE_studies) ~ "yes",
+      TRUE ~ "no"
+    )) %>%
+  # add time to publication metrics
+   mutate(
+    diff_V40_VEpub = as.Date(min_VE_pub_date) - as.Date(owid_vac_F40),
+    diff_intro_VE_pub = as.Date(min_VE_pub_date) - as.Date(min_vac_intro)
+    )
+
+#Geographical information
+
+countries <-  ne_countries(returnclass = "sf") %>% 
+  mutate(iso3c = countrycode(admin, origin = "country.name", destination = "iso3c")) %>% 
+  filter(iso3c!="ATA")
+  
+
+world_ineq_gral <- 
+  merge(countries, Ineq_merged, by.x = "iso3c", by.y = "Country.Code", all = TRUE) %>% 
+    mutate(
+    n_VE_studies_g = case_when(
+      n_VE_studies > 0 & n_VE_studies < 6 ~ "01-05",
+      n_VE_studies >= 6 & n_VE_studies < 11 ~ "06-10",
+      n_VE_studies >= 11 & n_VE_studies < 16 ~ "11-15",
+      n_VE_studies >= 16 ~ "16+",
+      TRUE ~ "0"
+    )
+    )
+  
+
+world_ineq_gral <- st_as_sf(world_ineq_gral)
+```
+
+
+```{r}
+# paper distribution(iv)
+fig2_map<- ggplot(data = world_ineq_gral) +
+  geom_sf(aes(fill = n_VE_studies_g), 
+          position = "identity") + 
+  scale_fill_manual(values = c("#DDDDDD","#d9e8bd","#8cba9e","#338c73","#006666" ),
+                    labels = c("0","01-05", "06-10", "11-15", "16+"))+ 
+  labs(
+    title= "(A)",
+    fill = 'Number of\nVE studies') +
+  theme_void() +
+  theme(
+    legend.position = "bottom",        # Move legend to the bottom
+    legend.key.width = unit(0.5, "cm"), # Adjust the width of legend key to make it smaller
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10) 
+  )
+
+fig2_map
+```
+
+```{r}
+#Graph 2.b: % publications by GNI
+summ_GNI_eff_study <- Ineq_merged %>%
+  select(Country.Name,q_GNI_per_c_WB, n_VE_studies, min_VE_pub_date) %>% 
+  filter(!is.na(n_VE_studies)) %>%  # Exclude rows with NA in the 'n_VE_studies' variable
+  group_by(
+    q_GNI_per_c_WB
+  ) %>% 
+  summarize(
+    total_st_GNI = sum(n_VE_studies),
+    perc_st_GNI= sum(n_VE_studies)/422*100, #fix with final value
+    min_VE_pub_date= min(min_VE_pub_date)
+  )
+summ_GNI_eff_study
+
+# Plot (B)
+plot2_b <- ggplot(summ_GNI_eff_study, aes(x = as.factor(q_GNI_per_c_WB), y = perc_st_GNI, fill = as.factor(q_GNI_per_c_WB))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
+  coord_flip()+
+  labs(title = "(B)",
+       x = "GNI quartile",
+       y = "% VE studies") +
+    guides(fill = "none") +  # Remove the fill legend
+  theme_minimal() +
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))+
+  theme(
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10)
+  ) +
+  scale_y_continuous(limits = c(0, 100), breaks = c(0, 25, 50, 75, 100))
+plot2_b
+```
+
+```{r}
+#Graph 2.c: bar-plot countries with publication
+Ineq_merged_introduced <- subset(Ineq_merged,  V1_dummy=="yes")
+
+table(Ineq_merged_introduced$q_GNI_per_c_WB)
+
+eff_study_perc <-Ineq_merged %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarise(
+    study = sum(study_dummy == "yes"))%>%
+  mutate(
+    countries_quartile=case_when(
+      q_GNI_per_c_WB == 1 ~ 48,
+      q_GNI_per_c_WB == 2 ~ 49,
+      q_GNI_per_c_WB == 3 ~ 49,
+      q_GNI_per_c_WB == 4 ~ 48
+    ),
+  ) %>% 
+  mutate(
+    study_per = round(study / countries_quartile * 100, 0),
+    )
+eff_study_perc
+
+#Plot (C)
+plot2_c<- ggplot(eff_study_perc, aes(x = as.factor(q_GNI_per_c_WB), y = study_per, fill = as.factor(q_GNI_per_c_WB))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
+  coord_flip()+ labs(title = "(C)",
+       x = "",
+       y = "% countries with VE studies") +
+    guides(fill = "none") +  # Remove the fill legend
+  theme_minimal() +
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))+
+  theme(
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10)
+  )  +
+  scale_y_continuous(limits = c(0, 60))
+
+plot2_c
+```
+
+
+```{r}
+# Plot time to publication (D)
+ plot2_d<-ggplot(Ineq_merged) +
+  geom_boxplot(aes(x = diff_intro_VE_pub, y = as.factor(q_GNI_per_c_WB)), outlier.shape=NA) +
+   geom_point(
+    aes(
+     x = diff_intro_VE_pub, y = as.factor(q_GNI_per_c_WB),
+      #size = studies,
+      color = as.factor(q_GNI_per_c_WB)
+    ),
+    alpha = 0.5,
+    position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
+  )+
+  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"))+
+  labs(
+    title = "(D)",
+    x = "Number of days from introduction to first VE publication", 
+    y = "GNI quartile")  +
+  guides(color = FALSE) +
+  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  theme_minimal()  +
+  theme(
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10) 
+   ) +
+   scale_x_continuous(limits = c(0, 1050), breaks = c(0, 250, 500, 750, 1000)) 
+
+plot2_d
+
+summary_vacc_eff_delay <- Ineq_merged %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarize(
+    median_value_1 = round(median(as.numeric(diff_intro_VE_pub), na.rm = TRUE),0),
+    q25_1 = round(quantile(as.numeric(diff_intro_VE_pub), 0.25, na.rm = TRUE),0),
+    q75_1 = round(quantile(as.numeric(diff_intro_VE_pub), 0.75, na.rm = TRUE),0)
+  )
+summary_vacc_eff_delay
+```
+
+```{r}
+n_distinct(COVID19VE_ineq_merged$Study_id_f)
+plat_summary <- COVID19VE_ineq_merged %>% 
+  select(Study_id_f, min_pub_date, vac_type, q_GNI_per_c_WB) %>% 
+  distinct() %>% 
+  group_by(vac_type) %>% 
+  summarise(
+    min_pub_vac_type = min(as.Date(min_pub_date)),
+    total_papers_vac_type= n(),
+    per_papers_vac_type = n()/422*100
+  )
+plat_summary$vac_type <- factor(plat_summary$vac_type, levels = c("Multiple", "Inactivated","Vectored","mRNA"))
+#Plot
+plot2_e<- ggplot(plat_summary, aes(x = vac_type, y =per_papers_vac_type , fill = vac_type)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  labs(title = "(E)",
+       x = "",
+       y = "% VE studies") +
+    guides(fill = "none") +  # Remove the fill legend
+  theme_minimal() +
+  theme(
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10)
+  ) +
+  scale_fill_manual(values = c("grey", "#6699CC","#EE99AA", "#EECC66"))+
+  scale_x_discrete(labels = c("Multiple", "Inactivated", "Vectored", "mRNA")) +
+  scale_y_continuous(limits = c(0, 100), breaks = c(0, 25, 50, 75, 100))
+plot2_e
+
+```
+
+```{r}
+
+vac_plat_distrib <- COVID19VE_ineq_merged %>% 
+  select(Country.Code, q_GNI_per_c_WB, vac_type) %>% 
+  distinct() %>%  
+  group_by(q_GNI_per_c_WB, vac_type) %>% 
+  summarise(total=n()) %>% 
+  mutate(
+    countries_quartile=case_when(
+      q_GNI_per_c_WB == 1 ~ 48,
+      q_GNI_per_c_WB == 2 ~ 49,
+      q_GNI_per_c_WB == 3 ~ 49,
+      q_GNI_per_c_WB == 4 ~ 48
+    )
+  ) %>% 
+  mutate(
+    vac_type_per = round(total / countries_quartile * 100, 0),
+    ) 
+vac_plat_distrib
+
+#Plot
+
+vac_plat_distrib$vac_type <- factor(vac_plat_distrib$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Multiple"))
+
+
+plot2_f<- ggplot(vac_plat_distrib, aes(x = as.factor(q_GNI_per_c_WB), y = vac_type_per, fill = as.factor(q_GNI_per_c_WB))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  facet_wrap(~ vac_type, nrow = 2) +
+  labs(title = "(F)",
+       x = "GNI quartile",
+       y = "% countries with VE studies") +
+    guides(fill = "none") +  # Remove the fill legend
+scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  theme_minimal()+
+  theme(
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10) 
+  )+
+  scale_y_continuous(limits = c(0, 50), breaks = c(0, 25, 50))
+plot2_f
+
+```
+
+```{r}
+outcome_summary <- COVID19VE_ineq_merged %>% 
+  select(Study_id_f, outcome_final) %>% 
+  distinct() %>% 
+  group_by(outcome_final) %>% 
+  summarise(
+    total_papers_out= n(),
+    per_papers_out = round(n()/nstudies*100,0)
+  )
+outcome_summary
+```
+
+```{r}
+variant_summary <- COVID19VE_ineq_merged %>% 
+  select(Study_id_f, variant_clean) %>% 
+  distinct() %>% 
+  group_by(variant_clean) %>% 
+  summarise(
+    total_papers_out= n(),
+    per_papers_out = round(n()/nstudies*100,0)
+  )
+variant_summary
+```
+
+
+```{r}
+# (fig2_map + plot2_d +
+#   plot_layout(ncol = 1, heights = c(3, 1))) |
+#   # Arrange plot2_b, plot2_c, plot2_e, and plot2_f together
+#   ((plot2_b | plot2_c) /
+#    (plot2_e | plot2_f))
+# 
+# ((fig2_map / plot2_d) |
+#   (plot2_b / plot2_e) |
+#    (plot2_c / plot2_f) +
+#   plot_layout(nrow = 1, widths = c(3, 1, 1))) 
+# 
+# combined_plot <- (
+#   (fig2_map / plot2_d) |
+#   (plot2_b / plot2_e) |
+#   (plot2_c / plot2_f)
+# )
+# 
+# combined_plot + plot_layout(ncol = 3, widths = c(3, 1, 1), heights = c(3,1) )
+
+
+col1<-(fig2_map + plot2_d +
+  plot_layout(ncol = 1, heights = c(1, 1)))
+
+col2<-(plot2_b | plot2_c) /
+   (plot2_e | plot2_f)
+
+combined_plot <- col1 | col2
+
+combined_plot + plot_layout(ncol = 3, widths = c(3, 3, 3))
+
+```
+
+
+#Supplementary figure
+
+```{r F2}
+
+# Figure 3.A Vaccine effectiveness papers temporal distribution by countries quartile economic inequalities distribution between countries (GNI per capita).  (Upper) Each point represents a paper according to the publication date by GNI per capita quartile. (Lower) Total published papers per year half according to the GNI per capita quartile. Vaccine effectiveness papers included in the 23 June 2023 View-Hub Primary Series Studies database.
+
+data_F2 <- COVID19VE_ineq_merged %>% 
+  select(country_clean, iso3c, min_pub_date, semester,Study_id_f, q_GNI_per_c_WB) %>% 
+  distinct()
+
+time_a<- data_F2 %>%
+  ggplot(aes(x = as.Date(min_pub_date), y = as.factor(q_GNI_per_c_WB))) +
+  geom_boxplot() +
+  geom_jitter(aes(color = as.factor(q_GNI_per_c_WB), alpha = 0.5)) +
+   guides(alpha = "none") +
+  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) + #I dont like the scale
+  labs(x = "Publication Date", y = "GNI quartile")  +
+  guides(color = FALSE) +
+  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  theme_minimal()
+
+paper_sem_quart <- data_F2 %>%
+  group_by(semester, q_GNI_per_c_WB) %>%
+  summarise(
+    total_papers = n()
+  ) 
+  
+   
+time_b <- ggplot(paper_sem_quart, aes(x = semester, y = total_papers, fill = as.factor(q_GNI_per_c_WB))) +
+  geom_bar(stat = "identity") +
+  labs(x = "", y = "N VE studies", fill = "GNI quartile") +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
+    labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)") ) 
+
+```
+
+
+## B
+
+
+```{r }
+
+# Figure 3.B Vaccine effectiveness papers temporal distribution by vaccine type.  (Upper) Each point represents a paper according to the publication date by vaccine type. (Lower) Total published papers per year half according to vaccine type. Vaccine effectiveness papers included in the 23 June 2023 View-Hub Primary Series Studies database.
+
+data_F3 <- COVID19VE_ineq_merged %>% 
+  select(country_clean, iso3c, min_pub_date, semester, Study_id_f, q_GNI_per_c_WB, vac_type) %>% 
+  distinct() 
+
+data_F3$vac_type <- factor(data_F3$vac_type, levels = c("Multiple", "Inactivated", "Vectored", "mRNA"))
+
+timeB_a<- data_F3 %>%
+  ggplot(aes(x = as.Date(min_pub_date), y = as.factor(vac_type))) +
+  geom_boxplot() +
+  geom_jitter(aes(color = as.factor(vac_type),alpha = 0.5)) +
+  guides(alpha = "none") +
+  scale_color_manual(values = c("grey", "#6699CC","#EE99AA", "#EECC66"))+
+  labs(x = "Publication Date", y = "Vaccine platform")  +
+  guides(color = FALSE) +
+  scale_y_discrete(labels = c("Multiple", "Inactivated", "Vectored", "mRNA")) + 
+  theme_minimal()
+
+paper_sem_quart <- data_F3 %>%
+  group_by(semester, vac_type) %>%
+  summarise(
+    total_papers = n()
+  ) 
+  
+   
+timeB_b <- ggplot(paper_sem_quart, aes(x = semester, y = total_papers, fill = as.factor(vac_type))) +
+  geom_bar(stat = "identity") +
+  labs(x = "", y = "N VE studies", fill = "Vaccine platform") +
+  theme_minimal() +
+  theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_manual(values = c("grey", "#6699CC","#EE99AA", "#EECC66"),
+    labels = c("Multiple", "Inactivated", "Vectored", "mRNA"))
+
+combined_plotB <- time_a/time_b/timeB_a/timeB_b
+combined_plotB 
+vac_type_sum2 <- data_F3 %>%
+  group_by(vac_type) %>%
+  summarise(min_date = min(as.Date(min_pub_date)),
+            ) 
+
+
+
+median_labels <- data_F3 %>%
+  group_by(vac_type) %>%
+  summarize(
+    median_value = as.Date(median(as.numeric(min_pub_date), na.rm = TRUE), origin = "1970-01-01"),
+    q25 = as.Date(quantile(as.numeric(min_pub_date), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75 = as.Date(quantile(as.numeric(min_pub_date), 0.75, na.rm = TRUE), origin = "1970-01-01")
+  )
+```
+
+
+#### Descriptive table (Supplement)
+
+
+```{r}
+#Supplementary table 2
+
+# vaccine study distribution
+table_vacc <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, clean_vaccine) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(clean_vaccine, total_study) %>%
+  mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(clean_vaccine, `n(%)`) %>% 
+  distinct()
+
+table_vac2 <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, vac_type, clean_vaccine) %>% 
+  group_by(vac_type) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(vac_type, clean_vaccine,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(vac_type, clean_vaccine, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = vac_type, values_from = `n(%)`)
+  
+combined_Vac <- left_join(table_vacc, table_vac2)
+
+
+# vaccine platform study distribution
+table_plat_vac <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, vac_type) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(vac_type, total_study) %>%
+  mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(vac_type, `n(%)`) %>% 
+  distinct()
+
+
+#variant of interest
+table_VoI1 <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, variant_clean) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(variant_clean, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(variant_clean, `n(%)`) %>% 
+  distinct()
+
+table_VoI2 <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, vac_type, variant_clean) %>% 
+  group_by(vac_type) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(vac_type, variant_clean,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(vac_type, variant_clean, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = vac_type, values_from = `n(%)`)
+  
+combined_VoI <- left_join(table_VoI1, table_VoI2)
+
+#outcome
+table_outcome1 <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, outcome_final) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(outcome_final, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(outcome_final, `n(%)`) %>% 
+  distinct()
+table_outcome2 <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, vac_type, outcome_final) %>% 
+  group_by(vac_type) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(vac_type, outcome_final,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(vac_type, outcome_final, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = vac_type, values_from = `n(%)`)
+  
+combined_outcome <- left_join(table_outcome1, table_outcome2)
+
+#GNI
+table_GNI1 <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, q_GNI_per_c_WB) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f) 
+  ) %>% 
+  group_by(q_GNI_per_c_WB, total_study) %>% 
+   mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(q_GNI_per_c_WB, `n(%)`) %>% 
+  distinct()
+table_GNI2 <- COVID19VE_ineq_merged %>%
+  distinct(Study_id_f, vac_type, q_GNI_per_c_WB) %>% 
+  group_by(vac_type) %>% 
+  mutate(
+    total_study=n_distinct(Study_id_f)) %>% 
+  ungroup() %>% 
+  group_by(vac_type, q_GNI_per_c_WB,total_study) %>% 
+ mutate(n = n(),
+         `n(%)` = paste0( n, " (", round(n / total_study * 100, 0),"%)" )) %>% 
+  ungroup() %>% 
+  select(vac_type, q_GNI_per_c_WB, `n(%)`) %>% 
+  distinct() %>% 
+  pivot_wider(names_from = vac_type, values_from = `n(%)`)
+  
+combined_GNI <- left_join(table_GNI1, table_GNI2)
+```

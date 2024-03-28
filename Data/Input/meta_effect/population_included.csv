@@ -1,0 +1,153 @@
+number;population_category;criteria_pop
+1;HCW;exclude
+2;> 80 years;include
+3;general pop;include
+4;LTCF residents;exclude
+5;LTCF staff;exclude
+6;pre-surgical hospital patients;exclude
+7;> 70 years;include
+8;80-83 years;include
+9;? 65 years;include
+10;70-79 years;include
+11;? 80 years;include
+12;? 70 years;include
+13;close contacts;exclude
+14;priority groups;exclude
+15;chronically ill;exclude
+16;pregnant persons;exclude
+17;patients with cirrhosis;exclude
+18;16-64 years;include
+19;immunocompromised, ? 16 years;exclude
+20;HHC of cases;exclude
+21;> 60 years;include
+22;65-79 years;include
+23;50-64 years;include
+24;transplant patients;exclude
+25;SNF residents;exclude
+26;incarcerated persons;exclude
+27;incarcerated persons, moderate/high risk for severe disease;exclude
+28;immuncompetent;include
+29;surgery patients;exclude
+30;16-39 years;include
+31;40-59 years;include
+32;? 60 years;include
+33;HCW and staff;exclude
+34;? 50 years;include
+35;? 50 years with ? 1 chronic respiratory condition;exclude
+36;? 50 years with ? 1 chronic non-respiratory condition;exclude
+37;immunocompromised adults;include
+38;hospitalized veterans;exclude
+39;50-69 years;include
+40;immunocompromised HCW;exclude
+41;pregnant HCW;exclude
+42;LTCF residents and staff;exclude
+43;12-15 years;exclude
+44;contacts of index cases;exclude
+45;16-18 years;exclude
+46;45-74 years;include
+47;75-84 years;include
+48;? 85 years;include
+49;incarcerated men;exclude
+50;12-18 years;exclude
+51;60+ years;include
+52;HCW aged 16-69 years;exclude
+53;? 15 years;include
+54;16-17 years;exclude
+55;males 65+;exclude
+56;12-14 years;exclude
+57;12-17 years;exclude
+58;general pop with prior SARS-CoV-2 infection;exclude
+59;12-16 years;exclude
+60;veterans 18+ years;exclude
+61;? 75 years;include
+62;end stage kidney disease patients;exclude
+63;15-59 years;include
+64;60-79 years;include
+65;haemodialysis patients;exclude
+66;households with children;exclude
+67;6-16 years;exclude
+68;6-11 years;exclude
+69;infants <6 months when timing of maternal vaccination was anytime up to 14 days before delivery;exclude
+70;infants <6 months when timing of maternal vaccination was in first 20 weeks;exclude
+71;infants <6 months when timing of maternal vaccination was from 21 weeks' gestation up to 14 days before delivery;exclude
+72;Contacts of index cases;exclude
+73;5-11 years;exclude
+74;hemodialysis patients;exclude
+75;3-5 years;exclude
+76;18-39 years;include
+77;40-64 years;include
+78;clinically vulnerable 16-64 years;exclude
+79;18-64 years;include
+80;ED/UC encounters or hospitalization among adults with COVID-19 like illness;exclude
+81;transplant recipients;exclude
+82;childcare workers;exclude
+83;12-59 years;include
+84;individuals with rheumatoid arthritis;exclude
+85;individuals with ankylosing spondylitis;exclude
+86;individuals with psoriasis;exclude
+87;individuals with inflammatory bowel disease;exclude
+88;3-11 years;exclude
+89;military personnel;exclude
+90;veterans;exclude
+91;students 18-64 years;exclude
+92;employees 18-65 years;exclude
+93;18+ years in a correctional facility;exclude
+94;contacts of index cases among women aged 45-64;exclude
+95;hospitalized adults;exclude
+96;5-10 years;exclude
+97;prison residents;exclude
+98;prison staff;exclude
+99;prison residents and staff;exclude
+100;newborns;exclude
+101;SNF employees;exclude
+102;? 40 years;include
+103;nursing home residents;exclude
+104;20-59 years;include
+105;60-69 years;include
+106;veterans < 65 years;exclude
+107;veterans ? 65 years;exclude
+108;? 12 years;include
+109;LTCF employees;exclude
+110;patients with chronic kidney disease;exclude
+111;18-50 years;include
+112;51-64 years;include
+113;11-17 years;exclude
+114;?12 years with diabetes mellitus;exclude
+115;?5 years;include
+116;50-59 years;include
+117;?3 years;include
+118;?11 years;include
+119;?65 years;include
+120;?60 years;include
+121;?80 years;include
+122;infants;exclude
+123;HCW with low physical activity;exclude
+124;HCW years with moderate physical activity;exclude
+125;HCW years with high physical activity;exclude
+126;adolescents;exclude
+127;?18 years with prior breakthrough Omicron infection;exclude
+128;18-60 years;include
+129;mothers of infants < 6 months;exclude
+130;infants < 6 months of mothers receiving second dose in first trimester;exclude
+131;infants < 6 months of mothers receiving second dose in second trimester;exclude
+132;infants < 6 months of mothers receiving second dose in third trimester;exclude
+133;infants 0-8 weeks;exclude
+134;infants 9-16 weeks;exclude
+135;infants >16 weeks and < 6 months;exclude
+136;infants < 6 months;exclude
+137;18-64 years clinically vulnerable;exclude
+138;?18 years, Social Vulnerability Index Quartile 1;exclude
+139;?18 years, Social Vulnerability Index Quartile 2;exclude
+140;?18 years, Social Vulnerability Index Quartile 3;exclude
+141;?18 years, Social Vulnerability Index Quartile 4;exclude
+142;LTCF staff <65 years;exclude
+143;?18 years on chronic hemodialysis;exclude
+144;0-4 years;exclude
+145;?12 years;include
+146;infants of mothers vaccinated post-partum;exclude
+147;3-17 years;exclude
+148;?50 years;include
+149;close contacts of unvaccinated index cases, females 45-64 years;exclude
+150;?18 years with substance abuse disorders;exclude
+151;18-66 years;include
+152;12-20 years;exclude
