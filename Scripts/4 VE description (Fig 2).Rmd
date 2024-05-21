@@ -81,6 +81,14 @@ GNI_studies <- COVID19VE_ineq_merged %>%
     perc_VE_studies = round(n_distinct(Study_id_f)/422*100,0)
   )
 
+#Create table with study counts and introduction dates by vaccine platform and outcome
+plat_outcome_studies <- COVID19VE_ineq_merged %>%
+  group_by(vac_type, outcome_final) %>%
+  summarise(
+    min_VE_pub_date = min(as.Date(min_pub_date)),
+    n_VE_studies = n_distinct(Study_id_f),
+    perc_VE_studies = round(n_distinct(Study_id_f)/422*100,0)
+  )
 
 # Check all country iso codes represented in inequity data
 all(Country_studies$Country.Code %in% Ineq_merged$Country.Code)

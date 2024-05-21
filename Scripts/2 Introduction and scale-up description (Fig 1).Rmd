@@ -136,6 +136,20 @@ summary_vacc_intro_scale <- Ineq_vaccine_coverage %>%
     q75_70 = round(quantile(diff_intro_F70, 0.75, na.rm=TRUE),0)
   )
 summary_vacc_intro_scale
+
+#First vaccine introduction after 01-12-2020 by quartile
+
+min_intro <- Ineq_vaccine_coverage %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarize(
+min_vac_intro=min(as.Date(min_vac_intro)[!is.na(min_vac_intro) & as.Date(min_vac_intro) > as.Date("2020-12-01")])
+  )
+
+min_intro <- left_join(min_intro, Ineq_vaccine_coverage) %>% 
+  select(1:3)
+
+min_intro
+
 ```
 
 ```{r}
@@ -442,6 +456,29 @@ owid_vaccine_country_g <- Ineq_vaccine_coverage_platform %>%
 
 unique(owid_vaccine_country_g$vaccine)
 
+#Global vaccine platform %
+global_vac_plat_distrib <-owid_vaccine_country_g %>% 
+  select(
+    Country.Code, q_GNI_per_c_WB, vac_type
+  ) %>% 
+  distinct() %>% 
+  filter(
+    !is.na(q_GNI_per_c_WB)
+  ) %>%  
+  group_by(vac_type) %>% 
+  summarise(total=n()) %>% 
+  filter(
+    vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored" |vac_type=="Protein"
+  ) %>% 
+  mutate(
+    vac_type_per = round(total / 194 * 100, 1),
+    ) 
+
+global_vac_plat_distrib
+
+
+
+
 #Vaccine platform by GNI quartile
 vac_plat_distrib <-owid_vaccine_country_g %>% 
   select(
@@ -467,7 +504,10 @@ vac_plat_distrib <-owid_vaccine_country_g %>%
   mutate(
     vac_type_per = round(total / countries_quartile * 100, 1),
     ) 
+
 vac_plat_distrib
+
+
 ```
 
 ```{r}
