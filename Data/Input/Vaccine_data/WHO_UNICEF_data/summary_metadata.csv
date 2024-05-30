@@ -1,0 +1,94 @@
+indicator,description,data_category,class,type,unit,sources,update_frequency
+adm_gen_date,Date of latest gender-disaggregated administration data reporting,Administration,Date,Direct figure,Date,eJRF and regional data systems,Monthly
+adm_gen_fem_cps,Female individuals with a complete primary series,Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_gen_mal_cps,Male individuals with a complete primary series,Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_hcw_a1d,Number of healthcare workers having received at least one dose,Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_hcw_boost,Number of booster and/or additional doses administered to healthcare workers,Administration,Numeric,Direct figure,Doses,eJRF and regional data systems,Monthly
+adm_hcw_cps,Number of healthcare workers with a complete primary series,Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_hcw_cps_adj,"Number of healthcare workers with a complete primary series of any product of any source, with adjustments for countries likely to be artificially low (as described in methods note)",Administration,Numeric,Calculation,Individuals,eJRF and regional data systems,Monthly
+adm_hcw_date,Date of latest administration data reporting on healthcare workers,Administration,Date,Direct figure,Date,eJRF and regional data systems,Monthly
+adm_hcw_target,"Number of healthcare workers targeted for COVID-19 vaccination, country-reported",Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_old_a1d,Number of older adults having received at least one dose,Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_old_boost,Number of booster and/or additional doses administered to older adults,Administration,Numeric,Direct figure,Doses,eJRF and regional data systems,Monthly
+adm_old_cps,Older adults with a complete primary series,Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_old_cps_adj,"Older adults with a complete primary series, capped to 100% of older adult population according to country older adult definition",Administration,Numeric,Calculation,Individuals,eJRF and regional data systems,Monthly
+adm_old_date,Date of latest administration data reporting on older adults,Administration,Date,Direct figure,Date,eJRF and regional data systems,Monthly
+adm_old_target,"Number of older adults targeted for COVID-19 vaccination, country-reported",Administration,Numeric,Direct figure,Individuals,eJRF and regional data systems,Monthly
+adm_tot_a1d,Number of individuals having received at least one dose,Administration,Numeric,Direct figure,Individuals,WHO COVmart,Monthly
+adm_tot_boost,Number of booster and/or additional doses administered,Administration,Numeric,Direct figure,Doses,WHO COVmart,Monthly
+adm_tot_cps,Number of individuals with a complete primary series,Administration,Numeric,Direct figure,Individuals,WHO COVmart,Monthly
+adm_tot_cps_adj,"Number of individuals with a complete primary series of any product of any source, with adjustments for countries reporting adm_td and / or only adm_a1d and adm_td",Administration,Numeric,Calculation,Individuals,WHO COVmart,Monthly
+adm_tot_date,Date of latest administration data reporting,Administration,Date,Direct figure,Date,WHO COVmart,Monthly
+adm_tot_pv,Number of individuals with an incomplete (partial) primary series,Administration,Numeric,Calculation,Individuals,WHO COVmart,Monthly
+adm_tot_td,Total doses administered,Administration,Numeric,Direct figure,Doses,WHO COVmart,Monthly
+cov_gen_diff,Difference in percentage of female & male individuals with a complete primary series,Population coverage,Numeric,Calculation,Percentage,eJRF and regional data systems; UNPOP,Monthly
+cov_gen_fem_cps,"Female individuals with a complete primary series, as percentage of female population",Population coverage,Numeric,Calculation,Percentage,eJRF and regional data systems; UNPOP,Monthly
+cov_gen_mal_fv,"Male individuals with a complete primary series, as percentage of male population",Population coverage,Numeric,Calculation,Percentage,eJRF and regional data systems; UNPOP,Monthly
+cov_hcw_a1d,"Healthcare workers with at least one dose, as percentage of total healthcare worker population",Population coverage,Numeric,Calculation,Percentage,eJRF and regional data systems; UNPOP,Monthly
+cov_hcw_cps,"Healthcare workers with a complete primary series (adjusted), as percentage of total healthcare worker population",Population coverage,Numeric,Calculation,Percentage,International Labor Organization Health workforce data; Electronic Joint Reporting Form (eJRF),Monthly
+cov_old_a1d,"Older adults with at least one dose, as percentage of older adult population",Population coverage,Numeric,Calculation,Percentage,eJRF and regional data systems; UNPOP,Monthly
+cov_old_cps,"Older adults with a complete primary series, as percentage of older adult population",Population coverage,Numeric,Calculation,Percentage,eJRF and regional data systems; UNPOP,Monthly
+cov_tot_a1d,"Individuals with at least one dose, as percentage of total population",Population coverage,Numeric,Calculation,Percentage of total population,WHO COVmart; UNPOP,Monthly
+cov_tot_boost,"Individuals having received a booster / additional dose, as percentage of total population",Population coverage,Numeric,Calculation,Percentage of total population,WHO COVmart; UNPOP,Monthly
+cov_tot_cps,"Individuals with a complete primary series, as percentage of total population",Population coverage,Numeric,Calculation,Percentage of total population,WHO COVmart; UNPOP,Monthly
+cov_tot_cps_since_lm,"Individuals having completed a primary series within the past 4 weeks, as percentage of total population",Population coverage,Numeric,Calculation,Percentage of total population,WHO COVmart; UNPOP,Monthly
+ct_deadline,Country coverage target deadline,Population coverage,Date,Direct figure,Date,CoVDP DP flatfile,On-going
+ct_status,Status of progress against individual country targets,Population coverage,Character,Calculation,N/A,WHO COVmart; UNPOP,Monthly
+ct_target,Country coverage target percentage,Population coverage,Numeric,Direct figure,Percentage,CoVDP DP flatfile,On-going
+date_refresh,Date of latest dataset refresh,Dataset management,Date,Direct figure,Date,COVDP,Monthly
+del_cour_covax_prop,Proportion of vaccine courses received from COVAX of total vaccine courses received,Supply received,Numeric,Calculation,Percentage of total population,UNICEF MDB,Monthly
+del_cour_tot,"Vaccine courses received, total",Supply received,Numeric,Calculation,Courses,UNICEF MDB; WHO SAGE,Monthly
+del_cour_tot_per,"Vaccine courses received, total, as percentage of total population",Supply received,Numeric,Calculation,Percentage of total population,UNICEF MDB; WHO SAGE,Monthly
+del_date,Date of latest supply received dataset,Supply received,Date,Direct figure,Date,UNICEF MDB,Monthly
+del_dose_jj_prop,Proportion of vaccine J&J doses received of total vaccine doses received,Supply received,Numeric,Calculation,Percentage,UNICEF MDB,Monthly
+del_dose_since_lm,"Vaccine doses received, total, within the past four weeks",Supply received,Numeric,Calculation,Doses,UNICEF MDB,Monthly
+del_dose_tot,"Vaccine doses received, total",Supply received,Numeric,Direct figure,Doses,UNICEF MDB,Monthly
+dvr_4wk_cps,4-week average daily rate of change in number of individuals with a complete primary series,Daily vaccination rate,Numeric,Calculation,Individuals per day,WHO COVmart,Monthly
+dvr_4wk_cps_per,"4-week average daily rate of change in number of individuals with a complete primary series, as percentage of total population",Daily vaccination rate,Numeric,Calculation,Percentage of total population,WHO COVmart,Monthly
+dvr_4wk_td,4-week average daily vaccination rate,Daily vaccination rate,Numeric,Calculation,Doses per day,WHO COVmart,Monthly
+dvr_4wk_td_change_lm_per,Percent change in 4-week average daily vaccination rate since last month,Daily vaccination rate,Numeric,Calculation,Percentage,WHO COVmart,Monthly
+dvr_4wk_td_change_lm_trend,Daily vaccination rate trend over the last month,Daily vaccination rate,Character,Calculation,N/A,WHO COVmart,Monthly
+dvr_4wk_td_lm,"4-week average daily vaccination rate, as at one month (4 weeks) prior to current date",Daily vaccination rate,Numeric,Calculation,Doses per day,WHO COVmart,Monthly
+dvr_4wk_td_max,Maximum 4-week average daily vaccination rate since roll-out,Daily vaccination rate,Numeric,Calculation,Doses per day,WHO COVmart,Monthly
+dvr_4wk_td_max_per,"Maximum 4-week average daily vaccination rate since roll-out, as percentage of total population",Daily vaccination rate,Numeric,Calculation,Percentage of population per day,WHO COVmart; UNPOP,Monthly
+dvr_4wk_td_per,"4-week average daily vaccination rate, as percentage of total population",Daily vaccination rate,Numeric,Calculation,Percentage of population per day,WHO COVmart; UNPOP,Monthly
+fin_percapita,"Allocated external financing, total, per capita",Financing,Numeric,Calculation,USD per capita,UNICEF C19VFM; UNPOP,Monthly
+fin_tot,"Allocated external financing, total",Financing,Numeric,Direct figure,USD,UNICEF C19VFM,Monthly
+income_group,World Bank 2021 income group classification,Entity characteristics,Character,Direct figure,N/A,World Bank,Periodically
+iso,ISO-3 code,Entity characteristics,Text,Direct figure,N/A,ISO,Periodically
+name_short,Country name,Entity characteristics,Text,Direct figure,N/A,WHO REFmart,Periodically
+pol_age_old,"Age group definition, older adults",Policy,Character,Direct figure,N/A,eJRF and regional data systems; WHO Regional offices,Periodically
+pol_age_old_source,Source of older adults age group definition,Policy,Character,Direct figure,N/A,eJRF and regional data systems; WHO Regional offices,Periodically
+pol_jj,"Complete primary series definition, Janssen product",Policy,Character,Direct figure,N/A,eJRF and regional data systems; WHO Regional offices,Periodically
+pop,"Population, total",Entity characteristics,Numeric,Direct figure,Individuals,UNPOP,Annually
+pop_18p,"Population, aged 18 and over",Entity characteristics,Numeric,Direct figure,Individuals,UNPOP,Annually
+pop_60p,"Population, aged 60 and older",Entity characteristics,Numeric,Direct figure,Individuals,UNPOP,Annually
+pop_70per,70% of total population (pop),Entity characteristics,Numeric,Calculation,Individuals,UNPOP,Annually
+pop_gen_fem,"Population, female",Entity characteristics,Numeric,Direct figure,Individuals,UNPOP,Annually
+pop_gen_mal,"Population, male",Entity characteristics,Numeric,Direct figure,Individuals,UNPOP,Annually
+pop_hcw,"Population, healthcare workers",Entity characteristics,Numeric,Direct figure,Individuals,ILOStat,Periodically
+pop_old,"Population, older adults (as defined by country)",Entity characteristics,Numeric,Direct figure,Individuals,UNPOP / eJRF,Periodically
+pop_u18,"Population, under age 18",Entity characteristics,Numeric,Direct figure,Individuals,UNPOP,Annually
+pu_del_rem,Doses estimated remaining,Product utilization,Numeric,Calculation,Doses,UNICEF MDB; WHO COVmart,Monthly
+pu_del_rem_per,"Doses estimated remaining, as percentage of total population",Product utilization,Numeric,Calculation,Percentage of total population,UNICEF MDB; WHO COVmart,Monthly
+pu_used_per,Percentage of doses delivered having been administered,Product utilization,Numeric,Calculation,Percentage of total population,UNICEF MDB; WHO COVmart,Monthly
+region_unicef,UNICEF region,Entity characteristics,Character,Direct figure,N/A,UNICEF,Periodically
+region_who,WHO region,Entity characteristics,Character,Direct figure,N/A,WHO,Periodically
+ri_dtp1,"Children having received a first dose of a DTP-containing vaccine, as percentage of cohort of eligible infants",Routine coverage,Numeric,Direct figure,Percentage,WUENIC 2022,Annually
+ri_dtp3,"Children having received a third dose of a DTP-containing vaccine, as percentage of cohort of eligible infants",Routine coverage,Numeric,Direct figure,Percentage,WUENIC 2022,Annually
+ri_mcv1,"Children having received a first dose of a measles-containing vaccine, as percentage of cohort of eligible infants",Routine coverage,Numeric,Direct figure,Percentage,WUENIC 2022,Annually
+ri_mcv2,"Children having received a second doses of a measles-containing vaccine, as percentage of cohort of eligible infants",Routine coverage,Numeric,Direct figure,Percentage,WUENIC 2022,Annually
+ri_zero_dose,Children not having received any dose of a DTP-containing vaccine,Routine coverage,Numeric,Direct figure,Percentage,WUENIC 2022,Annually
+status_covax,COVAX participation modality,Entity characteristics,Character,Direct figure,N/A,COVAX Facility,Periodically
+status_csc,COVID-19 Vaccine Delivery Partnership Concerted Support Status,Entity characteristics,Character,Direct figure,N/A,COVDP,Periodically
+status_who,WHO legal status of reporting entity,Entity characteristics,Character,Direct figure,N/A,WHO,Periodically
+t10_status,Status of progress against 10% coverage target,Population coverage,Character,Calculation,N/A,WHO COVmart; UNPOP,Monthly
+t20_status,Status of progress against 20% coverage target,Population coverage,Character,Calculation,N/A,WHO COVmart; UNPOP,Monthly
+t40_cour_need_adm,Additional vaccine courses needing to be administered to reach 40% coverage target,Administration,Numeric,Calculation,Courses,WHO COVmart,Monthly
+t40_cour_need_del,Additional vaccine courses needing to be received to reach 40% coverage target,Supply received,Numeric,Calculation,Courses,UNICEF MDB,Monthly
+t40_cour_req,"Total number of vaccine courses required to vaccinate 40% of total population with a complete primary series, including a standard assumption of 10% dose wastage",Entity characteristics,Numeric,Calculation,Courses,UNPOP,Annually
+t40_status,Status of progress against 40% coverage target,Population coverage,Character,Calculation,N/A,WHO COVmart; UNPOP,Monthly
+t70_cour_need_adm,Additional vaccine courses needing to be administered to reach 70% coverage target,Administration,Numeric,Calculation,Courses,WHO COVmart,Monthly
+t70_cour_need_del,Additional vaccine courses needing to be received to reach 70% coverage target,Supply received,Numeric,Calculation,Courses,UNICEF MDB,Monthly
+t70_cour_req,"Total number of vaccine courses required to vaccinate 40% of total population with a complete primary series, including a standard assumption of 10% dose wastage",Entity characteristics,Numeric,Calculation,Courses,UNPOP,Annually
+t70_status,Status of progress against 70% coverage target,Population coverage,Character,Calculation,N/A,WHO COVmart; UNPOP,Monthly

@@ -1,0 +1,40 @@
+indicator,description,class,type,unit,sources,update_frequency
+adm_hcw_a1d_add,"Healthcare workers having received at least one dose, cumulative",Numeric,Calculation,Individuals,WHO WIISEmart,Monthly
+adm_hcw_boost_add,"Healthcare workers having received a first booster dose, cumulative",Numeric,Calculation,Individuals,WHO WIISEmart,Monthly
+adm_hcw_cps_add,"Healthcare workers having received a complete primary series, cumulative",Numeric,Calculation,Individuals,WHO WIISEmart,Monthly
+adm_old_a1d_add,"Older adults having received at least one dose, cumulative",Numeric,Calculation,Individuals,WHO WIISEmart,Monthly
+adm_old_boost_add,"Older adults having received a first booster dose, cumulative",Numeric,Calculation,Individuals,WHO WIISEmart,Monthly
+adm_old_cps_add,"Older adults having received a complete primary series, cumulative",Numeric,Calculation,Individuals,WHO WIISEmart,Monthly
+adm_tot_a1d_add,"Individuals having received at least one dose, cumulative",Numeric,Direct figure,Individuals,WHO COVmart,Monthly
+adm_tot_a1d_month,"Individuals having received at least one dose, net during the month indicated",Numeric,Calculation,Individuals,WHO COVmart,Monthly
+adm_tot_boost_add,"Individuals having received a first booster, cumulative",Numeric,Direct figure,Individuals,WHO COVmart,Monthly
+adm_tot_boost_month,"Individuals having received a first booster, net during the month indicated",Numeric,Calculation,Individuals,WHO COVmart,Monthly
+adm_tot_cps_add,"Individuals having received a complete primary series, cumulative",Numeric,Direct figure,Individuals,WHO COVmart,Monthly
+adm_tot_cps_month,"Individuals having received a complete primary series, net during the month indicated",Numeric,Calculation,Individuals,WHO COVmart,Monthly
+adm_tot_td_add,"Total doses administered, cumulative",Numeric,Direct figure,Doses,WHO COVmart,Monthly
+adm_tot_td_month,"Total doses administered, net during the month indicated",Numeric,Calculation,Doses,WHO COVmart,Monthly
+cov_hcw_a1d,"Healthcare workers with at least one dose, as percentage of total healthcare worker population",Numeric,Calculation,Percentage,WHO WIISEmart,Monthly
+cov_hcw_boost,"Healthcare workers with a first booster dose, as percentage of total healthcare worker population",Numeric,Calculation,Percentage,WHO WIISEmart,Monthly
+cov_hcw_cps,"Healthcare workers with a complete primary series (adjusted), as percentage of total healthcare worker population",Numeric,Calculation,Percentage,WHO WIISEmart,Monthly
+cov_old_a1d,"Older adults with at least one dose, as percentage of older adult population",Numeric,Calculation,Percentage,WHO WIISEmart,Monthly
+cov_old_boost,"Older adults with a first booster dose, as percentage of older adult population",Numeric,Calculation,Percentage,WHO WIISEmart,Monthly
+cov_old_cps,"Older adults with a complete primary series, as percentage of older adult population",Numeric,Calculation,Percentage,WHO WIISEmart,Monthly
+cov_tot_a1d,"Individuals with at least one dose, as percentage of total population",Numeric,Calculation,Percentage,WHO COVmart,Monthly
+cov_tot_boost,"Individuals having received a booster / additional dose, as percentage of total population",Numeric,Calculation,Percentage,WHO COVmart,Monthly
+cov_tot_cps,"Individuals with a complete primary series, as percentage of total population",Numeric,Calculation,Percentage,WHO COVmart,Monthly
+date,"Date, month, corresponding to data",Date,Direct figure,N/A,N/A,N/A
+del_dose_add,"Vaccine doses received, cumulative",Numeric,Direct figure,Doses,UNICEF MDB,Monthly
+del_dose_month,"Vaccine doses received, net during the month indicated",Numeric,Calculation,Doses,UNICEF MDB,Monthly
+est_stock,"Estimated remaining vaccine supply, calculated by subtracting adm_td_add from del_dose_add on a monthly basis",Numeric,Calculation,Doses,WHO COVmart; UNICEF MDB,Monthly
+fin_percapita,"Committed external delivery financing for COVID-19 vaccine delivery, per capita & cumulative",Numeric,Calculation,USD,UNICEF C19VFM,Monthly
+fin_total,"Committed external delivery financing for COVID-19 vaccine delivery, total & cumulative",Numeric,Calculation,USD,UNICEF C19VFM,Monthly
+income_group,World Bank 2021 income group classification,Character,Direct figure,N/A,World Bank,Periodically
+iso,ISO-3 code,Character,Direct figure,N/A,ISO,Periodically
+name_short,"Country, area, or territory name",Character,Direct figure,N/A,WHO,Periodically
+pop,"Population, total",Numeric,Direct figure,Individuals,UNPOP,Annually
+pop_hcw,"Population, total healthcare workers",Numeric,Direct figure,Individuals,ILO Stat,Periodically
+pop_old,"Population, older adults (as defined by country)",Numeric,Direct figure,Individuals,UNPOP,Annually
+region_who,WHO region,Character,Direct figure,N/A,WHO,Periodically
+status_covax,COVAX participation modality,Character,Direct figure,N/A,COVAX Facility,Periodically
+status_csc,COVID-19 Vaccine Delivery Partnership Concerted Support Status,Character,Direct figure,N/A,CoVDP,Periodically
+status_who,WHO legal status of reporting entity,Character,Direct figure,N/A,WHO,Periodically
