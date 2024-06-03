@@ -277,7 +277,7 @@ map1_a<- ggplot(data = world_ineq_gral) +
                     breaks = c("<30", "30-59", "60-89", "90+", "not reached")) +
   labs(
     title= "(A)\nTime to vaccine introduction",
-    fill = "Time since\n01 Dec 2020\n    (days)") +
+    fill = "Time since\n08 Dec 2020\n    (days)") +
   theme_void()+
   guides(color = guide_legend(title.position = "bottom", nrow = 1))+
   theme(
