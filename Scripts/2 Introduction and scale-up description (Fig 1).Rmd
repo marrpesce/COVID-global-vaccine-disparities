@@ -112,7 +112,7 @@ Ineq_vaccine_coverage <- Ineq_merged %>%
     diff_owid_who_intro = as.numeric(owid_vac_intro - who_vac_intro)
   )%>% 
     mutate(
-    diff_min_vac_intro_1Dec2020 = as.numeric(min_vac_intro - dmy("8-12-2020")), 
+    diff_min_vac_intro_8Dec2020 = as.numeric(min_vac_intro - dmy("8-12-2020")), 
     diff_intro_F40 = as.numeric(as.Date(owid_vac_F40) - as.Date(min_vac_intro)),
     diff_intro_F70 = as.numeric(as.Date(owid_vac_F70) - as.Date(min_vac_intro)),
     owid_who= case_when(
@@ -123,9 +123,9 @@ Ineq_vaccine_coverage <- Ineq_merged %>%
     )
     ) %>% 
   mutate(
-    diff_min_vac_intro_1Dec2020_clean=case_when(
-      diff_min_vac_intro_1Dec2020<0 ~ 0,
-      TRUE ~ diff_min_vac_intro_1Dec2020
+    diff_min_vac_intro_8Dec2020_clean=case_when(
+      diff_min_vac_intro_8Dec2020<0 ~ 0,
+      TRUE ~ diff_min_vac_intro_8Dec2020
     )
   ) %>%
   select(-FIRST_VACCINE_DATE, -location)
@@ -138,9 +138,9 @@ summary_vacc_intro_scale <- Ineq_vaccine_coverage %>%
   summarize(
     n = length(q_GNI_per_c_WB),
     n_intro = sum(!is.na(min_vac_intro)),
-    median_value_1 = round(median(diff_min_vac_intro_1Dec2020, na.rm=TRUE),0),
-    q25_1 = round(quantile(diff_min_vac_intro_1Dec2020, 0.25, na.rm=TRUE),0),
-    q75_1 = round(quantile(diff_min_vac_intro_1Dec2020, 0.75, na.rm=TRUE),0),
+    median_value_1 = round(median(diff_min_vac_intro_8Dec2020, na.rm=TRUE),0),
+    q25_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.25, na.rm=TRUE),0),
+    q75_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.75, na.rm=TRUE),0),
     median_value_40 = round(median(diff_intro_F40, na.rm=TRUE),0),
     q25_40 = round(quantile(diff_intro_F40, 0.25, na.rm=TRUE),0),
     q75_40 = round(quantile(diff_intro_F40, 0.75, na.rm=TRUE),0),
@@ -210,10 +210,10 @@ summary_vacc_dates <- Ineq_vaccine_coverage %>%
 Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>% 
   mutate(
             V1_group= case_when(
-      diff_min_vac_intro_1Dec2020 < 30  ~ "<30",
-      diff_min_vac_intro_1Dec2020 > 29 & diff_min_vac_intro_1Dec2020 < 60 ~ "30-59",
-      diff_min_vac_intro_1Dec2020 > 59 & diff_min_vac_intro_1Dec2020 < 90 ~ "60-89",
-      diff_min_vac_intro_1Dec2020 > 89 ~ "90+",
+      diff_min_vac_intro_8Dec2020 < 30  ~ "<30",
+      diff_min_vac_intro_8Dec2020 > 29 & diff_min_vac_intro_8Dec2020 < 60 ~ "30-59",
+      diff_min_vac_intro_8Dec2020 > 59 & diff_min_vac_intro_8Dec2020 < 90 ~ "60-89",
+      diff_min_vac_intro_8Dec2020 > 89 ~ "90+",
       TRUE ~ "not reached"
   ),
             V40_group= case_when(
@@ -354,13 +354,13 @@ c1<- ggplot(milestone_achieved, aes(x = as.factor(q_GNI_per_c_WB), y = Value, fi
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
   coord_flip()+
-  facet_wrap(~ milestone, labeller = labeller(milestone = c("V1_per" = "Vaccine introduction (31/12/2021)", "V40_per" = "Vaccine scale-up (40%,31/12/2021)"))) +
+  facet_wrap(~ milestone, labeller = labeller(milestone = c("V1_per" = "Vaccine introduction (31/12/2021)", "V40_per" = "Vaccine scale-up (40%, 31/12/2021)"))) +
   labs(title = "(B)",
        x = "",
        y = "% countries achieving milestone") +
     guides(fill = "none") +  # Remove the fill legend
   theme_minimal() +
-  scale_x_discrete(labels = c("1(lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
   theme_minimal() + 
   theme(
     legend.position = "bottom",
@@ -379,10 +379,10 @@ c1
 ```{r}
 #ii) Box plot introduction/scale-up yes no per GNI per capita quartile
 intro_scale_delay<- Ineq_vaccine_coverage %>%
-  select(Country.Name, q_GNI_per_c_WB, diff_min_vac_intro_1Dec2020, diff_intro_F40) %>%
-  filter(!is.na(diff_min_vac_intro_1Dec2020)) %>%
+  select(Country.Name, q_GNI_per_c_WB, diff_min_vac_intro_8Dec2020, diff_intro_F40) %>%
+  filter(!is.na(diff_min_vac_intro_8Dec2020)) %>%
   pivot_longer(
-    cols = c(diff_min_vac_intro_1Dec2020, diff_intro_F40),
+    cols = c(diff_min_vac_intro_8Dec2020, diff_intro_F40),
     names_to = "Diff_dates",
     values_to = "Value"
   ) 
@@ -404,12 +404,12 @@ c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
   )+
   scale_x_continuous(limits = c(0, NA))+
   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  facet_wrap(~Diff_dates, scales = "free_x", labeller = labeller(Diff_dates = c("diff_min_vac_intro_1Dec2020" = "Time to vaccine introduction", "diff_intro_F40" = "Time to vaccine scale-up (40%)")))+
+  facet_wrap(~Diff_dates, scales = "free_x", labeller = labeller(Diff_dates = c("diff_min_vac_intro_8Dec2020" = "Time to vaccine introduction", "diff_intro_F40" = "Time to vaccine scale-up (40%)")))+
   labs(title = "(C)",
        x = "Number of days", 
        y = "GNI quartile")  +
   guides(color = "none") +
-  scale_y_discrete(labels = c("1(lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
   theme_minimal() + 
   theme(
     legend.position = "bottom",
@@ -577,7 +577,7 @@ d_vac_plat_distrib_plot<- ggplot(vac_plat_distrib, aes(x = as.factor(q_GNI_per_c
     guides(fill = "none") +  # Remove the fill legend
   scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
   theme_minimal() +
-  scale_x_discrete(labels = c("1(lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
   theme(
     legend.position = "bottom",
     legend.text = element_text(size = 8),  # Adjust text size
@@ -682,7 +682,7 @@ s2_vac_name_distrib_plot<- ggplot(vac_name_distrib, aes(x = as.factor(q_GNI_per_
   scale_fill_manual(values = c("#EECC66", "#EE99AA", "#6699CC", "#009999"),
     labels = c("mRNA","Vectored", "Inactivated", "Protein")) +
   theme_minimal() +
-  scale_x_discrete(labels = c("1(lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
   theme(
     legend.position = "bottom",
     legend.text = element_text(size = 8),  # Adjust text size
@@ -701,7 +701,7 @@ s2_vac_name_distrib_plot
 map_GNI_q <- ggplot(data = world_ineq_gral) +
   geom_sf(aes(fill = as.factor(q_GNI_per_c_WB)), position = "identity") + 
   scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
-                    labels = c("1(lower\nincome)", "2", "3", "4 (higher\nincome)","no data\navailable")) +
+                    labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)","no data\navailable")) +
   labs(
     fill = "GNI per capita quartile") +
   theme_void()+
