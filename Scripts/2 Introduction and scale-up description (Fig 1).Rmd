@@ -810,14 +810,27 @@ high_priority_metrics <- left_join(WHO_hcw_old_data, WHO_hcw_old_sum_data) %>%
 
 coverage_high_2021_2023<- WHO_hcw_old_data %>% 
   select(iso, date, cov_hcw_cps, cov_old_cps, cov_tot_cps, cov_tot_boost, cov_hcw_boost, cov_old_boost) %>% 
-  filter(date=="2021-12-01" | date=="2023-12-01") %>% 
+  filter(date=="2021-12-01" | date=="2023-12-01" | date=="2023-11-01") %>% 
   pivot_wider(., names_from = date, values_from = c(cov_hcw_cps, cov_old_cps, cov_tot_cps, cov_tot_boost, cov_hcw_boost, cov_old_boost))
 
 Ineq_vaccine_coverage<- left_join(Ineq_vaccine_coverage, high_priority_metrics, by=c("iso3c"= "iso"))
 
 Ineq_vaccine_coverage<- left_join(Ineq_vaccine_coverage, coverage_high_2021_2023, by=c("iso3c"= "iso"))
 
-
+# Since some countries end reporting at 11/2023 rather than 12/2023, take maximum value 
+Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>%
+  mutate(
+    `cov_hcw_cps_2023-12-01` = if_else(!is.na(`cov_hcw_cps_2023-12-01`), `cov_hcw_cps_2023-12-01`, `cov_hcw_cps_2023-11-01`),
+    `cov_old_cps_2023-12-01` = if_else(!is.na(`cov_old_cps_2023-12-01`), `cov_old_cps_2023-12-01`, `cov_old_cps_2023-11-01`),
+    `cov_tot_cps_2023-12-01` = if_else(!is.na(`cov_tot_cps_2023-12-01`), `cov_tot_cps_2023-12-01`, `cov_tot_cps_2023-11-01`),
+    `cov_hcw_boost_2023-12-01` = if_else(!is.na(`cov_hcw_boost_2023-12-01`), `cov_hcw_boost_2023-12-01`, `cov_hcw_boost_2023-11-01`),
+    `cov_old_boost_2023-12-01` = if_else(!is.na(`cov_old_boost_2023-12-01`), `cov_old_boost_2023-12-01`, `cov_old_boost_2023-11-01`),
+    `cov_tot_boost_2023-12-01` = if_else(!is.na(`cov_tot_boost_2023-12-01`), `cov_tot_boost_2023-12-01`, `cov_tot_boost_2023-11-01`)
+  ) %>%
+  select(-ends_with('2023-11-01'))
+  
+# Save output
+write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_data_plus_priority_groups.csv")
 ```
 
 # Boxplots health care workers and older elderly
