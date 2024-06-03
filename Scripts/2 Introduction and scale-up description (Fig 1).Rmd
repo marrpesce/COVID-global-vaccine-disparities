@@ -617,7 +617,6 @@ vac_distrib <-owid_vaccine_country_g %>%
 
 
 ```{r}
-
 # Figure 1.
 
 (map1_a / map1_b) |
