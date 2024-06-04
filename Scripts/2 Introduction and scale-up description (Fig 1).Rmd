@@ -838,8 +838,8 @@ write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_data_p
 collated = rbind(
   Ineq_vaccine_coverage %>% mutate(coverage = `cov_hcw_cps_2021-12-01`, date = "December 2021", group = "HCWs"),
   Ineq_vaccine_coverage %>% mutate(coverage = `cov_hcw_cps_2023-12-01`, date = "December 2023", group = "HCWs"),
-  Ineq_vaccine_coverage %>% mutate(coverage = `cov_old_cps_2021-12-01`, date = "December 2021", group = "Elderly"),
-  Ineq_vaccine_coverage %>% mutate(coverage = `cov_old_cps_2023-12-01`, date = "December 2023", group = "Elderly"),
+  Ineq_vaccine_coverage %>% mutate(coverage = `cov_old_cps_2021-12-01`, date = "December 2021", group = "Older adults"),
+  Ineq_vaccine_coverage %>% mutate(coverage = `cov_old_cps_2023-12-01`, date = "December 2023", group = "Older adults"),
   Ineq_vaccine_coverage %>% mutate(coverage = `cov_tot_cps_2021-12-01`, date = "December 2021", group = "Whole population"),
   Ineq_vaccine_coverage %>% mutate(coverage = `cov_tot_cps_2023-12-01`, date = "December 2023", group = "Whole population")
 )
