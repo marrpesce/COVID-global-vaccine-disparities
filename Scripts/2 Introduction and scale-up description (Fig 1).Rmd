@@ -27,7 +27,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r Libraries}
-
 library(tidyverse)
 library(readr)
 library(sf)
@@ -622,8 +621,6 @@ vac_distrib <-owid_vaccine_country_g %>%
 (map1_a / map1_b) |
   (c1 / c2_plot_intro_scale_delay / d_vac_plat_distrib_plot)
 
-
-
 ```
 
 
@@ -1012,7 +1009,7 @@ old_milestone_achieved <- Ineq_vaccine_coverage %>%
 ```{r}
 #Overall coverage dec 2021/ 2023
 summary_overall_cov_21_23 <- collated %>%
-  select(iso3c, q_GNI_per_c_WB, `cov_hcw_cps_2023-12-01`:`cov_old_cps_2021-12-01`) %>% 
+  select(iso3c, q_GNI_per_c_WB, `cov_hcw_cps_2023-12-01`:`cov_tot_cps_2021-12-01`) %>% 
   unique() %>% 
   filter(!is.na(iso3c)) %>% 
   group_by(q_GNI_per_c_WB) %>%
@@ -1022,6 +1019,8 @@ summary_overall_cov_21_23 <- collated %>%
     n_hcw_dec23 = sum(!is.na(`cov_hcw_cps_2023-12-01`)),
     n_old_dec21 = sum(!is.na(`cov_old_cps_2021-12-01`)),
     n_old_dec23 = sum(!is.na(`cov_old_cps_2023-12-01`)),
+    n_tot_dec21 = sum(!is.na(`cov_tot_cps_2021-12-01`)),
+    n_tot_dec23 = sum(!is.na(`cov_tot_cps_2023-12-01`)),
     median_hcw_dec21 = round((median(as.numeric(`cov_hcw_cps_2021-12-01`), na.rm = TRUE)*100),0),
     q25_hcw_dec21 = round((quantile(as.numeric(`cov_hcw_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
     q75_hcw_dec21 = round((quantile(as.numeric(`cov_hcw_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
@@ -1033,14 +1032,22 @@ summary_overall_cov_21_23 <- collated %>%
     q75_old_dec21 = round((quantile(as.numeric(`cov_old_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
     median_old_dec23 = round((median(as.numeric(`cov_old_cps_2023-12-01`), na.rm = TRUE)*100),0),
     q25_old_dec23 = round((quantile(as.numeric(`cov_old_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
-    q75_old_dec23 = round((quantile(as.numeric(`cov_old_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0)
+    q75_old_dec23 = round((quantile(as.numeric(`cov_old_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0),
+    median_tot_dec21 = round((median(as.numeric(`cov_tot_cps_2021-12-01`), na.rm = TRUE)*100),0),
+    q25_tot_dec21 = round((quantile(as.numeric(`cov_tot_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_tot_dec21 = round((quantile(as.numeric(`cov_tot_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
+    median_tot_dec23 = round((median(as.numeric(`cov_tot_cps_2023-12-01`), na.rm = TRUE)*100),0),
+    q25_tot_dec23 = round((quantile(as.numeric(`cov_tot_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_tot_dec23 = round((quantile(as.numeric(`cov_tot_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0)
   ) %>% 
   mutate(
     hcw_dec21 = paste0( median_hcw_dec21, "% (", q25_hcw_dec21, "%-", q75_hcw_dec21, "%)"),
     hcw_dec23 = paste0( median_hcw_dec23, "% (", q25_hcw_dec23, "%-", q75_hcw_dec23, "%)"),
     old_dec21 = paste0( median_old_dec21, "% (", q25_old_dec21, "%-", q75_old_dec21, "%)"),
-    old_dec23 = paste0( median_old_dec23, "% (", q25_old_dec23, "%-", q75_old_dec23, "%)")
+    old_dec23 = paste0( median_old_dec23, "% (", q25_old_dec23, "%-", q75_old_dec23, "%)"),
+    tot_dec21 = paste0( median_tot_dec21, "% (", q25_tot_dec21, "%-", q75_tot_dec21, "%)"),
+    tot_dec23 = paste0( median_tot_dec23, "% (", q25_tot_dec23, "%-", q75_tot_dec23, "%)")
   ) %>% 
-  select(q_GNI_per_c_WB, hcw_dec21:old_dec23) 
+  select(q_GNI_per_c_WB:n_tot_dec23, hcw_dec21:tot_dec23) 
 ```
 
