@@ -33,8 +33,8 @@ library(tidyverse)
 library(readr)
 library(rnaturalearth)
 library(sf)
-library(viridisLite)
-library(viridis)
+#library(viridisLite)
+#library(viridis)
 library(lubridate)
 library(countrycode)
 library(patchwork) 
@@ -135,7 +135,7 @@ world_ineq_gral <- st_as_sf(world_ineq_gral)
 fig2_map<- ggplot(data = world_ineq_gral) +
   geom_sf(aes(fill = n_VE_studies_g), 
           position = "identity") + 
-  scale_fill_manual(values = c("#DDDDDD","#d9e8bd","#8cba9e","#338c73","#006666" ),
+  scale_fill_manual(values = c("#F0F0F0", "#C8E6A4", "#79C77A", "#3D8B62", "#005147"),
                     labels = c("0","01-05", "06-10", "11-15", "16+"))+ 
   labs(
     title= "(A)",
@@ -395,16 +395,26 @@ variant_summary
 # 
 # combined_plot + plot_layout(ncol = 3, widths = c(3, 1, 1), heights = c(3,1) )
 
-
-col1<-(fig2_map + plot2_d +
-  plot_layout(ncol = 1, heights = c(1, 1)))
-
-col2<-(plot2_b | plot2_c) /
-   (plot2_e | plot2_f)
-
-combined_plot <- col1 | col2
-
-combined_plot + plot_layout(ncol = 3, widths = c(3, 3, 3))
+# 
+# col1<-(fig2_map + plot2_d +
+#   plot_layout(ncol = 1, heights = c(1, 1)))
+# 
+# col2<-(plot2_b | plot2_c) /
+#    (plot2_e | plot2_f)
+# 
+# combined_plot <- col1 | col2
+# 
+# combined_plot + plot_layout(ncol = 3, widths = c(3, 3, 3))
+# 
+# fig2_map
+# plot2_d
+# (plot2_b | plot2_c | plot2_e | plot2_f)
+Fig3_plot <- 
+  fig2_map /
+  (plot2_d | plot2_b | plot2_c) /
+  (plot2_e | plot2_f) +
+  plot_layout(heights = c(3, 1, 1))
+Fig3_plot
 
 ```
 
@@ -652,7 +662,7 @@ supp_data <- Ineq_merged %>%
   ) %>%
   select(
     -c(Economy, `Income group`, perc_VE_studies, study_dummy, 
-       Region, Country.Code, owid_who, diff_min_vac_intro_1Dec2020, diff_V40_VEpub),
+       Region, Country.Code, owid_who, diff_min_vac_intro_8Dec2020, diff_V40_VEpub),
     -starts_with("V1"), -starts_with("V4"), -starts_with("V7")
   ) %>%
   relocate(iso3c, .after = Country.Name) %>%
@@ -665,7 +675,7 @@ supp_data <- Ineq_merged %>%
          worldbank_GNI_year = year_GNI,
          owid_vaccines = vaccines,
          owid_last_observation_date = last_observation_date,
-         diff_min_vac_intro_1Dec2020 = diff_min_vac_intro_1Dec2020_clean,
+         diff_min_vac_intro_1Dec2020 = diff_min_vac_intro_8Dec2020_clean,
          any_mRNA = mRNA,
          any_vectored = Vectored,
          any_inactivated = Inactivated,

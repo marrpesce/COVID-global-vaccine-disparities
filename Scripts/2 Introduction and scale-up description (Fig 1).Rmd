@@ -133,27 +133,63 @@ table(Ineq_vaccine_coverage$owid_who)
 
 #median dates to built groups
 summary_vacc_intro_scale <- Ineq_vaccine_coverage %>%
+  
   group_by(q_GNI_per_c_WB) %>%
   summarize(
+    # Count of countries in each GNI quartile
     n = length(q_GNI_per_c_WB),
+    # Count of countries with available vaccine introduction dates
     n_intro = sum(!is.na(min_vac_intro)),
-    median_value_1 = round(median(diff_min_vac_intro_8Dec2020, na.rm=TRUE),0),
-    q25_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.25, na.rm=TRUE),0),
-    q75_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.75, na.rm=TRUE),0),
-    median_value_40 = round(median(diff_intro_F40, na.rm=TRUE),0),
-    q25_40 = round(quantile(diff_intro_F40, 0.25, na.rm=TRUE),0),
-    q75_40 = round(quantile(diff_intro_F40, 0.75, na.rm=TRUE),0),
-    median_value_70 = round(median(diff_intro_F70, na.rm=TRUE),0),
-    q25_70 = round(quantile(diff_intro_F70, 0.25, na.rm=TRUE),0),
-    q75_70 = round(quantile(diff_intro_F70, 0.75, na.rm=TRUE),0)
-  ) %>% 
+    # Summary statistics for introduction delays (in days since December 8, 2020)
+    median_value_1 = round(median(diff_min_vac_intro_8Dec2020, na.rm = TRUE), 0),
+    q25_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.25, na.rm = TRUE), 0),
+    q75_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.75, na.rm = TRUE), 0),
+    # Summary statistics for scale-up delays to reach 40% coverage (in days)
+    median_value_40 = round(median(diff_intro_F40, na.rm = TRUE), 0),
+    q25_40 = round(quantile(diff_intro_F40, 0.25, na.rm = TRUE), 0),
+    q75_40 = round(quantile(diff_intro_F40, 0.75, na.rm = TRUE), 0),
+    # Summary statistics for scale-up delays to reach 70% coverage (in days)
+    median_value_70 = round(median(diff_intro_F70, na.rm = TRUE), 0),
+    q25_70 = round(quantile(diff_intro_F70, 0.25, na.rm = TRUE), 0),
+    q75_70 = round(quantile(diff_intro_F70, 0.75, na.rm = TRUE), 0),
+    # Dates for vaccine introduction and scale-ups (median and quartiles)
+    median_value_1_date = as.Date(median(as.numeric(min_vac_intro), na.rm = TRUE), origin = "1970-01-01"),
+    q25_1_date = as.Date(quantile(as.numeric(min_vac_intro), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_1_date = as.Date(quantile(as.numeric(min_vac_intro), 0.75, na.rm = TRUE), origin = "1970-01-01"),
+    # Dates for reaching 40% coverage
+    median_value_40_date = as.Date(median(as.numeric(as.Date(owid_vac_F40)), na.rm = TRUE), origin = "1970-01-01"),
+    q25_40_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F40)), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_40_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F40)), 0.75, na.rm = TRUE), origin = "1970-01-01"),
+    # Dates for reaching 70% coverage
+    median_value_70_date = as.Date(median(as.numeric(as.Date(owid_vac_F70)), na.rm = TRUE), origin = "1970-01-01"),
+    q25_70_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F70)), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_70_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F70)), 0.75, na.rm = TRUE), origin = "1970-01-01")
+  ) %>%
   mutate(
-    introduction = paste0( median_value_1, " (", q25_1, "-", q75_1, ")"),
-    scale_40 = paste0( median_value_40, " (", q25_40, "-", q75_40, ")"),
-    scale_70 = paste0( median_value_70, " (", q25_70, "-", q75_70, ")")
-  ) %>% 
-  select(q_GNI_per_c_WB, n, n_intro, introduction, scale_40, scale_70)
+    # Create readable summary columns for delays
+    introduction = paste0(median_value_1, " (", q25_1, "-", q75_1, ")"),
+    scale_40 = paste0(median_value_40, " (", q25_40, "-", q75_40, ")"),
+    scale_70 = paste0(median_value_70, " (", q25_70, "-", q75_70, ")"),
+    # Create readable summary columns for dates
+    introduction_date = paste0(format(median_value_1_date, "%d/%m/%Y"), " (", 
+                                format(q25_1_date, "%d/%m/%Y"), "-", 
+                                format(q75_1_date, "%d/%m/%Y"), ")"),
+    scale_40_date = paste0(format(median_value_40_date, "%d/%m/%Y"), " (", 
+                           format(q25_40_date, "%d/%m/%Y"), "-", 
+                           format(q75_40_date, "%d/%m/%Y"), ")"),
+    scale_70_date = paste0(format(median_value_70_date, "%d/%m/%Y"), " (", 
+                           format(q25_70_date, "%d/%m/%Y"), "-", 
+                           format(q75_70_date, "%d/%m/%Y"), ")")
+  ) %>%
+  # Select and organize the relevant output columns
+  select(
+    q_GNI_per_c_WB, n, n_intro, 
+    introduction, scale_40, scale_70, 
+    introduction_date, scale_40_date, scale_70_date
+  )
+
 summary_vacc_intro_scale
+
 
 #First vaccine introduction after 08-12-2020 by quartile
 
@@ -208,11 +244,25 @@ summary_vacc_dates <- Ineq_vaccine_coverage %>%
 #Create groups 
 Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>% 
   mutate(
+            V1_date_group=  case_when(
+      min_vac_intro < dmy("01-01-2021")  ~ "before jan/2021",
+      min_vac_intro >= dmy("01-01-2021") & min_vac_intro < dmy("01-02-2021") ~ "jan/2021",
+      min_vac_intro >= dmy("01-02-2021") & min_vac_intro < dmy("01-03-2021") ~ "feb/2021",
+      min_vac_intro >= dmy("01-03-2021") ~ "march/2021 +",
+      TRUE ~ "not reached"
+  ),
             V1_group= case_when(
       diff_min_vac_intro_8Dec2020 < 30  ~ "<30",
       diff_min_vac_intro_8Dec2020 > 29 & diff_min_vac_intro_8Dec2020 < 60 ~ "30-59",
       diff_min_vac_intro_8Dec2020 > 59 & diff_min_vac_intro_8Dec2020 < 90 ~ "60-89",
       diff_min_vac_intro_8Dec2020 > 89 ~ "90+",
+      TRUE ~ "not reached"
+  ),
+            V40_date_group=  case_when(
+      owid_vac_F40 < dmy("01-06-2021")  ~ "before Jun/2021",
+      owid_vac_F40 >= dmy("01-06-2021") & owid_vac_F40 < dmy("01-09-2021") ~ "Jun-Aug/2021",
+      owid_vac_F40 >= dmy("01-09-2021") & owid_vac_F40 < dmy("01-12-2021") ~ "Sep-Nov/2021",
+      owid_vac_F40 >= dmy("01-12-2021") ~ "Dec/2021 +",
       TRUE ~ "not reached"
   ),
             V40_group= case_when(
@@ -269,14 +319,37 @@ world_ineq_gral <- st_as_sf(world_ineq_gral)
 ```{r}
 #Map A.i: vaccine introduction
 
+# map1_a<- ggplot(data = world_ineq_gral) +
+#   geom_sf(aes(fill = as.factor(V1_group)), position = "identity") + 
+#   scale_fill_manual(values = c("#2e73b8","#75b2d8","#9dd5ea", "#d7e0f4","#DDDDDD"),
+#                     labels = c("<30", "30-59", "60-89", "90+", "not reached"),
+#                     breaks = c("<30", "30-59", "60-89", "90+", "not reached")) +
+#   labs(
+#     title= "(A)\nTime to vaccine introduction",
+#     fill = "Time since\n08 Dec 2020\n    (days)") +
+#   theme_void()+
+#   guides(color = guide_legend(title.position = "bottom", nrow = 1))+
+#   theme(
+#     legend.position = "bottom",
+#     legend.text = element_text(size = 9),  # Adjust text size
+#     legend.title = element_text(size = 8),  # Adjust legend title size
+#     plot.title = element_text(size = 10) 
+#   )
+# 
+# map1_a
+
+
+#Map A.i.b: vaccine introduction date!
+
 map1_a<- ggplot(data = world_ineq_gral) +
-  geom_sf(aes(fill = as.factor(V1_group)), position = "identity") + 
-  scale_fill_manual(values = c("#2e73b8","#75b2d8","#9dd5ea", "#d7e0f4","#DDDDDD"),
-                    labels = c("<30", "30-59", "60-89", "90+", "not reached"),
-                    breaks = c("<30", "30-59", "60-89", "90+", "not reached")) +
+  geom_sf(aes(fill = as.factor(V1_date_group)), position = "identity") + 
+  scale_fill_manual(values = c("#2e73b8","#75b2d8","#9dd5ea", "#d7e0f4","#A2B1A4"),
+                    labels = c("< jan\n2021", "jan\n2021", "feb\n2021", "march\n2021 +", "not\nreached"),
+                    breaks = c("before jan/2021", "jan/2021", "feb/2021", "march/2021 +", "not reached"),
+                    na.value = "#F0F3F0") +
   labs(
-    title= "(A)\nTime to vaccine introduction",
-    fill = "Time since\n08 Dec 2020\n    (days)") +
+    title= "(A)\nVaccine introduction date",
+    fill = "Introduction\nmonth") +
   theme_void()+
   guides(color = guide_legend(title.position = "bottom", nrow = 1))+
   theme(
@@ -287,16 +360,35 @@ map1_a<- ggplot(data = world_ineq_gral) +
   )
 
 map1_a
-
-#Map A.ii: scale-up 
+# 
+# #Map A.ii: scale-up 
+# map1_b<- ggplot(data = world_ineq_gral) +
+#   geom_sf(aes(fill = as.factor(V40_group)), position = "identity") + 
+#   scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#DDDDDD"),
+#                     breaks = c("<180", "180-269", "270-359", "360+", "not reached"),
+#                     labels = c("<180", "180-269", "270-359", "360+", "not reached")) +
+#   labs(
+#            title= "Time to vaccine scale-up (40%)",
+#     fill = "Time since\nintroduction\n      (days)") +
+#   theme_void()+ 
+#   theme(
+#     legend.position = "bottom",
+#     legend.text = element_text(size = 9),  # Adjust text size
+#     legend.title = element_text(size = 8),  # Adjust legend title size
+#     plot.title = element_text(size = 10) # Adjust plot title size
+#   ) 
+# 
+# map1_b
+#Map A.ii: scale-up DATE
 map1_b<- ggplot(data = world_ineq_gral) +
-  geom_sf(aes(fill = as.factor(V40_group)), position = "identity") + 
-  scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#DDDDDD"),
-                    breaks = c("<180", "180-269", "270-359", "360+", "not reached"),
-                    labels = c("<180", "180-269", "270-359", "360+", "not reached")) +
+  geom_sf(aes(fill = as.factor(V40_date_group)), position = "identity") + 
+  scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#A2B1A4"),
+                    breaks = c("before Jun/2021", "Jun-Aug/2021", "Sep-Nov/2021", "Dec/2021 +", "not reached"),
+                    labels = c("<Jun\n2021", "Jun-Aug\n2021", "Sep-Nov\n2021", "Dec\n2021 +", "not reached"),
+                    na.value = "#F0F3F0") +
   labs(
-           title= "Time to vaccine scale-up (40%)",
-    fill = "Time since\nintroduction\n      (days)") +
+           title= "Time of vaccine scale-up (40%)",
+    fill = "Months") +
   theme_void()+ 
   theme(
     legend.position = "bottom",
@@ -306,7 +398,6 @@ map1_b<- ggplot(data = world_ineq_gral) +
   ) 
 
 map1_b
-
 ```
 
 
@@ -376,18 +467,69 @@ c1
 
 
 ```{r}
+# #ii) Box plot introduction/scale-up yes no per GNI per capita quartile
+# intro_scale_delay<- Ineq_vaccine_coverage %>%
+#   select(Country.Name, q_GNI_per_c_WB, diff_min_vac_intro_8Dec2020, diff_intro_F40) %>%
+#   filter(!is.na(diff_min_vac_intro_8Dec2020)) %>%
+#   pivot_longer(
+#     cols = c(diff_min_vac_intro_8Dec2020, diff_intro_F40),
+#     names_to = "Diff_dates",
+#     values_to = "Value"
+#   ) 
+# 
+# # Set factor levels
+# intro_scale_delay$Diff_dates = factor(intro_scale_delay$Diff_dates, levels = unique(intro_scale_delay$Diff_dates))
+# 
+# c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
+#   geom_boxplot(aes(x = Value, y = as.factor(q_GNI_per_c_WB)), outlier.shape = NA) +
+#    geom_point(
+#     aes(
+#      x = Value, 
+#      y = as.factor(q_GNI_per_c_WB),
+#       #size = studies,
+#       color = as.factor(q_GNI_per_c_WB)
+#     ),
+#     alpha = 0.5,
+#     position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
+#   )+
+#   scale_x_continuous(limits = c(0, NA))+
+#   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
+#   facet_wrap(~Diff_dates, scales = "free_x", labeller = labeller(Diff_dates = c("diff_min_vac_intro_8Dec2020" = "Time to vaccine introduction", "diff_intro_F40" = "Time to vaccine scale-up (40%)")))+
+#   labs(title = "(C)",
+#        x = "Number of days", 
+#        y = "GNI quartile")  +
+#   guides(color = "none") +
+#   scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+#   theme_minimal() + 
+#   theme(
+#     legend.position = "bottom",
+#     legend.text = element_text(size = 8),# Adjust text size
+#     legend.title = element_text(size = 9),  # Adjust legend title size
+#     plot.title = element_text(size = 10) # Adjust plot title size
+#   ) 
+#  
+# c2_plot_intro_scale_delay 
+
+  
+```
+
+
+```{r}
+#Option B
 #ii) Box plot introduction/scale-up yes no per GNI per capita quartile
 intro_scale_delay<- Ineq_vaccine_coverage %>%
-  select(Country.Name, q_GNI_per_c_WB, diff_min_vac_intro_8Dec2020, diff_intro_F40) %>%
-  filter(!is.na(diff_min_vac_intro_8Dec2020)) %>%
+  mutate(
+    owid_vac_F40 = as.Date(owid_vac_F40)  ) %>% 
+  select(Country.Name, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40) %>%
+  filter(!is.na(min_vac_intro)) %>%
   pivot_longer(
-    cols = c(diff_min_vac_intro_8Dec2020, diff_intro_F40),
-    names_to = "Diff_dates",
+    cols = c(min_vac_intro, owid_vac_F40),
+    names_to = "Date",
     values_to = "Value"
   ) 
 
 # Set factor levels
-intro_scale_delay$Diff_dates = factor(intro_scale_delay$Diff_dates, levels = unique(intro_scale_delay$Diff_dates))
+ intro_scale_delay$Date = factor(intro_scale_delay$Date, levels = unique(intro_scale_delay$Date))
 
 c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
   geom_boxplot(aes(x = Value, y = as.factor(q_GNI_per_c_WB)), outlier.shape = NA) +
@@ -401,11 +543,12 @@ c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
     alpha = 0.5,
     position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
   )+
-  scale_x_continuous(limits = c(0, NA))+
+  scale_x_date(limits = c(as.Date("2020-12-01"), NA),
+               date_labels = "%b/%Y") +
   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  facet_wrap(~Diff_dates, scales = "free_x", labeller = labeller(Diff_dates = c("diff_min_vac_intro_8Dec2020" = "Time to vaccine introduction", "diff_intro_F40" = "Time to vaccine scale-up (40%)")))+
+  facet_wrap(~Date, scales = "free_x", labeller = labeller(Date = c("min_vac_intro" = "Date of vaccine introduction", "owid_vac_F40" = "Date of vaccine scale-up (40%)")), nrow=2)+
   labs(title = "(C)",
-       x = "Number of days", 
+       x = "Date", 
        y = "GNI quartile")  +
   guides(color = "none") +
   scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
@@ -421,6 +564,7 @@ c2_plot_intro_scale_delay
 
   
 ```
+
 
 #1.D vaccine profile
 
@@ -617,9 +761,35 @@ vac_distrib <-owid_vaccine_country_g %>%
 
 ```{r}
 # Figure 1.
-
+#Original
 (map1_a / map1_b) |
   (c1 / c2_plot_intro_scale_delay / d_vac_plat_distrib_plot)
+
+
+# Define areas
+layout <- "
+AAA
+AAA
+AAA
+AAA
+BBB
+BBB
+BBB
+BBB
+CCE
+DDE
+"
+
+# Combine plots into layout
+final_plot <- map1_a + 
+              map1_b + 
+              c1 + 
+              d_vac_plat_distrib_plot + 
+              c2_plot_intro_scale_delay +
+              plot_layout(design = layout)
+
+# Display final plot
+final_plot
 
 ```
 
@@ -1049,5 +1219,56 @@ summary_overall_cov_21_23 <- collated %>%
     tot_dec23 = paste0( median_tot_dec23, "% (", q25_tot_dec23, "%-", q75_tot_dec23, "%)")
   ) %>% 
   select(q_GNI_per_c_WB:n_tot_dec23, hcw_dec21:tot_dec23) 
+```
+
+
+Supplementary scatter plot
+
+```{r}
+
+#Scatter plot + smooth line
+# x= GNI + y = date
+milestone_country <- Ineq_vaccine_coverage %>%
+  select(Country.Name, GNI_per_c_WB, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40, owid_vac_F70) %>%
+  mutate(
+    owid_vac_F40 = as.Date(owid_vac_F40), 
+    owid_vac_F70 = as.Date(owid_vac_F70)
+  ) %>% 
+  pivot_longer(
+    cols = c(min_vac_intro, owid_vac_F40, owid_vac_F70),
+    names_to = "milestone",
+    values_to = "date"
+  )
+
+  
+plot_milestone_country <- ggplot(milestone_country) +
+  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB))) +
+  geom_smooth(aes(
+    x = log(GNI_per_c_WB), y = date),
+    color = "black", 
+    linetype = "dotted", 
+    size = 0.5,     
+    se = TRUE,       
+    alpha = 0.3)+       
+  facet_wrap(~ milestone, 
+             scales = "free", 
+             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)","owid_vac_F70" = "Vaccine scale-up (70%)" ))) + 
+  scale_y_date(
+    limits = c(as.Date("2020-12-01"), NA),
+               date_labels = "%b/%Y") +
+  labs(
+    title = "Vaccine Milestones by GNI per Capita",
+    x = "GNI per capita (log)",
+    y = "Date",
+    color = "GNI quartile"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "bold"),
+    legend.position = "bottom"
+  )
+
+plot_milestone_country
+
 ```
 
