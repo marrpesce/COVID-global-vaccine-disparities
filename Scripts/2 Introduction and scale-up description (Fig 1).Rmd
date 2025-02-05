@@ -1272,3 +1272,25 @@ plot_milestone_country
 
 ```
 
+```{r}
+# Supplementary table Intro+Scale-up
+sup_table_intro_scale_country <- Ineq_vaccine_coverage%>%
+  select(
+    Country.Name, Country.Code, Region, continent, GNI_per_c_WB, 
+    year_GNI, q_GNI_per_c_WB, `Income group`, owid_vac_intro, 
+    who_vac_intro, min_vac_intro, owid_who, owid_vac_F40, 
+    owid_vac_F70, vac_intro_hcw, vac_F40_hcw, vac_F70_hcw, 
+    vac_intro_old, vac_F40_old, vac_F70_old
+  ) %>% 
+  rename(
+    min_vac_intro_owid_or_who = owid_who
+  )
+
+sup_table_plat_country <- Ineq_vaccine_coverage_platform %>% 
+  select(Country.Code, vaccines:source_name, mRNA:Protein) 
+
+sup_table_intro_scale_plat_country<- left_join(sup_table_intro_scale_country, sup_table_plat_country)
+
+write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_intro_scale_plat_plus_priority_groups.csv")
+```
+
