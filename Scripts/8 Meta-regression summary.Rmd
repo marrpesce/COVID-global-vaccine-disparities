@@ -25,12 +25,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(metafor)
-library(dmetar)
 library(forestplot)
 library(patchwork)
-library("scales")
+library(scales)
 
-VEmetareg <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv") %>% 
+VEmetareg0 <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv")
+VEmetareg <- VEmetareg0 %>% 
   filter(include=="yes")
 
 # summarise study counts
@@ -128,7 +128,7 @@ ggplot() +
 # Extended Data Table X
 # A table listing all VE estimates by study would improve reproducibility and indicate which estimates were used or excluded.
 
-metareg_included <- VEmetareg %>% 
+metareg_included <- VEmetareg0 %>% 
   select(
   -dose_number, 
   -GNI_per_c_WB, -year_GNI, -Economy, -Region, -dose_number,
@@ -146,10 +146,11 @@ View_Hub_data <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv")
 
 studies_selected <- left_join(study_number, View_Hub_data)
 
-studies_selected_inf <-left_join(studies_selected, metareg_included)  %>% 
+studies_selected_info <-left_join(studies_selected, metareg_included)  %>% 
   select  ("Study_id_f", "first author", "publication_date", "semester", "study design", "population_category", "historyofCOVID", "country_clean", "Country.Code", "continent", "Income group", "GNI_per_c_WB", "year_GNI", "variant_clean", "clean_vaccine", "vac_type", "dose_number", "timing_of_dose_days","outcome_final", "min_period_days", "max_period_days","min_vac_intro", "owid_vac_F40", "owid_vac_F70", "VE", "LCL", "UCL", "include", "justification", sensitivity:SE.ln.RR
 )
 
+write.csv(studies_selected_info, "Data/Processed/Extended_Data_all_VE_estimates.csv")
 
 ```
 

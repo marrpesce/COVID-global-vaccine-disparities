@@ -387,7 +387,7 @@ map1_b<- ggplot(data = world_ineq_gral) +
                     labels = c("<Jun\n2021", "Jun-Aug\n2021", "Sep-Nov\n2021", "Dec\n2021 +", "not reached"),
                     na.value = "#F0F3F0") +
   labs(
-           title= "Time of vaccine scale-up (40%)",
+           title= "(B)\nTime of vaccine scale-up (40%)",
     fill = "Months") +
   theme_void()+ 
   theme(
@@ -546,8 +546,8 @@ c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
   scale_x_date(limits = c(as.Date("2020-12-01"), NA),
                date_labels = "%b/%Y") +
   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  facet_wrap(~Date, scales = "free_x", labeller = labeller(Date = c("min_vac_intro" = "Date of vaccine introduction", "owid_vac_F40" = "Date of vaccine scale-up (40%)")), nrow=2)+
-  labs(title = "(C)",
+  facet_wrap(~Date, scales = "free_x", labeller = labeller(Date = c("min_vac_intro" = "Date of vaccine introduction", "owid_vac_F40" = "Date of vaccine scale-up (40%)")), nrow=1)+
+  labs(title = "(A)",
        x = "Date", 
        y = "GNI quartile")  +
   guides(color = "none") +
@@ -714,7 +714,7 @@ d_vac_plat_distrib_plot<- ggplot(vac_plat_distrib, aes(x = as.factor(q_GNI_per_c
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip()+
   facet_wrap(~ vac_type, ncol=4) +
-  labs(title = "(D)",
+  labs(title = "(C)",
        x = "",
        y = " % countries using platform (07/01/2024)") +
     guides(fill = "none") +  # Remove the fill legend
@@ -760,36 +760,42 @@ vac_distrib <-owid_vaccine_country_g %>%
 
 
 ```{r}
-# Figure 1.
-#Original
-(map1_a / map1_b) |
-  (c1 / c2_plot_intro_scale_delay / d_vac_plat_distrib_plot)
+# # Figure 1.
+# #Original
+# (map1_a / map1_b) |
+#   (c1 / c2_plot_intro_scale_delay / d_vac_plat_distrib_plot)
+# 
+# 
+# # Define areas
+# layout <- "
+# AAA
+# AAA
+# AAA
+# AAA
+# BBB
+# BBB
+# BBB
+# BBB
+# CCE
+# DDE
+# "
+# 
+# # Combine plots into layout
+# final_plotA <- map1_a + 
+#               map1_b + 
+#               c1 + 
+#               d_vac_plat_distrib_plot + 
+#               c2_plot_intro_scale_delay +
+#               plot_layout(design = layout)
+# 
+# # Display final plot
+# final_plotA
 
+#Option B
+map_2 <-map1_a / map1_b
 
-# Define areas
-layout <- "
-AAA
-AAA
-AAA
-AAA
-BBB
-BBB
-BBB
-BBB
-CCE
-DDE
-"
+Fig_3 <- c2_plot_intro_scale_delay / (c1 |  d_vac_plat_distrib_plot)
 
-# Combine plots into layout
-final_plot <- map1_a + 
-              map1_b + 
-              c1 + 
-              d_vac_plat_distrib_plot + 
-              c2_plot_intro_scale_delay +
-              plot_layout(design = layout)
-
-# Display final plot
-final_plot
 
 ```
 
