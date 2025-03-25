@@ -43,8 +43,8 @@ skip_lines <- 4
 # Read the CSV file, skipping the metadata lines 
 
 #GNI
-GNI_per_c_WB <- read.csv("Data/Input/inequalities databases/GNI per capita (ppp)/GNI_per_c.csv", skip = skip_lines) %>%
-  select(-c(X2020,X2021,X2022)) # remove years post COVID emergence
+GNI_per_c_WB <- read.csv("Data/Input/inequalities databases/WB_GNI_Atlas/API_NY.GNP.PCAP.CD_DS2_en_csv_v2_75655.csv", skip = skip_lines) %>%
+  select(-c(X2020,X2021,X2022, X2023)) # remove years post COVID emergence
 
 #World bank quartiles
 Income_group_WB <- read_excel("Data/Input/inequalities databases/income_group (World Bank).xlsx")
@@ -68,13 +68,12 @@ GNI_per_c_WB_ok = GNI_per_c_WB %>%
 names(GNI_per_c_WB_ok)[2:3] = c("GNI_per_c_WB", "year_GNI")
 
 # List countries without GNI data
-GNI_per_c_WB$Country.Name[!(GNI_per_c_WB$Country.Name) %in% GNI_per_c_WB_ok$Country.Name] #n = 20
+GNI_per_c_WB$Country.Name[!(GNI_per_c_WB$Country.Name) %in% GNI_per_c_WB_ok$Country.Name] #n = 11
 
-#  [1] "Andorra"                   "American Samoa"            "Channel Islands"           "Cuba"                   
-#  [5] "Faroe Islands"             "Gibraltar"                 "Greenland"                 "Guam"                   
-#  [9] "Isle of Man"               "Not classified"            "Liechtenstein"             "St. Martin (French part)"
-# [13] "Monaco"                    "Northern Mariana Islands"  "New Caledonia"             "Korea, Dem. People's Rep."
-# [17] "French Polynesia"          "Syrian Arab Republic"      "British Virgin Islands"    "Virgin Islands (U.S.)" 
+#  [1] "American Samoa"            "Channel Islands"           "Gibraltar"                 "Guam"                      "Not classified"      
+#  [6] "St. Martin (French part)"  "Monaco"                    "Northern Mariana Islands"  "Korea, Dem. People's Rep." "British Virgin Islands" 
+#  [11] "Virgin Islands (U.S.)"    
+
 ```
 
 ```{r FINAL inequalities}
@@ -100,10 +99,11 @@ nrow(merge_ineq) # 217 countries
 
 # Filter countries without GNI data
 merge_ineq <- merge_ineq %>% filter(!is.na(GNI_per_c_WB))
-nrow(merge_ineq) # 198 countries
+nrow(merge_ineq) # 207 countries
 
 #Create quartiles
 merge_ineq <- merge_ineq %>%
+  # excluded Marshall Islands, the Federated States of Micronesia, and Puerto Rico from descriptive analyses as vaccine coverage metrics were not included in WHO or Our World in Data databases despite records of vaccine introductions in the public domain
   filter(Country.Name != "Micronesia, Fed. Sts." & Country.Name != "Marshall Islands" & Country.Name != "Puerto Rico") %>% 
   mutate(
     q_GNI_per_c_WB = ntile(GNI_per_c_WB, 4)
@@ -115,7 +115,7 @@ sum(is.na(merge_ineq$q_GNI_per_c_WB)) # 0
 
 ```{r}
 # Summarise year of GNI data
-table(merge_ineq$year_GNI) # data pre 2019 for 5/195 (3%)
+table(merge_ineq$year_GNI) # data pre 2019 for 7/204 (3%)
 
 # Show countries with pre-2019 data
 subset(merge_ineq, year_GNI!=2019)[,c("Country.Name", "year_GNI")]

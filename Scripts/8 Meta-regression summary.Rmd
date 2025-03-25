@@ -44,22 +44,19 @@ VEmetareg %>% group_by(variant_clean, clean_vaccine, q_GNI_per_c_WB) %>%
 # BNT162b2 delta GNI 2
 # BNT162b2 omicron GNI 3
 # ChAdOx omicron GNI 2/3
-# Ad26 delta GNI 3
 
 # Recode levels
-VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Janssen Ad26.COV2.S"] = "Ad26.COV2.S"
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="BioNTech/Pfizer BNT162b2"] = "BNT162b2"
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Oxford/AstraZeneca ChAdOx1-S"] = "ChAdOx1-S"
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Moderna mRNA-1273"] = "mRNA-1273"
-VEmetareg$clean_vaccine = factor(VEmetareg$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273", "Ad26.COV2.S"))
+VEmetareg$clean_vaccine = factor(VEmetareg$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273"))
 
 metareg_collated <- rbind(
-  read_csv("Data/Processed/meta_summary_Ad26.COV2.S.csv"),
   read_csv("Data/Processed/meta_summary_BNT162b2.csv"),
   read_csv("Data/Processed/meta_summary_ChAdOx1-S.csv"),
   read_csv("Data/Processed/meta_summary_mRNA-1273.csv")
 ) 
-metareg_collated$clean_vaccine = factor(metareg_collated$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273", "Ad26.COV2.S"))
+metareg_collated$clean_vaccine = factor(metareg_collated$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273"))
 
 metareg_collated$`N studies` = ">2"
 metareg_collated$`N studies`[metareg_collated$clean_vaccine == "mRNA-1273" & 
@@ -76,9 +73,7 @@ metareg_collated$`N studies`[metareg_collated$VoI == "omicron" &
                           metareg_collated$clean_vaccine == "ChAdOx1-S" & 
                           metareg_collated$GNI %in% c(2,3)] = "1-2"
 
-metareg_collated$`N studies`[metareg_collated$VoI == "delta" & 
-                          metareg_collated$clean_vaccine == "Ad26.COV2.S" & 
-                          metareg_collated$GNI %in% c(3)] = "1-2"
+
 ## set variant levels
 metareg_collated$VoI = factor(metareg_collated$VoI, levels=c("omicron", "delta"))
 VEmetareg$variant_clean = factor(VEmetareg$variant_clean, levels=c("omicron", "delta"))

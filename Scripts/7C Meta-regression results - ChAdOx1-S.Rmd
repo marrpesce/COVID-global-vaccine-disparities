@@ -14,17 +14,15 @@ editor_options:
 - Meta-regression model results and plots for selected vaccine
 
 
-#Janssen
+#Oxford/AstraZeneca ChAdOx1-S
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 # select vaccine
-selected_vaccine = "Oxford/AstraZeneca ChAdOx1-S" # values: "BioNTech/Pfizer BNT162b2" "Janssen Ad26.COV2.S" "Oxford/AstraZeneca ChAdOx1-S" "Moderna mRNA-1273"
+selected_vaccine = "Oxford/AstraZeneca ChAdOx1-S" # values: "BioNTech/Pfizer BNT162b2" "Oxford/AstraZeneca ChAdOx1-S" "Moderna mRNA-1273"
 simple_name = "ChAdOx1-S" # for file outputs 
 
-# create logical for whether to run omicron analysis
-if (selected_vaccine == "Janssen Ad26.COV2.S") { janssen=TRUE } else { janssen=FALSE}
 ```
 
 
@@ -93,7 +91,7 @@ delta_severe <- VEmetareg_data_clean %>%
   mutate(
     subgroup = as.factor(1:nrow(.)),
     Study_id_f = as.factor(Study_id_f),
-    q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels=c("4", "3", "2")),
+    q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels=c("4", "3", "2", "1")),
   )
 
 
@@ -104,7 +102,6 @@ delta_severe <- VEmetareg_data_clean %>%
 
 
 ```{r}
-if (!janssen) {
 #Filter:omicron, severe 
 
 omicron_severe <- VEmetareg_data_clean %>%
@@ -112,11 +109,10 @@ omicron_severe <- VEmetareg_data_clean %>%
   mutate(
     subgroup = as.factor(1:nrow(.)),
     Study_id_f = as.factor(Study_id_f),
-    q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels=c("4", "3", "2")),
+    q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels=c("4", "3", "2", "1")),
     country_clean =as.factor(country_clean)
   )
 
-}
 ```
 
 
@@ -148,6 +144,7 @@ pred.delta_severe.GNI <-  distinct(pred.delta_severe.GNI)
 pred.delta_severe.GNI$GNI = 4
 pred.delta_severe.GNI$GNI[pred.delta_severe.GNI$X.q_GNI_per_c_WB3==1] = 3
 pred.delta_severe.GNI$GNI[pred.delta_severe.GNI$X.q_GNI_per_c_WB2==1] = 2
+pred.delta_severe.GNI$GNI[pred.delta_severe.GNI$X.q_GNI_per_c_WB1==1] = 1
 pred.delta_severe.GNI$VoI <- rep("delta", nrow(pred.delta_severe.GNI))
 # pred.delta_severe.GNI$subgroup <- 
 # pred.delta_severe.GNI$country <- 
@@ -189,30 +186,37 @@ Sum_delta_severe.GNI <- cbind.data.frame(pred.delta_severe.GNI, I_o_p_delta_seve
          ) 
 Sum_delta_severe.GNI # order is GNI2 - row 1, GNI 3 - row 2, GNI 4 - row 1
 
+# summary metrics for GNI quartile 1
+delta_rr_GNI_1 = Sum_delta_severe.GNI$pred[3]
+delta_lci_GNI_1 = Sum_delta_severe.GNI$ci.lb[3]
+delta_uci_GNI_1 = Sum_delta_severe.GNI$ci.ub[3]
+delta_RR_summary_GNI_1 = Sum_delta_severe.GNI$RR_summary[3]
+
 # summary metrics for GNI quartile 2
-delta_rr_GNI_2 = Sum_delta_severe.GNI$pred[3]
-delta_lci_GNI_2 = Sum_delta_severe.GNI$ci.lb[3]
-delta_uci_GNI_2 = Sum_delta_severe.GNI$ci.ub[3]
-delta_RR_summary_GNI_2 = Sum_delta_severe.GNI$RR_summary[3]
+delta_rr_GNI_2 = Sum_delta_severe.GNI$pred[4]
+delta_lci_GNI_2 = Sum_delta_severe.GNI$ci.lb[4]
+delta_uci_GNI_2 = Sum_delta_severe.GNI$ci.ub[4]
+delta_RR_summary_GNI_2 = Sum_delta_severe.GNI$RR_summary[4]
 
 # summary metrics for GNI quartile 3
-delta_rr_GNI_3 = Sum_delta_severe.GNI$pred[2]
-delta_lci_GNI_3 = Sum_delta_severe.GNI$ci.lb[2]
-delta_uci_GNI_3 = Sum_delta_severe.GNI$ci.ub[2]
-delta_RR_summary_GNI_3 = Sum_delta_severe.GNI$RR_summary[2]
+delta_rr_GNI_3 = Sum_delta_severe.GNI$pred[1]
+delta_lci_GNI_3 = Sum_delta_severe.GNI$ci.lb[1]
+delta_uci_GNI_3 = Sum_delta_severe.GNI$ci.ub[1]
+delta_RR_summary_GNI_3 = Sum_delta_severe.GNI$RR_summary[1]
 
 # summary metrics for GNI quartile 4
-delta_rr_GNI_4 = Sum_delta_severe.GNI$pred[1]
-delta_lci_GNI_4 = Sum_delta_severe.GNI$ci.lb[1]
-delta_uci_GNI_4 = Sum_delta_severe.GNI$ci.ub[1]
-delta_RR_summary_GNI_4 = Sum_delta_severe.GNI$RR_summary[1]
+delta_rr_GNI_4 = Sum_delta_severe.GNI$pred[2]
+delta_lci_GNI_4 = Sum_delta_severe.GNI$ci.lb[2]
+delta_uci_GNI_4 = Sum_delta_severe.GNI$ci.ub[2]
+delta_RR_summary_GNI_4 = Sum_delta_severe.GNI$RR_summary[2]
+
+
 ```
 
 
 
 
 ```{r}
-if (!janssen) {
 ### MODEL omicron_severe: GNI
 omicron_severe.GNI <-
   rma.mv(
@@ -290,18 +294,14 @@ omicron_rr_GNI_4 = Sum_omicron_severe.GNI$pred[2]
 omicron_lci_GNI_4 = Sum_omicron_severe.GNI$ci.lb[2]
 omicron_uci_GNI_4 = Sum_omicron_severe.GNI$ci.ub[2]
 omicron_RR_summary_GNI_4 = Sum_omicron_severe.GNI$RR_summary[2]
-}
+
 ```
 
 ```{r}
 #Table severe (Omicron + Delta)
 
 #Data meta GNI
-if (!janssen) {
-  meta_GNI <- rbind(Sum_omicron_severe.GNI, Sum_delta_severe.GNI )
-} else {
-  meta_GNI <- Sum_delta_severe.GNI
-}
+meta_GNI <- rbind(Sum_omicron_severe.GNI, Sum_delta_severe.GNI )
 
 meta_GNI$vaccine = selected_vaccine
 meta_GNI$clean_vaccine = simple_name
@@ -356,10 +356,6 @@ RRs = c("RR (95% CI)",NA,
         delta_gni_4$RR_full,delta_RR_summary_GNI_4)
 tabletext = cbind(titles, country, population, follow_up, RRs)
 
-# exclude GNI quartile rows for janssen analsys
-if (janssen) {
-  tabletext = tabletext[-c(2,3,4),]
-}
 
 # list RRs
 m = c(NA,NA,
@@ -375,17 +371,7 @@ u = c(NA,NA,
       delta_gni_3$RR.UCL,delta_uci_GNI_3,NA,NA,
       delta_gni_4$RR.UCL,delta_uci_GNI_4)
 
-if (janssen) {
-m = c(NA,NA,
-      delta_gni_3$RR,delta_rr_GNI_3,NA,NA,
-      delta_gni_4$RR,delta_rr_GNI_4)
-l = c(NA,NA,
-      delta_gni_3$RR.LCL,delta_lci_GNI_3,NA,NA,
-      delta_gni_4$RR.LCL,delta_lci_GNI_4)
-u = c(NA,NA,
-      delta_gni_3$RR.UCL,delta_uci_GNI_3,NA,NA,
-      delta_gni_4$RR.UCL,delta_uci_GNI_4)
-}
+
 
 # truncate variables for plotting
 m[m<0.01] = 0.01
@@ -401,7 +387,7 @@ forestplot(tabletext,m,l,u,
                       tabletext[3:nrow(tabletext),1]=="GNI quartile 4")),
     zero=NA,
     xlog=TRUE,
-    xticks=log(c(0.01,0.1,0.2,0.5,1)),
+    xticks=c(0.01,0.1,0.2,0.5,1),
     colgap=unit(5,"mm"),
     txt_gp = fpTxtGp(ticks = gpar(cex=1), xlab = gpar(cex=1)),
     xlab="RR"
@@ -411,7 +397,6 @@ forestplot(tabletext,m,l,u,
 
 #### Omicron
 ```{r}
-if (!janssen) {
 # Code country as character
 omicron_severe$country_clean = as.character(omicron_severe$country_clean)
 
@@ -484,11 +469,11 @@ forestplot(tabletext,m,l,u,
                       tabletext[3:nrow(tabletext),1]=="GNI quartile 4")),
     zero=NA,
     xlog=TRUE,
-    xticks=log(c(0.01,0.1,0.2,0.5,1)),
+    xticks=c(0.01,0.1,0.2,0.5,1),
     colgap=unit(5,"mm"),
     txt_gp = fpTxtGp(ticks = gpar(cex=1), xlab = gpar(cex=1)),
     xlab="RR"
     )
-}
+
 ```
 
