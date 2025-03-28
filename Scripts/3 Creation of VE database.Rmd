@@ -34,12 +34,11 @@ library(tidyverse)
 library(lubridate)
 ```
 
+
 ```{r,import database}
 #Vaccine Effectiveness Weekly studies database (11-01-2024)
 
 COVID19VE <- read.xlsx("Data/Input/meta_effect/WeeklySummary_COVID19_VE_Studies_20240111_0.xlsx",sheetName = "Primary Series Studies", check.names=FALSE) 
-
-
 
 # Update non-standard strings to avoid later issues
 COVID19VE$timing_of_dose_days = str_replace_all(COVID19VE$timing_of_dose_days, "≤", ">=")
@@ -117,8 +116,8 @@ length(unique(COVID19VE_country$Study_id_f)) #425 unique studies
 # Filter studies without income data
 COVID19VE_country[!(COVID19VE_country$iso3c %in% Ineq_merged$iso3c),] # 3 studies - 1 from Cuba (Más-Bermejo), 1 from Taiwan (Huang) and 1 from Puerto Rico (Irizarry)
 COVID19VE_country <- COVID19VE_country %>% filter(iso3c %in% Ineq_merged$iso3c)
-nrow(COVID19VE_country) #3597 estimates
-length(unique(COVID19VE_country$Study_id_f)) #422 unique studies
+nrow(COVID19VE_country) #3599 estimates
+length(unique(COVID19VE_country$Study_id_f)) #423 unique studies
 ```
 
 
@@ -217,8 +216,8 @@ all(clean_variants$variant_context %in% COVID19VE_ineq_merged$variant_context)
 COVID19VE_ineq_merged <- COVID19VE_ineq_merged %>% left_join(clean_variants, by=c("variant_context"))
 
 # Summarise
-nrow(COVID19VE_ineq_merged) #3597 estimates
-length(unique(COVID19VE_ineq_merged$Study_id_f)) #422 unique studies
+nrow(COVID19VE_ineq_merged) #3599 estimates
+length(unique(COVID19VE_ineq_merged$Study_id_f)) #423 unique studies
 ```
 
 ```{r}

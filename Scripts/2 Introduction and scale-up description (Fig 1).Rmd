@@ -77,9 +77,7 @@ owid_vaccine_plat <- read_csv("Data/Input/Vaccine_data/owid_vaccine_plat.csv") %
 ```
 
 
-#Figure 1.
-
-## Maps
+#Data transformation for descriptive analysis
 
 
 ```{r}
@@ -131,88 +129,57 @@ Ineq_vaccine_coverage <- Ineq_merged %>%
 
 table(Ineq_vaccine_coverage$owid_who)
 
-#median dates to built groups
-summary_vacc_intro_scale <- Ineq_vaccine_coverage %>%
-  group_by(q_GNI_per_c_WB) %>%
-  summarize(
-    n = length(q_GNI_per_c_WB),
-    n_intro = sum(!is.na(min_vac_intro)),
-    median_value_1 = round(median(diff_min_vac_intro_8Dec2020, na.rm=TRUE),0),
-    q25_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.25, na.rm=TRUE),0),
-    q75_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.75, na.rm=TRUE),0),
-    median_value_40 = round(median(diff_intro_F40, na.rm=TRUE),0),
-    q25_40 = round(quantile(diff_intro_F40, 0.25, na.rm=TRUE),0),
-    q75_40 = round(quantile(diff_intro_F40, 0.75, na.rm=TRUE),0),
-    median_value_70 = round(median(diff_intro_F70, na.rm=TRUE),0),
-    q25_70 = round(quantile(diff_intro_F70, 0.25, na.rm=TRUE),0),
-    q75_70 = round(quantile(diff_intro_F70, 0.75, na.rm=TRUE),0)
-  ) %>% 
-  mutate(
-    introduction = paste0( median_value_1, " (", q25_1, "-", q75_1, ")"),
-    scale_40 = paste0( median_value_40, " (", q25_40, "-", q75_40, ")"),
-    scale_70 = paste0( median_value_70, " (", q25_70, "-", q75_70, ")")
-  ) %>% 
-  select(q_GNI_per_c_WB, n, n_intro, introduction, scale_40, scale_70)
-summary_vacc_intro_scale
-
-#First vaccine introduction after 08-12-2020 by quartile
-
-min_intro <- Ineq_vaccine_coverage %>%
-  group_by(q_GNI_per_c_WB) %>%
-  summarize(
-min_vac_intro=min(as.Date(min_vac_intro)[!is.na(min_vac_intro) & as.Date(min_vac_intro) > as.Date("2020-12-07")])
-  )
-
-min_intro <- left_join(min_intro, Ineq_vaccine_coverage) %>% 
-  select(1:3)
-
-min_intro
-
-
-
-#median dates to built groups
-summary_vacc_dates <- Ineq_vaccine_coverage %>%
-  # mutate(
-  #   min_vac_intro_month = floor_date(as.Date(min_vac_intro), "month"),
-  #   vac_F40_month = floor_date(as.Date(owid_vac_F40), "month"),
-  #   vac_F70_month = floor_date(as.Date(owid_vac_F70), "month")
-  # ) %>%
-  group_by(q_GNI_per_c_WB) %>%
-  summarize(
-    n = length(q_GNI_per_c_WB),
-    n_intro = sum(!is.na(min_vac_intro)),
-    median_value_1 = as.Date(median(as.numeric(min_vac_intro), na.rm = TRUE), origin = "1970-01-01"),
-    q25_1 = as.Date(quantile(as.numeric(min_vac_intro), 0.25, na.rm = TRUE), origin = "1970-01-01"),
-    q75_1 = as.Date(quantile(as.numeric(min_vac_intro), 0.75, na.rm = TRUE), origin = "1970-01-01"),
-    median_value_40 = as.Date(median(as.numeric(as.Date(owid_vac_F40)), na.rm = TRUE), origin = "1970-01-01"),
-    q25_40 = as.Date(quantile(as.numeric(as.Date(owid_vac_F40)), 0.25, na.rm = TRUE), origin = "1970-01-01"),
-    q75_40 = as.Date(quantile(as.numeric(as.Date(owid_vac_F40)), 0.75, na.rm = TRUE), origin = "1970-01-01"),
-    median_value_70 = as.Date(median(as.numeric(as.Date(owid_vac_F70)), na.rm = TRUE), origin = "1970-01-01"),
-    q25_70 = as.Date(quantile(as.numeric(as.Date(owid_vac_F70)), 0.25, na.rm = TRUE), origin = "1970-01-01"),
-    q75_70 = as.Date(quantile(as.numeric(as.Date(owid_vac_F70)), 0.75, na.rm = TRUE), origin = "1970-01-01")
-  ) %>% 
-  mutate(
-    introduction = paste0( median_value_1, " (", q25_1, "-", q75_1, ")"),
-    scale_40 = paste0( median_value_40, " (", q25_40, "-", q75_40, ")"),
-    scale_70 = paste0( median_value_70, " (", q25_70, "-", q75_70, ")")
-  ) %>% 
-  select(q_GNI_per_c_WB, introduction, scale_40, scale_70) 
-
-
 ```
 
 
+# First vaccine introduction after 08-12-2020 by quartile
+####!!!!!! Should we delete this? !!!!!!#####
+
+# ```{r}
+# #First vaccine introduction after 08-12-2020 by quartile
+# 
+# min_intro <- Ineq_vaccine_coverage %>%
+#   group_by(q_GNI_per_c_WB) %>%
+#   summarize(
+# min_vac_intro=min(as.Date(min_vac_intro)[!is.na(min_vac_intro) & as.Date(min_vac_intro) > as.Date("2020-12-07")])
+#   )
+# 
+# min_intro <- left_join(min_intro, Ineq_vaccine_coverage) %>% 
+#   select(1:3)
+# 
+# min_intro
+# 
+# ```
+
+#################################################################################
+#Fig. 1. Global inequities in COVID-19 vaccine introduction and scale-up maps####
+#################################################################################
 
 
+# Data for Introduction and scale-up map
 ```{r}
 #Create groups 
 Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>% 
   mutate(
+            V1_date_group=  case_when(
+      min_vac_intro < dmy("01-01-2021")  ~ "before jan/2021",
+      min_vac_intro >= dmy("01-01-2021") & min_vac_intro < dmy("01-02-2021") ~ "jan/2021",
+      min_vac_intro >= dmy("01-02-2021") & min_vac_intro < dmy("01-03-2021") ~ "feb/2021",
+      min_vac_intro >= dmy("01-03-2021") ~ "march/2021 +",
+      TRUE ~ "not reached"
+  ),
             V1_group= case_when(
       diff_min_vac_intro_8Dec2020 < 30  ~ "<30",
       diff_min_vac_intro_8Dec2020 > 29 & diff_min_vac_intro_8Dec2020 < 60 ~ "30-59",
       diff_min_vac_intro_8Dec2020 > 59 & diff_min_vac_intro_8Dec2020 < 90 ~ "60-89",
       diff_min_vac_intro_8Dec2020 > 89 ~ "90+",
+      TRUE ~ "not reached"
+  ),
+            V40_date_group=  case_when(
+      owid_vac_F40 < dmy("01-06-2021")  ~ "before Jun/2021",
+      owid_vac_F40 >= dmy("01-06-2021") & owid_vac_F40 < dmy("01-09-2021") ~ "Jun-Aug/2021",
+      owid_vac_F40 >= dmy("01-09-2021") & owid_vac_F40 < dmy("01-12-2021") ~ "Sep-Nov/2021",
+      owid_vac_F40 >= dmy("01-12-2021") ~ "Dec/2021 +",
       TRUE ~ "not reached"
   ),
             V40_group= case_when(
@@ -265,18 +232,18 @@ world_ineq_gral <- st_as_sf(world_ineq_gral)
 ```
 
 
-
 ```{r}
-#Map A.i: vaccine introduction
+#Map A: vaccine introduction dates
 
 map1_a<- ggplot(data = world_ineq_gral) +
-  geom_sf(aes(fill = as.factor(V1_group)), position = "identity") + 
-  scale_fill_manual(values = c("#2e73b8","#75b2d8","#9dd5ea", "#d7e0f4","#DDDDDD"),
-                    labels = c("<30", "30-59", "60-89", "90+", "not reached"),
-                    breaks = c("<30", "30-59", "60-89", "90+", "not reached")) +
+  geom_sf(aes(fill = as.factor(V1_date_group)), position = "identity") + 
+  scale_fill_manual(values = c("#2e73b8","#75b2d8","#9dd5ea", "#d7e0f4","#A2B1A4"),
+                    labels = c("< jan\n2021", "jan\n2021", "feb\n2021", "march\n2021 +", "not\nreached"),
+                    breaks = c("before jan/2021", "jan/2021", "feb/2021", "march/2021 +", "not reached"),
+                    na.value = "#F0F3F0") +
   labs(
-    title= "(A)\nTime to vaccine introduction",
-    fill = "Time since\n08 Dec 2020\n    (days)") +
+    title= "(A)\nVaccine introduction date",
+    fill = "Introduction\nmonth") +
   theme_void()+
   guides(color = guide_legend(title.position = "bottom", nrow = 1))+
   theme(
@@ -288,15 +255,16 @@ map1_a<- ggplot(data = world_ineq_gral) +
 
 map1_a
 
-#Map A.ii: scale-up 
+#Map 1.B: scale-up dates
 map1_b<- ggplot(data = world_ineq_gral) +
-  geom_sf(aes(fill = as.factor(V40_group)), position = "identity") + 
-  scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#DDDDDD"),
-                    breaks = c("<180", "180-269", "270-359", "360+", "not reached"),
-                    labels = c("<180", "180-269", "270-359", "360+", "not reached")) +
+  geom_sf(aes(fill = as.factor(V40_date_group)), position = "identity") + 
+  scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#A2B1A4"),
+                    breaks = c("before Jun/2021", "Jun-Aug/2021", "Sep-Nov/2021", "Dec/2021 +", "not reached"),
+                    labels = c("<Jun\n2021", "Jun-Aug\n2021", "Sep-Nov\n2021", "Dec\n2021 +", "not reached"),
+                    na.value = "#F0F3F0") +
   labs(
-           title= "Time to vaccine scale-up (40%)",
-    fill = "Time since\nintroduction\n      (days)") +
+           title= "(B)\nTime of vaccine scale-up (40%)",
+    fill = "Months") +
   theme_void()+ 
   theme(
     legend.position = "bottom",
@@ -309,15 +277,25 @@ map1_b
 
 ```
 
-
-
-
-# C: barplot and boxplots
-
 ```{r}
-#ii) Bar plot introduction/scale-up yes no per GNI per capita quartile
+#Fig 1: composition
+Fig_1 <-map1_a / map1_b
 
-milestone_achieved <- Ineq_vaccine_coverage %>% 
+Fig_1
+```
+
+
+
+
+########################################################################################
+#### Fig 2. Global inequities in COVID-19 vaccine introduction and scale-up charts.#####
+########################################################################################
+
+## Fig 2.a:  Percentage of countries achieving vaccine introduction (left) and scale-up to 40% primary series coverage by 31 December 2021 (right) by GNIpc
+```{r}
+#Fig 2.a:  Percentage of countries achieving vaccine introduction (left) and scale-up to 40% primary series coverage by 31 December 2021 (right) by GNIpc
+
+summary_milestone_achieved <- Ineq_vaccine_coverage %>% 
   group_by(q_GNI_per_c_WB) %>% 
   summarise(
     V1 = sum(V1_dummy == "yes"),
@@ -335,21 +313,19 @@ milestone_achieved <- Ineq_vaccine_coverage %>%
     V70_per_nd = round(sum(V70_dummy_no_date == "yes") / V1_nd * 100, 1),
   )
 
-milestone_achieved
+summary_milestone_achieved
 
-milestone_achieved <- milestone_achieved %>% 
+summary_milestone_achieved_l <- summary_milestone_achieved %>% 
     pivot_longer(
     cols = c(V1_per, V40_per),
     names_to = "milestone",
     values_to = "Value"
   )
 
-milestone_achieved
+summary_milestone_achieved_l
 
-```
-
-```{r}
-c1<- ggplot(milestone_achieved, aes(x = as.factor(q_GNI_per_c_WB), y = Value, fill = as.factor(q_GNI_per_c_WB))) +
+# Plot
+Fig_2_a_vac_achiev <- ggplot(summary_milestone_achieved_l, aes(x = as.factor(q_GNI_per_c_WB), y = Value, fill = as.factor(q_GNI_per_c_WB))) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
   coord_flip()+
@@ -368,28 +344,34 @@ c1<- ggplot(milestone_achieved, aes(x = as.factor(q_GNI_per_c_WB), y = Value, fi
     plot.title = element_text(size = 10) # Adjust plot title size
   ) 
 
-c1
+Fig_2_a_vac_achiev
 
 
 
 ```
 
+## Fig 2.b:  Time to vaccine introduction (left) and scale-up (right) by GNIpc
 
 ```{r}
-#ii) Box plot introduction/scale-up yes no per GNI per capita quartile
+#Fig 2.b:  Time to vaccine introduction (left) and scale-up (right) by GNIpc
+
+#Data for plot
 intro_scale_delay<- Ineq_vaccine_coverage %>%
-  select(Country.Name, q_GNI_per_c_WB, diff_min_vac_intro_8Dec2020, diff_intro_F40) %>%
-  filter(!is.na(diff_min_vac_intro_8Dec2020)) %>%
+  mutate(
+    owid_vac_F40 = as.Date(owid_vac_F40)  ) %>% 
+  select(Country.Name, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40) %>%
+  filter(!is.na(min_vac_intro)) %>%
   pivot_longer(
-    cols = c(diff_min_vac_intro_8Dec2020, diff_intro_F40),
-    names_to = "Diff_dates",
+    cols = c(min_vac_intro, owid_vac_F40),
+    names_to = "Date",
     values_to = "Value"
   ) 
 
 # Set factor levels
-intro_scale_delay$Diff_dates = factor(intro_scale_delay$Diff_dates, levels = unique(intro_scale_delay$Diff_dates))
+ intro_scale_delay$Date = factor(intro_scale_delay$Date, levels = unique(intro_scale_delay$Date))
 
-c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
+#Plot
+Fig_2_b_vac_delay <- ggplot(intro_scale_delay) +
   geom_boxplot(aes(x = Value, y = as.factor(q_GNI_per_c_WB)), outlier.shape = NA) +
    geom_point(
     aes(
@@ -401,11 +383,12 @@ c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
     alpha = 0.5,
     position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
   )+
-  scale_x_continuous(limits = c(0, NA))+
+  scale_x_date(limits = c(as.Date("2020-12-01"), NA),
+               date_labels = "%b/%Y") +
   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  facet_wrap(~Diff_dates, scales = "free_x", labeller = labeller(Diff_dates = c("diff_min_vac_intro_8Dec2020" = "Time to vaccine introduction", "diff_intro_F40" = "Time to vaccine scale-up (40%)")))+
-  labs(title = "(C)",
-       x = "Number of days", 
+  facet_wrap(~Date, scales = "free_x", labeller = labeller(Date = c("min_vac_intro" = "Date of vaccine introduction", "owid_vac_F40" = "Date of vaccine scale-up (40%)")), nrow=1)+
+  labs(title = "(A)",
+       x = "Date", 
        y = "GNI quartile")  +
   guides(color = "none") +
   scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
@@ -417,23 +400,29 @@ c2_plot_intro_scale_delay <- ggplot(intro_scale_delay) +
     plot.title = element_text(size = 10) # Adjust plot title size
   ) 
  
-c2_plot_intro_scale_delay 
+Fig_2_b_vac_delay 
 
   
 ```
 
-#1.D vaccine profile
+#Remove??
 
-#Panel 1.B 
-Countries vaccine distribution and amount of papers produced by type and income quartile. 
+#```{r}
+# 
+# # List any countries not represented in OWID dataset
+# Ineq_vaccine_coverage[!(Ineq_vaccine_coverage$iso3c %in% owid_covid_data$iso_code),]
+# # Kosovo - GNI quartile 2 - is not represented in OWID database
+# # 197 other countries in Ineq_vaccine_coverage are included in owid_covid_data (although not all have recorded vaccinations)
+# 
+# ```
+
+
+## 2.c Percentage of countries using different vaccine platforms by GNIpc 
 
 ```{r owid vacc plat}
-#Data wrangling
+## 2.c Percentage of countries using different vaccine platforms by GNIpc
 
-# List any countries not represented in OWID dataset
-Ineq_vaccine_coverage[!(Ineq_vaccine_coverage$iso3c %in% owid_covid_data$iso_code),]
-# Kosovo - GNI quartile 2 - is not represented in OWID database
-# 197 other countries in Ineq_vaccine_coverage are included in owid_covid_data (although not all have recorded vaccinations)
+#Data preparation
 
 # List vaccines 
 unique(unlist(strsplit(paste(owid_vaccine_plat$vaccines, collapse = ', '), ", ")))
@@ -508,31 +497,8 @@ owid_vaccine_country_g <- Ineq_vaccine_coverage_platform %>%
 
 unique(owid_vaccine_country_g$vaccine)
 
-#Global vaccine platform %
-global_vac_plat_distrib <-owid_vaccine_country_g %>% 
-  select(
-    Country.Code, q_GNI_per_c_WB, vac_type
-  ) %>% 
-  distinct() %>% 
-  filter(
-    !is.na(q_GNI_per_c_WB)
-  ) %>%  
-  group_by(vac_type) %>% 
-  summarise(total=n()) %>% 
-  filter(
-    vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored" |vac_type=="Protein"
-  ) %>% 
-  mutate(
-    vac_type_per = round(total / 194 * 100, 1),
-    ) 
-
-global_vac_plat_distrib
-
-
-
-
 #Vaccine platform by GNI quartile
-vac_plat_distrib <-owid_vaccine_country_g %>% 
+summary_vac_plat_distrib_GNI <-owid_vaccine_country_g %>% 
   select(
     Country.Code, q_GNI_per_c_WB, vac_type
   ) %>% 
@@ -547,30 +513,26 @@ vac_plat_distrib <-owid_vaccine_country_g %>%
   ) %>% 
   mutate(
     countries_quartile=case_when(
-      q_GNI_per_c_WB == 1 ~ 48,
-      q_GNI_per_c_WB == 2 ~ 49,
-      q_GNI_per_c_WB == 3 ~ 49,
-      q_GNI_per_c_WB == 4 ~ 48
+      q_GNI_per_c_WB == 1 ~ 50,
+      q_GNI_per_c_WB == 2 ~ 51,
+      q_GNI_per_c_WB == 3 ~ 51,
+      q_GNI_per_c_WB == 4 ~ 51
     )
   ) %>% 
   mutate(
     vac_type_per = round(total / countries_quartile * 100, 1),
     ) 
 
-vac_plat_distrib
+summary_vac_plat_distrib_GNI
 
+summary_vac_plat_distrib_GNI$vac_type <- factor(summary_vac_plat_distrib_GNI$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Protein"))
 
-```
-
-```{r}
-vac_plat_distrib$vac_type <- factor(vac_plat_distrib$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Protein"))
-
-
-d_vac_plat_distrib_plot<- ggplot(vac_plat_distrib, aes(x = as.factor(q_GNI_per_c_WB), y = vac_type_per, fill = as.factor(q_GNI_per_c_WB))) +
+# Plot
+Fig_2_c_plat <- ggplot(summary_vac_plat_distrib_GNI, aes(x = as.factor(q_GNI_per_c_WB), y = vac_type_per, fill = as.factor(q_GNI_per_c_WB))) +
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip()+
   facet_wrap(~ vac_type, ncol=4) +
-  labs(title = "(D)",
+  labs(title = "(C)",
        x = "",
        y = " % countries using platform (07/01/2024)") +
     guides(fill = "none") +  # Remove the fill legend
@@ -583,140 +545,57 @@ d_vac_plat_distrib_plot<- ggplot(vac_plat_distrib, aes(x = as.factor(q_GNI_per_c
     legend.title = element_text(size = 9),  # Adjust legend title size
     plot.title = element_text(size = 10) 
   )
-d_vac_plat_distrib_plot
+
+Fig_2_c_plat
 
 ```
 
+## Fig 2 composition
 
 ```{r}
-vac_distrib <-owid_vaccine_country_g %>% 
+#Plot 2 comp
+
+Fig_2 <- Fig_2_a_vac_achiev / Fig_2_b_vac_delay / Fig_2_c_plat
+
+Fig_2
+```
+
+
+############################
+#Global vaccine platform  #
+###########################
+
+```{r}
+#Global vaccine platform %
+summary_perc_by_plat <-owid_vaccine_country_g %>% 
   select(
-    Country.Code, q_GNI_per_c_WB, vaccine
+    Country.Code, q_GNI_per_c_WB, vac_type
   ) %>% 
-  group_by(vaccine) %>% 
-  mutate(tot_vac = n()) %>% 
   distinct() %>% 
   filter(
     !is.na(q_GNI_per_c_WB)
   ) %>%  
-  group_by(q_GNI_per_c_WB, vaccine, tot_vac) %>% 
-  summarise(total_GNI=n())%>% 
-  mutate(
-    countries_quartile=case_when(
-      q_GNI_per_c_WB == 1 ~ 48,
-      q_GNI_per_c_WB == 2 ~ 49,
-      q_GNI_per_c_WB == 3 ~ 49,
-      q_GNI_per_c_WB == 4 ~ 48
-    )
-  ) %>% 
-  mutate(
-    vac_per = round(total_GNI / countries_quartile * 100, 1),
-    ) 
-```
-
-
-```{r}
-# Figure 1.
-
-(map1_a / map1_b) |
-  (c1 / c2_plot_intro_scale_delay / d_vac_plat_distrib_plot)
-
-```
-
-
-
-
-```{r Supplementary Figure 2}
-# Supplementary Figure 2. Percentage of countries using different vaccine platforms  by GNI quartile
-
-vac_name_distrib <-owid_vaccine_country_g %>% 
-  select(
-    Country.Code, q_GNI_per_c_WB, vac_type, vaccine
-  ) %>% 
-  distinct() %>% 
-  filter(
-    !is.na(q_GNI_per_c_WB)
-  ) %>% 
-  group_by(q_GNI_per_c_WB, vaccine, vac_type) %>% 
+  group_by(vac_type) %>% 
   summarise(total=n()) %>% 
-  # filter(
-  #   vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored"
-  # ) %>%
-  mutate(
-    countries_quartile=case_when(
-      q_GNI_per_c_WB == 1 ~ 48,
-      q_GNI_per_c_WB == 2 ~ 49,
-      q_GNI_per_c_WB == 3 ~ 49,
-      q_GNI_per_c_WB == 4 ~ 48
-    )
+  filter(
+    vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored" |vac_type=="Protein"
   ) %>% 
   mutate(
-    vac_name_per = round(total / countries_quartile * 100, 1),
+    vac_type_per = round(total / 203 * 100, 1),
     ) 
 
-vac_name_distrib
-
-#Plot
-vac_name_distrib$vac_type <- factor(vac_name_distrib$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Protein"))
-
-
-vac_name_distrib <- vac_name_distrib %>%
-  arrange(vac_type, -vac_name_per) %>%
-  mutate(order_variable = row_number()) %>%
-  ungroup()
-
-# set vaccine factor order
-vac_name_distrib$vaccine = factor(vac_name_distrib$vaccine, levels = unique(vac_name_distrib$vaccine))
-
-s2_vac_name_distrib_plot<- ggplot(vac_name_distrib, aes(x = as.factor(q_GNI_per_c_WB), y = vac_name_per, fill = as.factor(vac_type))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  coord_flip()+
-  facet_wrap(~vaccine,ncol = 5 ) +
-  labs(title = "",
-       x = "GNI quartile",
-       y = " % countries using vaccine",
-       fill = "Vaccine Type") +
-  scale_fill_manual(values = c("#EECC66", "#EE99AA", "#6699CC", "#009999"),
-    labels = c("mRNA","Vectored", "Inactivated", "Protein")) +
-  theme_minimal() +
-  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 8),  # Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10) 
-  )
-  
-s2_vac_name_distrib_plot
-```
-
-
-
-```{r}
-#Possible supplementary figure
-
-map_GNI_q <- ggplot(data = world_ineq_gral) +
-  geom_sf(aes(fill = as.factor(q_GNI_per_c_WB)), position = "identity") + 
-  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
-                    labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)","no data\navailable")) +
-  labs(
-    fill = "GNI per capita quartile") +
-  theme_void()+
-  guides(color = guide_legend(title.position = "bottom", nrow = 1))+
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 9),  # Adjust text size
-    legend.title = element_text(size = 8),  # Adjust legend title size
-    plot.title = element_text(size = 10) 
-  )
-
-map_GNI_q
+summary_perc_by_plat
 
 
 ```
 
 
-##Fig 2 on the ‘Coverage over time in high-priority groups’?
+
+
+#######################################################################################################
+##Fig 2. Vaccine coverage in high-risk populations (health care workers and older adults) and overall.#
+#######################################################################################################
+
 
 <!-- (A) Coverage in HCWs by GNI as of (top) Dec 2021 and (bottom) Dec 2023 -->
 <!-- (B) Coverage in older adults by GNI as of (top) Dec 2021 and (bottom) Dec 2023 -->
@@ -830,7 +709,7 @@ Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>%
 write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_data_plus_priority_groups.csv")
 ```
 
-# Boxplots health care workers and older elderly
+# plot
 
 
 ```{r}
@@ -875,6 +754,374 @@ ggplot(collated) +
   ) 
 ```
 
+
+
+#############################################################
+# Extended Data Fig. ?. Scatterplot ... + cor test for lable#
+#############################################################
+
+
+
+```{r}
+
+#Scatter plot + smooth line
+# x= GNI + y = date
+scatter_milestone_country <- Ineq_vaccine_coverage %>%
+  select(Country.Name, GNI_per_c_WB, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40, owid_vac_F70) %>%
+  mutate(
+    owid_vac_F40 = as.Date(owid_vac_F40), 
+    owid_vac_F70 = as.Date(owid_vac_F70)
+  ) %>% 
+  pivot_longer(
+    cols = c(min_vac_intro, owid_vac_F40, owid_vac_F70),
+    names_to = "milestone",
+    values_to = "date"
+  )
+
+  
+ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
+  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB))) +
+  geom_smooth(aes(
+    x = log(GNI_per_c_WB), y = date),
+    color = "black", 
+    linetype = "dotted", 
+    size = 0.5,     
+    se = TRUE,       
+    alpha = 0.3)+       
+  facet_wrap(~ milestone, 
+             scales = "free", 
+             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)","owid_vac_F70" = "Vaccine scale-up (70%)" ))) + 
+  scale_y_date(
+    limits = c(as.Date("2020-12-01"), NA),
+               date_labels = "%b/%Y") +
+  labs(
+    title = "Vaccine Milestones by GNI per Capita",
+    x = "GNI per capita (log)",
+    y = "Date",
+    color = "GNI quartile"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "bold"),
+    legend.position = "bottom"
+  )
+
+ED_F0_scatterplot_GNI_milestone
+
+#Correlation test: for adding to the legend
+spearman_corr <- scatter_milestone_country %>%
+  group_by(milestone) %>%
+  summarise(
+    cor = cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$estimate
+  )
+
+spearman_corr
+```
+
+
+###################################################################################################
+# Extended Data Fig. 1. Percentage of countries using different vaccine products by income status.#
+###################################################################################################
+
+
+```{r Supplementary Figure 2}
+# Extended Data Fig. 1. Percentage of countries using different vaccine products by income status.
+
+#Data preparation
+vac_prod_distrib_GNI <-owid_vaccine_country_g %>% 
+  select(
+    Country.Code, q_GNI_per_c_WB, vac_type, vaccine
+  ) %>% 
+  # group_by(vaccine) %>% 
+  # mutate(tot_vac = n()) %>%  
+  distinct() %>% 
+  filter(
+    !is.na(q_GNI_per_c_WB)
+  ) %>% 
+  group_by(q_GNI_per_c_WB, vaccine, vac_type) %>% 
+  summarise(total=n()) %>% 
+  # filter(
+  #   vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored"
+  # ) %>%
+  mutate(
+    countries_quartile=case_when(
+      q_GNI_per_c_WB == 1 ~ 50,
+      q_GNI_per_c_WB == 2 ~ 51,
+      q_GNI_per_c_WB == 3 ~ 51,
+      q_GNI_per_c_WB == 4 ~ 51
+    )
+  ) %>% 
+  mutate(
+    vac_name_per = round(total / countries_quartile * 100, 1),
+    ) 
+
+vac_prod_distrib_GNI
+
+vac_prod_distrib_GNI$vac_type <- factor(vac_prod_distrib_GNI$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Protein"))
+
+
+vac_prod_distrib_GNI <- vac_prod_distrib_GNI %>%
+  arrange(vac_type, -vac_name_per) %>%
+  mutate(order_variable = row_number()) %>%
+  ungroup()
+
+# set vaccine factor order
+vac_prod_distrib_GNI$vaccine = factor(vac_prod_distrib_GNI$vaccine, levels = unique(vac_prod_distrib_GNI$vaccine))
+
+
+#Plot Extended data 1
+ED_F1_vac_prod_distrib_GNI<- ggplot(vac_prod_distrib_GNI, aes(x = as.factor(q_GNI_per_c_WB), y = vac_name_per, fill = as.factor(vac_type))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  facet_wrap(~vaccine,ncol = 5 ) +
+  labs(title = "",
+       x = "GNI quartile",
+       y = " % countries using vaccine",
+       fill = "Vaccine Type") +
+  scale_fill_manual(values = c("#EECC66", "#EE99AA", "#6699CC", "#009999"),
+    labels = c("mRNA","Vectored", "Inactivated", "Protein")) +
+  theme_minimal() +
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10) 
+  )
+  
+ED_F1_vac_prod_distrib_GNI
+
+```
+
+
+
+########################################################################################
+# Extended Data Fig. 8. Map of countries by Gross National Income per capita quartile###
+########################################################################################
+
+
+```{r}
+# Extended Data Fig. 8. Map of countries by Gross National Income per capita quartile
+
+ED_F8_map_GNI_q <- ggplot(data = world_ineq_gral) +
+  geom_sf(aes(fill = as.factor(q_GNI_per_c_WB)), position = "identity") + 
+  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
+                    labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)","no data\navailable")) +
+  labs(
+    fill = "GNI per capita quartile") +
+  theme_void()+
+  guides(color = guide_legend(title.position = "bottom", nrow = 1))+
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),  # Adjust text size
+    legend.title = element_text(size = 8),  # Adjust legend title size
+    plot.title = element_text(size = 10) 
+  )
+
+ED_F8_map_GNI_q
+
+
+```
+
+
+##############################
+#####TABLES AND METRICS#######
+##############################
+
+########################################################################################
+#Extended Data Table 1 | Vaccine introduction and scale-up milestones by income status.#
+########################################################################################
+# Summary vaccine introduction and scale-up
+
+
+```{r}
+#median dates to built groups
+
+#Percentage milestone with and without considering date of achievement
+table_milestone_achieved <- summary_milestone_achieved %>% 
+  mutate(
+    intro_d_ach = paste0(V1, "/51", " (", V1_per, "%)"),
+    intro_nd_ach = paste0(V1_nd, "/51", " (", V1_per_nd, "%)"),
+    scale_40_d_ach = paste0(V40, "/", V1_nd, " (", V40_per, "%)"),
+    scale_40_nd_ach = paste0(V40_nd, "/", V1_nd, " (", V40_per_nd, "%)"),
+    scale_70_d_ach = paste0(V70, "/", V1_nd, " (", V70_per, "%)"),
+    scale_70_nd_ach = paste0(V70_nd, "/", V1_nd, " (", V70_per_nd, "%)")    
+  ) %>% 
+  select( q_GNI_per_c_WB, intro_d_ach:scale_70_nd_ach)
+
+#Time in days and date achived median without considering date of achievement
+summary_vacc_intro_scale_nd <- Ineq_vaccine_coverage %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarize(
+    # Summary statistics for introduction delays (in days since December 8, 2020)
+    median_value_1 = round(median(diff_min_vac_intro_8Dec2020, na.rm = TRUE), 0),
+    q25_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.25, na.rm = TRUE), 0),
+    q75_1 = round(quantile(diff_min_vac_intro_8Dec2020, 0.75, na.rm = TRUE), 0),
+    # Summary statistics for scale-up delays to reach 40% coverage (in days)
+    median_value_40 = round(median(diff_intro_F40, na.rm = TRUE), 0),
+    q25_40 = round(quantile(diff_intro_F40, 0.25, na.rm = TRUE), 0),
+    q75_40 = round(quantile(diff_intro_F40, 0.75, na.rm = TRUE), 0),
+    # Summary statistics for scale-up delays to reach 70% coverage (in days)
+    median_value_70 = round(median(diff_intro_F70, na.rm = TRUE), 0),
+    q25_70 = round(quantile(diff_intro_F70, 0.25, na.rm = TRUE), 0),
+    q75_70 = round(quantile(diff_intro_F70, 0.75, na.rm = TRUE), 0),
+    # Dates for vaccine introduction and scale-ups (median and quartiles)
+    median_value_1_date = as.Date(median(as.numeric(min_vac_intro), na.rm = TRUE), origin = "1970-01-01"),
+    q25_1_date = as.Date(quantile(as.numeric(min_vac_intro), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_1_date = as.Date(quantile(as.numeric(min_vac_intro), 0.75, na.rm = TRUE), origin = "1970-01-01"),
+    # Dates for reaching 40% coverage
+    median_value_40_date = as.Date(median(as.numeric(as.Date(owid_vac_F40)), na.rm = TRUE), origin = "1970-01-01"),
+    q25_40_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F40)), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_40_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F40)), 0.75, na.rm = TRUE), origin = "1970-01-01"),
+    # Dates for reaching 70% coverage
+    median_value_70_date = as.Date(median(as.numeric(as.Date(owid_vac_F70)), na.rm = TRUE), origin = "1970-01-01"),
+    q25_70_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F70)), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_70_date = as.Date(quantile(as.numeric(as.Date(owid_vac_F70)), 0.75, na.rm = TRUE), origin = "1970-01-01")
+  ) %>%
+  mutate(
+    # Create readable summary columns for delays
+    introduction = paste0(median_value_1, " (", q25_1, "-", q75_1, ")"),
+    scale_40 = paste0(median_value_40, " (", q25_40, "-", q75_40, ")"),
+    scale_70 = paste0(median_value_70, " (", q25_70, "-", q75_70, ")"),
+    # Create readable summary columns for dates
+    introduction_date = paste0(format(median_value_1_date, "%d/%m/%Y"), " (", 
+                                format(q25_1_date, "%d/%m/%Y"), "-", 
+                                format(q75_1_date, "%d/%m/%Y"), ")"),
+    scale_40_date = paste0(format(median_value_40_date, "%d/%m/%Y"), " (", 
+                           format(q25_40_date, "%d/%m/%Y"), "-", 
+                           format(q75_40_date, "%d/%m/%Y"), ")"),
+    scale_70_date = paste0(format(median_value_70_date, "%d/%m/%Y"), " (", 
+                           format(q25_70_date, "%d/%m/%Y"), "-", 
+                           format(q75_70_date, "%d/%m/%Y"), ")")
+  ) %>%
+  # Select and organize the relevant output columns
+  select(
+    q_GNI_per_c_WB, 
+    introduction, scale_40, scale_70, 
+    introduction_date, scale_40_date, scale_70_date
+  )
+
+summary_vacc_intro_scale_nd
+
+
+#Time in days and date achieved median without considering date of achievement
+summary_vacc_intro_scale_d <- Ineq_vaccine_coverage %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarize(
+    # Introduction (subset by V1_dummy == "yes")
+    median_value_1_d = round(median(diff_min_vac_intro_8Dec2020[V1_dummy == "yes"], na.rm = TRUE), 0),
+    q25_1_d = round(quantile(diff_min_vac_intro_8Dec2020[V1_dummy == "yes"], 0.25, na.rm = TRUE), 0),
+    q75_1_d = round(quantile(diff_min_vac_intro_8Dec2020[V1_dummy == "yes"], 0.75, na.rm = TRUE), 0),
+    median_value_1_date_d = as.Date(median(as.numeric(as.Date(min_vac_intro[V1_dummy == "yes"])), na.rm = TRUE), origin = "1970-01-01"),
+    q25_1_date_d = as.Date(quantile(as.numeric(as.Date(min_vac_intro[V1_dummy == "yes"])), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_1_date_d = as.Date(quantile(as.numeric(as.Date(min_vac_intro[V1_dummy == "yes"])), 0.75, na.rm = TRUE), origin = "1970-01-01"),
+
+    # 40% coverage (subset by V40_dummy == "yes")
+    median_value_40_d = round(median(diff_intro_F40[V40_dummy == "yes"], na.rm = TRUE), 0),
+    q25_40_d = round(quantile(diff_intro_F40[V40_dummy == "yes"], 0.25, na.rm = TRUE), 0),
+    q75_40_d = round(quantile(diff_intro_F40[V40_dummy == "yes"], 0.75, na.rm = TRUE), 0),
+    median_value_40_date_d = as.Date(median(as.numeric(as.Date(owid_vac_F40[V40_dummy == "yes"])), na.rm = TRUE), origin = "1970-01-01"),
+    q25_40_date_d = as.Date(quantile(as.numeric(as.Date(owid_vac_F40[V40_dummy == "yes"])), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_40_date_d = as.Date(quantile(as.numeric(as.Date(owid_vac_F40[V40_dummy == "yes"])), 0.75, na.rm = TRUE), origin = "1970-01-01"),
+
+    # 70% coverage (subset by V70_dummy == "yes")
+    median_value_70_d = round(median(diff_intro_F70[V70_dummy == "yes"], na.rm = TRUE), 0),
+    q25_70_d = round(quantile(diff_intro_F70[V70_dummy == "yes"], 0.25, na.rm = TRUE), 0),
+    q75_70_d = round(quantile(diff_intro_F70[V70_dummy == "yes"], 0.75, na.rm = TRUE), 0),
+    median_value_70_date_d = as.Date(median(as.numeric(as.Date(owid_vac_F70[V70_dummy == "yes"])), na.rm = TRUE), origin = "1970-01-01"),
+    q25_70_date_d = as.Date(quantile(as.numeric(as.Date(owid_vac_F70[V70_dummy == "yes"])), 0.25, na.rm = TRUE), origin = "1970-01-01"),
+    q75_70_date_d = as.Date(quantile(as.numeric(as.Date(owid_vac_F70[V70_dummy == "yes"])), 0.75, na.rm = TRUE), origin = "1970-01-01")
+  ) %>%
+  mutate(
+    introduction_d = paste0(median_value_1_d, " (", q25_1_d, "-", q75_1_d, ")"),
+    scale_40_d = paste0(median_value_40_d, " (", q25_40_d, "-", q75_40_d, ")"),
+    scale_70_d = paste0(median_value_70_d, " (", q25_70_d, "-", q75_70_d, ")"),
+
+    introduction_date_d = paste0(format(median_value_1_date_d, "%d/%m/%Y"), " (", 
+                                 format(q25_1_date_d, "%d/%m/%Y"), "-", 
+                                 format(q75_1_date_d, "%d/%m/%Y"), ")"),
+    scale_40_date_d = paste0(format(median_value_40_date_d, "%d/%m/%Y"), " (", 
+                             format(q25_40_date_d, "%d/%m/%Y"), "-", 
+                             format(q75_40_date_d, "%d/%m/%Y"), ")"),
+    scale_70_date_d = paste0(format(median_value_70_date_d, "%d/%m/%Y"), " (", 
+                             format(q25_70_date_d, "%d/%m/%Y"), "-", 
+                             format(q75_70_date_d, "%d/%m/%Y"), ")")
+  ) %>%
+  select(
+    q_GNI_per_c_WB, 
+    introduction_d, introduction_date_d,
+    scale_40_d, scale_40_date_d,
+    scale_70_d, scale_70_date_d
+  )
+
+
+
+# Collated table
+full_milestone_summary <- table_milestone_achieved %>%
+  left_join(summary_vacc_intro_scale_nd, by = "q_GNI_per_c_WB") %>%
+  left_join(summary_vacc_intro_scale_d, by = "q_GNI_per_c_WB")
+
+full_milestone_summary_flip <-   full_milestone_summary %>% 
+    pivot_longer(
+    cols = -q_GNI_per_c_WB,
+    names_to = "indicator",
+    values_to = "value"
+  ) %>% 
+    pivot_wider(
+    names_from = q_GNI_per_c_WB,
+    values_from = value,
+    names_prefix = "GNI_"
+  )
+
+full_milestone_summary_flip_ordered <- full_milestone_summary_flip %>%
+  filter(indicator %in% c(
+    "intro_d_ach",
+    "intro_nd_ach",
+    "introduction",
+    "introduction_date",
+    "scale_40_d_ach",
+    "scale_40_d",
+    "scale_40_date_d",
+    "scale_40_nd_ach",
+    "scale_40",
+    "scale_40_date",
+    "scale_70_d_ach",
+    "scale_70_d",
+    "scale_70_date_d",
+    "scale_70_nd_ach",
+    "scale_70",
+    "scale_70_date"
+  )) %>%
+  mutate(indicator = factor(indicator, levels = c(
+    "intro_d_ach",
+    "intro_nd_ach",
+    "introduction",
+    "introduction_date",
+    "scale_40_d_ach",
+    "scale_40_d",
+    "scale_40_date_d",
+    "scale_40_nd_ach",
+    "scale_40",
+    "scale_40_date",
+    "scale_70_d_ach",
+    "scale_70_d",
+    "scale_70_date_d",
+    "scale_70_nd_ach",
+    "scale_70",
+    "scale_70_date"
+  ))) %>%
+  arrange(indicator)
+
+
+```
+
+
+
+
+
+#################################################################################################################
+#Extended Data Table 2 | Vaccine coverage in high-risk populations and overall according to WHO/UNICEF database.#
+#################################################################################################################
 
 ```{r}
 # HCW
@@ -1049,5 +1296,34 @@ summary_overall_cov_21_23 <- collated %>%
     tot_dec23 = paste0( median_tot_dec23, "% (", q25_tot_dec23, "%-", q75_tot_dec23, "%)")
   ) %>% 
   select(q_GNI_per_c_WB:n_tot_dec23, hcw_dec21:tot_dec23) 
+```
+
+
+
+#########################
+#Supplementary database#
+########################
+
+
+```{r}
+# Supplementary table Intro+Scale-up
+sup_table_intro_scale_country <- Ineq_vaccine_coverage%>%
+  select(
+    Country.Name, Country.Code, Region, continent, GNI_per_c_WB, 
+    year_GNI, q_GNI_per_c_WB, `Income group`, owid_vac_intro, 
+    who_vac_intro, min_vac_intro, owid_who, owid_vac_F40, 
+    owid_vac_F70, vac_intro_hcw, vac_F40_hcw, vac_F70_hcw, 
+    vac_intro_old, vac_F40_old, vac_F70_old
+  ) %>% 
+  rename(
+    min_vac_intro_owid_or_who = owid_who
+  )
+
+sup_table_plat_country <- Ineq_vaccine_coverage_platform %>% 
+  select(Country.Code, vaccines:source_name, mRNA:Protein) 
+
+sup_table_intro_scale_plat_country<- left_join(sup_table_intro_scale_country, sup_table_plat_country)
+
+write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_intro_scale_plat_plus_priority_groups.csv")
 ```
 

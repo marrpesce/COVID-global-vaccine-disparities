@@ -25,12 +25,12 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 library(metafor)
-library(dmetar)
 library(forestplot)
 library(patchwork)
-library("scales")
+library(scales)
 
-VEmetareg <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv") %>% 
+VEmetareg0 <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv")
+VEmetareg <- VEmetareg0 %>% 
   filter(include=="yes")
 
 # summarise study counts
@@ -44,22 +44,19 @@ VEmetareg %>% group_by(variant_clean, clean_vaccine, q_GNI_per_c_WB) %>%
 # BNT162b2 delta GNI 2
 # BNT162b2 omicron GNI 3
 # ChAdOx omicron GNI 2/3
-# Ad26 delta GNI 3
 
 # Recode levels
-VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Janssen Ad26.COV2.S"] = "Ad26.COV2.S"
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="BioNTech/Pfizer BNT162b2"] = "BNT162b2"
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Oxford/AstraZeneca ChAdOx1-S"] = "ChAdOx1-S"
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Moderna mRNA-1273"] = "mRNA-1273"
-VEmetareg$clean_vaccine = factor(VEmetareg$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273", "Ad26.COV2.S"))
+VEmetareg$clean_vaccine = factor(VEmetareg$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273"))
 
 metareg_collated <- rbind(
-  read_csv("Data/Processed/meta_summary_Ad26.COV2.S.csv"),
   read_csv("Data/Processed/meta_summary_BNT162b2.csv"),
   read_csv("Data/Processed/meta_summary_ChAdOx1-S.csv"),
   read_csv("Data/Processed/meta_summary_mRNA-1273.csv")
 ) 
-metareg_collated$clean_vaccine = factor(metareg_collated$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273", "Ad26.COV2.S"))
+metareg_collated$clean_vaccine = factor(metareg_collated$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273"))
 
 metareg_collated$`N studies` = ">2"
 metareg_collated$`N studies`[metareg_collated$clean_vaccine == "mRNA-1273" & 
@@ -76,9 +73,7 @@ metareg_collated$`N studies`[metareg_collated$VoI == "omicron" &
                           metareg_collated$clean_vaccine == "ChAdOx1-S" & 
                           metareg_collated$GNI %in% c(2,3)] = "1-2"
 
-metareg_collated$`N studies`[metareg_collated$VoI == "delta" & 
-                          metareg_collated$clean_vaccine == "Ad26.COV2.S" & 
-                          metareg_collated$GNI %in% c(3)] = "1-2"
+
 ## set variant levels
 metareg_collated$VoI = factor(metareg_collated$VoI, levels=c("omicron", "delta"))
 VEmetareg$variant_clean = factor(VEmetareg$variant_clean, levels=c("omicron", "delta"))
@@ -120,4 +115,40 @@ ggplot() +
         axis.text.y = element_text(size=10),
         strip.text = element_text(size=10))
 ```
+
+
+
+
+```{r}
+# Extended Data Table X
+# A table listing all VE estimates by study would improve reproducibility and indicate which estimates were used or excluded.
+
+metareg_included <- VEmetareg0 %>% 
+  select(
+  -dose_number, 
+  -GNI_per_c_WB, -year_GNI, -Economy, -Region, -dose_number,
+  -`Income group`, -q_GNI_per_c_WB, -continent, 
+  -owid_vac_intro, -owid_vac_F40, -owid_vac_F70, 
+  -who_vac_intro, -min_vac_intro, -diff_owid_who_intro, 
+  -diff_intro_F40, -diff_intro_F70, -publication_date, -`...1`
+)
+  
+study_number <- VEmetareg %>% 
+  select  (Study_id_f) %>% 
+  unique()
+
+View_Hub_data <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv") 
+
+studies_selected <- left_join(study_number, View_Hub_data)
+
+studies_selected_info <-left_join(studies_selected, metareg_included)  %>% 
+  select  ("Study_id_f", "first author", "publication_date", "semester", "study design", "population_category", "historyofCOVID", "country_clean", "Country.Code", "continent", "Income group", "GNI_per_c_WB", "year_GNI", "variant_clean", "clean_vaccine", "vac_type", "dose_number", "timing_of_dose_days","outcome_final", "min_period_days", "max_period_days","min_vac_intro", "owid_vac_F40", "owid_vac_F70", "VE", "LCL", "UCL", "include", "justification", sensitivity:SE.ln.RR
+)
+
+write.csv(studies_selected_info, "Data/Processed/Extended_Data_all_VE_estimates.csv")
+
+```
+
+
+
 

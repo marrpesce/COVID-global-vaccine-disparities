@@ -42,14 +42,14 @@ VE_populations <- read_csv("Data/Input/meta_effect/VE_population_list.csv")
 
 ```{r, inclusion criteria}
 #Studies populations included in View-Hub primary series
-nrow(VEmetareg_data)  #3597 estimates
-n_distinct(VEmetareg_data$Study_id_f) #422 studies
+nrow(VEmetareg_data)  #3599 estimates
+n_distinct(VEmetareg_data$Study_id_f) #423 studies
 
 ## Step 1: exclude studies of infection
 VEmetareg_data <- VEmetareg_data %>% 
   filter(outcome_final=="severe" | outcome_final=="death") 
-nrow(VEmetareg_data)  #1641 estimates
-n_distinct(VEmetareg_data$Study_id_f) #249 studies
+nrow(VEmetareg_data)  #1643 estimates
+n_distinct(VEmetareg_data$Study_id_f) #250 studies
 
 ## Step 2: exclude non-eligible populations (including studies restricted to previously infected)
 # write csv files to generate VE_population_list.csv inputs
@@ -81,8 +81,8 @@ VEmetareg_data <- VEmetareg_data %>%
         historyofCOVID != "pre-Omicron prior infection" &
         historyofCOVID != "previously infected only"
         )
-nrow(VEmetareg_data)  #1229 estimates
-n_distinct(VEmetareg_data$Study_id_f) #177 studies
+nrow(VEmetareg_data)  #1231 estimates
+n_distinct(VEmetareg_data$Study_id_f) #178 studies
 
 included_studies<-VEmetareg_data %>% 
   select(Study_id_f, include_population) %>% 
@@ -102,8 +102,8 @@ VEmetareg_data <- VEmetareg_data %>%
   filter( dose == "final" & 
     clean_vaccine != "Multiple or heterologous RNA" &
     clean_vaccine != "Heterologous platforms")
-nrow(VEmetareg_data) #833
-n_distinct(VEmetareg_data$Study_id_f) #129
+nrow(VEmetareg_data) #835
+n_distinct(VEmetareg_data$Study_id_f) #130
 
 ## Step 4: cohort/case-control design
 table(VEmetareg_data$`study design`)
@@ -111,8 +111,8 @@ VEmetareg_data <- VEmetareg_data %>%
   filter(
     `study design` != "Screening method"
     )
-nrow(VEmetareg_data) #832
-n_distinct(VEmetareg_data$Study_id_f) #128
+nrow(VEmetareg_data) #834
+n_distinct(VEmetareg_data$Study_id_f) #129
 
 ## Step 5: variant-specific estimates
 table(VEmetareg_data$variant_clean)
@@ -123,8 +123,16 @@ VEmetareg_data <- VEmetareg_data %>%
     variant_clean != "other combinations"
     )
 
-nrow(VEmetareg_data) #484
-n_distinct(VEmetareg_data$Study_id_f) #75
+nrow(VEmetareg_data) #486
+n_distinct(VEmetareg_data$Study_id_f) #76
+
+## Filter 2-dose study of Ad26.COV2.S
+VEmetareg_data <- VEmetareg_data %>%
+    filter(!(clean_vaccine == "Janssen Ad26.COV2.S" & dose_number == "2"))
+
+nrow(VEmetareg_data) #473
+n_distinct(VEmetareg_data$Study_id_f) #76
+
 
 ## Step 6: exclude products with <10 unique studies
 table(VEmetareg_data$clean_vaccine)
@@ -133,10 +141,12 @@ n_distinct(subset(VEmetareg_data, clean_vaccine=="Bharat Covaxin/BBV152")$Study_
 n_distinct(subset(VEmetareg_data, clean_vaccine=="BioNTech/Pfizer BNT162b2")$Study_id_f) # 53
 n_distinct(subset(VEmetareg_data, clean_vaccine=="Cansino Ad5-nCoV")$Study_id_f) # 2
 n_distinct(subset(VEmetareg_data, clean_vaccine=="Gamaleya Gam-COVID-Vac/Sputnik V")$Study_id_f) # 6
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Janssen Ad26.COV2.S")$Study_id_f) # 15
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Janssen Ad26.COV2.S")$Study_id_f) # 13
 n_distinct(subset(VEmetareg_data, clean_vaccine=="Moderna mRNA-1273")$Study_id_f) # 27
 n_distinct(subset(VEmetareg_data, clean_vaccine=="Oxford/AstraZeneca ChAdOx1-S")$Study_id_f) # 28
 n_distinct(subset(VEmetareg_data, clean_vaccine=="Sinovac CoronaVac")$Study_id_f) # 12
+n_distinct(subset(VEmetareg_data, clean_vaccine=="Abdala (CIBG)")$Study_id_f) # 1
+
 
 VEmetareg_data <- VEmetareg_data %>%
   filter(
@@ -146,7 +156,8 @@ VEmetareg_data <- VEmetareg_data %>%
     clean_vaccine == "Oxford/AstraZeneca ChAdOx1-S" |
     clean_vaccine == "Sinovac CoronaVac"
     )
-nrow(VEmetareg_data) #436
+
+nrow(VEmetareg_data) #423
 n_distinct(VEmetareg_data$Study_id_f) #72
 
 ## Step 7: exclude variants with <10 unique studies
@@ -165,7 +176,7 @@ VEmetareg_data <- VEmetareg_data %>%
     variant_clean == "delta" |
     variant_clean == "omicron"
     )
-nrow(VEmetareg_data) #380
+nrow(VEmetareg_data) #367
 n_distinct(VEmetareg_data$Study_id_f) #65
 
 # sort 
@@ -313,17 +324,17 @@ write.csv(model_check, "Data/Processed/VE_model_check.csv")
 n_distinct(subset(VEmetareg_data, clean_vaccine =="Sinovac CoronaVac")$Study_id_f) # 7
 n_distinct(subset(VEmetareg_data, variant_clean =="alpha")$Study_id_f) # 15
 n_distinct(subset(VEmetareg_data, outcome_final !="severe")$Study_id_f) # 19
-n_distinct(subset(VEmetareg_data, variant_clean == "omicron" & clean_vaccine == "Janssen Ad26.COV2.S")$Study_id_f) #5
+n_distinct(subset(VEmetareg_data, clean_vaccine == "Janssen Ad26.COV2.S")$Study_id_f) #10
 
 VEmetareg_data <- VEmetareg_data %>%
   filter(
     clean_vaccine != "Sinovac CoronaVac" &
     outcome_final == "severe" &
     variant_clean != "alpha" &
-    !(variant_clean == "omicron" & clean_vaccine == "Janssen Ad26.COV2.S")
+    clean_vaccine != "Janssen Ad26.COV2.S"
     )
-nrow(VEmetareg_data) #225
-n_distinct(VEmetareg_data$Study_id_f) #53
+nrow(VEmetareg_data) #206
+n_distinct(VEmetareg_data$Study_id_f) #51
 
 # create max_duration_follow_up_days 
 VEmetareg_data$max_follow_up_days = str_replace_all(VEmetareg_data$`max duration follow-up`, " weeks","")
