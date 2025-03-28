@@ -126,32 +126,27 @@ VEmetareg_data <- VEmetareg_data %>%
 nrow(VEmetareg_data) #486
 n_distinct(VEmetareg_data$Study_id_f) #76
 
-## Filter 2-dose study of Ad26.COV2.S
-VEmetareg_data <- VEmetareg_data %>%
-    filter(!(clean_vaccine == "Janssen Ad26.COV2.S" & dose_number == "2"))
-
-nrow(VEmetareg_data) #473
-n_distinct(VEmetareg_data$Study_id_f) #76
-
+## Add vaccine - dose count combination
+VEmetareg_data$clean_vaccine_dose = paste0(VEmetareg_data$clean_vaccine," x ",VEmetareg_data$dose_number) 
 
 ## Step 6: exclude products with <10 unique studies
-table(VEmetareg_data$clean_vaccine)
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Beijing/Sinopharm BBIBP-CorV")$Study_id_f) # 6
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Bharat Covaxin/BBV152")$Study_id_f) # 3
-n_distinct(subset(VEmetareg_data, clean_vaccine=="BioNTech/Pfizer BNT162b2")$Study_id_f) # 53
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Cansino Ad5-nCoV")$Study_id_f) # 2
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Gamaleya Gam-COVID-Vac/Sputnik V")$Study_id_f) # 6
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Janssen Ad26.COV2.S")$Study_id_f) # 13
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Moderna mRNA-1273")$Study_id_f) # 27
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Oxford/AstraZeneca ChAdOx1-S")$Study_id_f) # 28
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Sinovac CoronaVac")$Study_id_f) # 12
-n_distinct(subset(VEmetareg_data, clean_vaccine=="Abdala (CIBG)")$Study_id_f) # 1
-
+table(VEmetareg_data$clean_vaccine_dose)
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Beijing/Sinopharm BBIBP-CorV x 2")$Study_id_f) # 6
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Bharat Covaxin/BBV152 x 2")$Study_id_f) # 3
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="BioNTech/Pfizer BNT162b2 x 2")$Study_id_f) # 53
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Cansino Ad5-nCoV x 1")$Study_id_f) # 2
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Gamaleya Gam-COVID-Vac/Sputnik V x 2")$Study_id_f) # 6
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Janssen Ad26.COV2.S x 2")$Study_id_f) # 2
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Janssen Ad26.COV2.S x 1")$Study_id_f) # 13
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Moderna mRNA-1273 x 2")$Study_id_f) # 27
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Oxford/AstraZeneca ChAdOx1-S x 2")$Study_id_f) # 28
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Sinovac CoronaVac x 2")$Study_id_f) # 12
+n_distinct(subset(VEmetareg_data, clean_vaccine_dose=="Abdala (CIBG) x 3")$Study_id_f) # 1
 
 VEmetareg_data <- VEmetareg_data %>%
   filter(
     clean_vaccine == "BioNTech/Pfizer BNT162b2" |
-    clean_vaccine == "Janssen Ad26.COV2.S" |
+    clean_vaccine_dose == "Janssen Ad26.COV2.S x 1" |
     clean_vaccine == "Moderna mRNA-1273" |
     clean_vaccine == "Oxford/AstraZeneca ChAdOx1-S" |
     clean_vaccine == "Sinovac CoronaVac"
@@ -314,11 +309,9 @@ model_check$sufficient_n = model_check$sum>=10
 model_check$n_nonQ4_over_2 = model_check$sum_nonQ4>=2
 model_check$eligible = model_check$sufficient_n==TRUE & model_check$n_nonQ4_over_2==TRUE
 write.csv(model_check, "Data/Processed/VE_model_check.csv")
-#sum(VEmetareg_data$clean_vaccine=="Sinovac CoronaVac" & VEmetareg_data$variant_clean=="alpha")
 
-# criteria met for 7 models in total
-# delta/severe - all vaccines
-# omicron/severe - BNT162b2, mRNA-1273, and ChAdOx1-S    
+# criteria met for 6 models in total
+# severe - delta/omicron - BNT162b2, mRNA-1273, and ChAdOx1-S 
 
 # apply filters
 n_distinct(subset(VEmetareg_data, clean_vaccine =="Sinovac CoronaVac")$Study_id_f) # 7
@@ -383,9 +376,7 @@ sensitivity_model_check$eligible = sensitivity_model_check$sufficient_n==TRUE & 
 
 write.csv(sensitivity_model_check, "Data/Processed/VE_sensitivity_model_check.csv")
 
-# criteria met for 7 models in total
-# delta/severe - all vaccines
-# omicron/severe - BNT162b2, mRNA-1273, and ChAdOx1-S 
+# criteria met for 0 models 
 ```
 
 

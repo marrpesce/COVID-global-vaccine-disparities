@@ -114,7 +114,7 @@ nrow(COVID19VE_country) #3640 estimates
 length(unique(COVID19VE_country$Study_id_f)) #425 unique studies
 
 # Filter studies without income data
-COVID19VE_country[!(COVID19VE_country$iso3c %in% Ineq_merged$iso3c),] # 3 studies - 1 from Cuba (Más-Bermejo), 1 from Taiwan (Huang) and 1 from Puerto Rico (Irizarry)
+COVID19VE_country[!(COVID19VE_country$iso3c %in% Ineq_merged$iso3c),] # 2 studies - 1 from Taiwan (Huang) and 1 from Puerto Rico (Irizarry)
 COVID19VE_country <- COVID19VE_country %>% filter(iso3c %in% Ineq_merged$iso3c)
 nrow(COVID19VE_country) #3599 estimates
 length(unique(COVID19VE_country$Study_id_f)) #423 unique studies
