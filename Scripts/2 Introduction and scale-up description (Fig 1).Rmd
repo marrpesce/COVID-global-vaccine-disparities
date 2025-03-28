@@ -128,6 +128,7 @@ Ineq_vaccine_coverage <- Ineq_merged %>%
   select(-FIRST_VACCINE_DATE, -location)
 
 table(Ineq_vaccine_coverage$owid_who)
+  
 
 ```
 
@@ -1115,6 +1116,23 @@ full_milestone_summary_flip_ordered <- full_milestone_summary_flip %>%
 
 ```
 
+########################
+#Metrics#
+############################
+
+```{r}
+#check owid-who
+summary_countries_who_owid <- Ineq_vaccine_coverage %>%
+  mutate(non_na = !is.na(diff_owid_who_intro)) %>%
+  group_by(non_na) %>% 
+  summarise(
+    count = n(),
+    median_diff = round(median(diff_owid_who_intro, na.rm = TRUE), 0),
+    q25_diff = round(quantile(diff_owid_who_intro, 0.25, na.rm = TRUE), 0),
+    q75_diff = round(quantile(diff_owid_who_intro, 0.75, na.rm = TRUE), 0),
+    less_7_days = sum(Ineq_vaccine_coverage$diff_owid_who_intro < 8, na.rm = TRUE)
+    )
+```
 
 
 
