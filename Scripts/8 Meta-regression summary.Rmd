@@ -35,15 +35,17 @@ VEmetareg <- VEmetareg0 %>%
 
 # summarise study counts
 VEmetareg %>% group_by(variant_clean, clean_vaccine, q_GNI_per_c_WB) %>%
-  summarise(n = sum(!is.na(`study ID`)))
+  summarise(n = length(unique(`study ID`)))
 # 1 study:
-# mRNA-1273 delta GNI 2/3
-# mRNA-1273 omicron GNI 2/3
+# BNT162b2 delta GNI 2
+# mRNA-1273 delta GNI 2
+# BNT162b2 omicron GNI 2
+# mRNA-1273 omicron GNI 2
 
 # 2 studies:
-# BNT162b2 delta GNI 2
-# BNT162b2 omicron GNI 3
+# ChAdOx delta GNI 1/2
 # ChAdOx omicron GNI 2/3
+# mRNA-1273 omicron GNI 3
 
 # Recode levels
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="BioNTech/Pfizer BNT162b2"] = "BNT162b2"
@@ -59,19 +61,24 @@ metareg_collated <- rbind(
 metareg_collated$clean_vaccine = factor(metareg_collated$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273"))
 
 metareg_collated$`N studies` = ">2"
+
+metareg_collated$`N studies`[metareg_collated$clean_vaccine == "BNT162b2" & 
+                          metareg_collated$GNI %in% c(2)] = "1-2"
+
 metareg_collated$`N studies`[metareg_collated$clean_vaccine == "mRNA-1273" & 
-                          metareg_collated$GNI %in% c(2,3)] = "1-2"
+                          metareg_collated$GNI %in% c(2)] = "1-2"
 
 metareg_collated$`N studies`[metareg_collated$VoI == "delta" & 
-                          metareg_collated$clean_vaccine == "BNT162b2" & 
-                          metareg_collated$GNI %in% c(2)] = "1-2"
-metareg_collated$`N studies`[metareg_collated$VoI == "omicron" & 
-                          metareg_collated$clean_vaccine == "BNT162b2" & 
-                          metareg_collated$GNI %in% c(3)] = "1-2"
+                          metareg_collated$clean_vaccine == "ChAdOx1-S" & 
+                          metareg_collated$GNI %in% c(1,2)] = "1-2"
 
 metareg_collated$`N studies`[metareg_collated$VoI == "omicron" & 
                           metareg_collated$clean_vaccine == "ChAdOx1-S" & 
                           metareg_collated$GNI %in% c(2,3)] = "1-2"
+
+metareg_collated$`N studies`[metareg_collated$VoI == "omicron" & 
+                          metareg_collated$clean_vaccine == "mRNA-1273" & 
+                          metareg_collated$GNI %in% c(3)] = "1-2"
 
 
 ## set variant levels
@@ -103,8 +110,8 @@ ggplot() +
   theme(legend.position = "right") +
   scale_color_manual(
     name = "GNI quartile", 
-     values = c("#44BB99","#AAAA00","#EE8866"),
-    labels =  c("2 (lower\nincome)" ,"3","4 (higher\nincome)")
+     values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
+    labels =  c("1 (lower\nincome)", "2" ,"3","4 (higher\nincome)")
   ) +
   guides(size = "none", colour = guide_legend(reverse = TRUE), shape = guide_legend(reverse = TRUE), ) + 
   geom_hline(yintercept = 1, linetype = "dashed", color = "black") +

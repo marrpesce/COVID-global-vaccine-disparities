@@ -9,14 +9,14 @@ editor_options:
 
 
 #### Inputs
-- Input/inequalities databases/GNI per capita (ppp)/GNI_per_c.csv: country-level GNI per capita
+- Input/inequalities databases/WB_GNI_Atlas/GNI_per_c.csv: country-level GNI per capita
 - Input/inequalities databases/income_group (World Bank).xlsx: World Bank regions and income groups
 
 #### Outputs
 - Processed/Ineq_merged.csv: Combined country-level income data
 
 #### Notes
-GNI per capita represents the primary covariate of interest. This indicator provides per capita values for gross national income (GNI. Formerly GNP) expressed in current international dollars converted by purchasing power parity (PPP) conversion factor (World Bank). 
+GNI per capita represents the primary covariate of interest. This indicator provides per capita values for gross national income (GNI. Formerly GNP) expressed in current international dollars converted by Atlas method (World Bank). 
 World Bank income groups provide additional descriptive information.
 
 
@@ -43,7 +43,7 @@ skip_lines <- 4
 # Read the CSV file, skipping the metadata lines 
 
 #GNI
-GNI_per_c_WB <- read.csv("Data/Input/inequalities databases/WB_GNI_Atlas/API_NY.GNP.PCAP.CD_DS2_en_csv_v2_75655.csv", skip = skip_lines) %>%
+GNI_per_c_WB <- read.csv("Data/Input/inequalities databases/WB_GNI_Atlas/GNI_per_c.csv", skip = skip_lines) %>%
   select(-c(X2020,X2021,X2022, X2023)) # remove years post COVID emergence
 
 #World bank quartiles
@@ -108,6 +108,10 @@ merge_ineq <- merge_ineq %>%
   mutate(
     q_GNI_per_c_WB = ntile(GNI_per_c_WB, 4)
   )   
+
+# Add iso3 for Kosovo
+merge_ineq$iso3c[merge_ineq$Country.Name=="Kosovo"]
+merge_ineq$iso3c[merge_ineq$Country.Name=="Kosovo"] = "XKX"
 
 # Check that all countries have quartile assigned
 sum(is.na(merge_ineq$q_GNI_per_c_WB)) # 0

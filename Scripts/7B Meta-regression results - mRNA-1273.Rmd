@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # select vaccine
 selected_vaccine = "Moderna mRNA-1273" # values: "BioNTech/Pfizer BNT162b2" "Oxford/AstraZeneca ChAdOx1-S" "Moderna mRNA-1273"
 simple_name = "mRNA-1273" # for file outputs 
-
+fup_sensitivity = TRUE # set to true to run sensitivity
 ```
 
 
@@ -36,7 +36,7 @@ library(patchwork)
 
 VEmetareg_data_clean <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.csv") %>% 
   filter(include=="yes") %>% 
-  mutate(publication_year = paste0( substring(`publication date`, nchar(`publication date`) - 3))) %>% 
+  mutate(publication_year = paste0( substring(`publication_date`, nchar(`publication_date`) - 3))) %>% 
   mutate(
     paper= paste0(
   `first author`, " (",
@@ -51,13 +51,22 @@ n_distinct(VEmetareg_data_clean$Study_id_f)
 VEmetareg_data_clean$country_clean[VEmetareg_data_clean$country_clean=="Hong Kong"] = "Hong Kong SAR"
 
 # Simplify names for plotting
-VEmetareg_data_clean$population_category[VEmetareg_data_clean$population_category=="immunocompetent adults"] = "immunocomp. adults"
+VEmetareg_data_clean$population_category[VEmetareg_data_clean$population_category=="immunocompetent adults"] = "non-ICP adults"
+
+if (fup_sensitivity) {
+  VEmetareg_data_clean = VEmetareg_data_clean %>% filter (max_period_days <= (26*7))
+}
 
 # check values for vaccines, outcome, variant and quartile
 table(VEmetareg_data_clean$clean_vaccine)
 table(VEmetareg_data_clean$outcome_final) # all severe
 table(VEmetareg_data_clean$variant_clean) # delta or omicron
-table(VEmetareg_data_clean$q_GNI_per_c_WB) # 4, 3, 2
+table(VEmetareg_data_clean$q_GNI_per_c_WB) # 4, 3, 2, 1
+
+# cross-tabulate vaccine, quartile and variant
+table(VEmetareg_data_clean$q_GNI_per_c_WB, VEmetareg_data_clean$clean_vaccine, VEmetareg_data_clean$variant_clean)
+# GNI Q1 only included for AZ - delta
+# Sensitivity models eligible for delta (BNT / AZ) and omicron (BNT)
 
 studies_countries_models <- VEmetareg_data_clean %>%
   group_by(variant_clean, clean_vaccine, q_GNI_per_c_WB) %>%
@@ -77,7 +86,11 @@ studies_countries_models <- VEmetareg_data_clean %>%
     median_max = paste0(median_max_period, " (", q25_max_period, "-", q75_max_period, ")")
   ) %>%
   select(-median_min_period, -q25_min_period, -q75_min_period, -median_max_period, -q25_max_period, -q75_max_period)
-write.csv(studies_countries_models, "Data/Processed/meta_summary_counts.csv")
+if (fup_sensitivity) {
+  write.csv(studies_countries_models, "Data/Processed/meta_summary_counts_fup_sensitivity.csv")
+} else {
+  write.csv(studies_countries_models, "Data/Processed/meta_summary_counts.csv")
+}
 ```
 
 ## MODEL 1.A: delta, severe 
@@ -184,7 +197,7 @@ Sum_delta_severe.GNI <- cbind.data.frame(pred.delta_severe.GNI, I_o_p_delta_seve
              format(round((1-ci.lb)*100,0),nsmall=0),")"
              )
          ) 
-Sum_delta_severe.GNI # order is GNI2 - row 1, GNI 3 - row 2, GNI 4 - row 1
+Sum_delta_severe.GNI 
 
 # summary metrics for GNI quartile 2
 delta_rr_GNI_2 = Sum_delta_severe.GNI$pred[3]
@@ -267,7 +280,7 @@ Sum_omicron_severe.GNI <- cbind.data.frame(pred.omicron_severe.GNI, I_o_p_omicro
              format(round((1-ci.lb)*100,0),nsmall=0),")"
              )
          ) 
-Sum_omicron_severe.GNI # order is GNI2 - row 3, GNI 3 - row 1, GNI 4 - row 2
+Sum_omicron_severe.GNI 
 
 # summary metrics for GNI quartile 2
 omicron_rr_GNI_2 = Sum_omicron_severe.GNI$pred[3]
@@ -297,7 +310,11 @@ meta_GNI <- rbind(Sum_omicron_severe.GNI, Sum_delta_severe.GNI )
 
 meta_GNI$vaccine = selected_vaccine
 meta_GNI$clean_vaccine = simple_name
-write.csv(meta_GNI, paste0("Data/Processed/meta_summary_",simple_name,".csv"))
+if (fup_sensitivity) {
+  write.csv(meta_GNI, paste0("../Data/Processed/meta_summary_",simple_name,"_fup_sensitivity.csv"))
+} else {
+  write.csv(meta_GNI, paste0("Data/Processed/meta_summary_",simple_name,".csv"))
+}
 ```
 
 ## Forest plots
@@ -378,7 +395,7 @@ forestplot(tabletext,m,l,u,
                       tabletext[3:nrow(tabletext),1]=="GNI quartile 4")),
     zero=NA,
     xlog=TRUE,
-    xticks=c(0.01,0.1,0.2,0.5,1),
+    xticks=log(c(0.01,0.1,0.2,0.5,1)),
     colgap=unit(5,"mm"),
     txt_gp = fpTxtGp(ticks = gpar(cex=1), xlab = gpar(cex=1)),
     xlab="RR"
@@ -460,7 +477,7 @@ forestplot(tabletext,m,l,u,
                       tabletext[3:nrow(tabletext),1]=="GNI quartile 4")),
     zero=NA,
     xlog=TRUE,
-    xticks=c(0.01,0.1,0.2,0.5,1),
+    xticks=log(c(0.01,0.1,0.2,0.5,1)),
     colgap=unit(5,"mm"),
     txt_gp = fpTxtGp(ticks = gpar(cex=1), xlab = gpar(cex=1)),
     xlab="RR"

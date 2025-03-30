@@ -702,7 +702,7 @@ supp_data <- Ineq_merged %>%
   ) %>%
   select(
     -c(Economy, `Income group`, perc_VE_studies, study_dummy, 
-       Region, Country.Code, owid_who, diff_min_vac_intro_8Dec2020, diff_V40_VEpub),
+       Region, Country.Code, owid_who, diff_V40_VEpub),
     -starts_with("V1"), -starts_with("V4"), -starts_with("V7")
   ) %>%
   relocate(iso3c, .after = Country.Name) %>%
@@ -715,7 +715,6 @@ supp_data <- Ineq_merged %>%
          worldbank_GNI_year = year_GNI,
          owid_vaccines = vaccines,
          owid_last_observation_date = last_observation_date,
-         diff_min_vac_intro_1Dec2020 = diff_min_vac_intro_8Dec2020_clean,
          any_mRNA = mRNA,
          any_vectored = Vectored,
          any_inactivated = Inactivated,
@@ -725,7 +724,6 @@ supp_data <- Ineq_merged %>%
          ivac_min_VE_pub_date = min_VE_pub_date,
          ivac_n_VE_studies = n_VE_studies,
          diff_intro_min_VE_pub = diff_intro_VE_pub) %>%
-  relocate(diff_min_vac_intro_1Dec2020, .after = diff_owid_who_intro)   %>%
   relocate(diff_intro_min_VE_pub, .after = ivac_n_VE_studies)
 
 
