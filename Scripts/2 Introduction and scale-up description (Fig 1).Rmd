@@ -296,6 +296,28 @@ summary_milestone_achieved <- Ineq_vaccine_coverage %>%
 
 summary_milestone_achieved
 
+summary_milestone_achieved <- Ineq_vaccine_coverage %>% 
+  group_by(q_GNI_per_c_WB) %>% 
+  summarise(
+    # V1 = sum(V1_dummy == "yes"),
+    # V40 = sum(V40_dummy == "yes"),
+    # V70 = sum(V70_dummy == "yes"),
+    # V1_nd = sum(V1_dummy_no_date == "yes"),
+    # V40_nd = sum(V40_dummy_no_date == "yes"),
+    # V70_nd = sum(V70_dummy_no_date == "yes"),
+    # total = n(),
+    V1_per = round(sum(V1_dummy == "yes") / n() * 100, 1),
+    V40_per = round(sum(V40_dummy == "yes") /sum(V1_dummy == "yes") * 100, 1) #,
+    # V70_per = round(sum(V70_dummy == "yes") / V1 * 100, 1),
+    # V1_per_nd = round(sum(V1_dummy_no_date == "yes") / n() * 100, 1),
+    # V40_per_nd = round(sum(V40_dummy_no_date == "yes") / V1_nd * 100, 1),
+    # V70_per_nd = round(sum(V70_dummy_no_date == "yes") / V1_nd * 100, 1),
+  )
+
+summary_milestone_achieved
+
+
+
 summary_milestone_achieved_l <- summary_milestone_achieved %>% 
     pivot_longer(
     cols = c(V1_per, V40_per),
@@ -731,13 +753,12 @@ ggplot(collated) +
 #Scatter plot + smooth line
 # x= GNI + y = date
 scatter_milestone_country <- Ineq_vaccine_coverage %>%
-  select(Country.Name, GNI_per_c_WB, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40, owid_vac_F70) %>%
+  select(Country.Name, GNI_per_c_WB, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40) %>%
   mutate(
-    owid_vac_F40 = as.Date(owid_vac_F40), 
-    owid_vac_F70 = as.Date(owid_vac_F70)
+    owid_vac_F40 = as.Date(owid_vac_F40)
   ) %>% 
   pivot_longer(
-    cols = c(min_vac_intro, owid_vac_F40, owid_vac_F70),
+    cols = c(min_vac_intro, owid_vac_F40),
     names_to = "milestone",
     values_to = "date"
   )
@@ -754,7 +775,7 @@ ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
     alpha = 0.3)+       
   facet_wrap(~ milestone, 
              scales = "free", 
-             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)","owid_vac_F70" = "Vaccine scale-up (70%)" ))) + 
+             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" ))) + 
   scale_y_date(
     limits = c(as.Date("2020-12-01"), NA),
                date_labels = "%b/%Y") +
@@ -768,7 +789,8 @@ ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
   theme(
     strip.text = element_text(face = "bold"),
     legend.position = "bottom"
-  )
+  )+
+  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))
 
 ED_F0_scatterplot_GNI_milestone
 
@@ -842,7 +864,7 @@ ED_F1_vac_prod_distrib_GNI<- ggplot(vac_prod_distrib_GNI, aes(x = as.factor(q_GN
        x = "GNI quartile",
        y = " % countries using vaccine",
        fill = "Vaccine Type") +
-  scale_fill_manual(values = c("#EECC66", "#EE99AA", "#6699CC", "#009999"),
+  scale_fill_manual(values = c("#F0E442", "#CC79A7","#D55E00","#0072B2" ),
     labels = c("mRNA","Vectored", "Inactivated", "Protein")) +
   theme_minimal() +
   scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
@@ -1334,4 +1356,5 @@ sup_table_intro_scale_plat_country<- left_join(sup_table_intro_scale_country, su
 
 write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_intro_scale_plat_plus_priority_groups.csv")
 ```
+
 
