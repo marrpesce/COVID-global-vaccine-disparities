@@ -85,6 +85,10 @@ metareg_collated$`N studies`[metareg_collated$VoI == "omicron" &
 metareg_collated$VoI = factor(metareg_collated$VoI, levels=c("omicron", "delta"))
 VEmetareg$variant_clean = factor(VEmetareg$variant_clean, levels=c("omicron", "delta"))
 
+## set GNI perc c levels
+metareg_collated$GNI = factor(metareg_collated$GNI, levels=c("1", "2", "3", "4"))
+VEmetareg$q_GNI_per_c_WB = factor(VEmetareg$q_GNI_per_c_WB, levels=c("1", "2", "3", "4"))
+
 ## reverse log10 transformation
 reverselog_trans <- function(base = exp(1)) {
     trans <- function(x) -log(x, base)
@@ -94,35 +98,104 @@ reverselog_trans <- function(base = exp(1)) {
               domain = c(1e-100, Inf))
 }
 
-ggplot() +
-  geom_point(data = metareg_collated, aes(x = VoI, y = pred, color = as.factor(GNI), shape = `N studies`),
-    position = position_dodge(width = 0.8), size=2.5) +
-  geom_errorbar(
-    data = metareg_collated,
-    aes(x = VoI, y = pred, color = as.factor(GNI), ymin = ci.lb, ymax = ci.ub),
-    width = 0, position = position_dodge(width = 0.8)) +
-  geom_point(data = VEmetareg,
-    aes(x = variant_clean,y = RR, size = 1 / SE.ln.RR ^ 2, color = as.factor(q_GNI_per_c_WB)),
-    alpha = 0.3, position = position_jitterdodge(jitter.width=0.3)) +
-  labs(x = "", y = "Vaccine effectiveness") +
-  scale_shape_manual(values=c(15, 0)) +
-  theme_minimal() +
-  theme(legend.position = "right") +
-  scale_color_manual(
-    name = "GNI quartile", 
-     values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
-    labels =  c("1 (lower\nincome)", "2" ,"3","4 (higher\nincome)")
-  ) +
-  guides(size = "none", colour = guide_legend(reverse = TRUE), shape = guide_legend(reverse = TRUE), ) + 
-  geom_hline(yintercept = 1, linetype = "dashed", color = "black") +
-  coord_flip() +
-  facet_grid(.~clean_vaccine) +
-  scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 1), labels = c(99,90,50,0), trans = reverselog_trans(10)) +
-  theme(axis.text.x=element_text(angle = 45, hjust = 1), 
-        axis.text.y = element_text(size=10),
-        strip.text = element_text(size=10))
+# ggplot() +
+#   geom_point(data = metareg_collated, aes(x = VoI, y = pred, color = GNI, shape = `N studies`),
+#     position = position_dodge(width = 0.8), size=2.5) +
+#   geom_errorbar(
+#     data = metareg_collated,
+#     aes(x = VoI, y = pred, color = GNI, ymin = ci.lb, ymax = ci.ub),
+#     width = 0, position = position_dodge(width = 0.8)) +
+#   geom_point(data = VEmetareg,
+#     aes(x = variant_clean,y = RR, size = 1 / SE.ln.RR ^ 2, color = q_GNI_per_c_WB),
+#     alpha = 0.3, position = position_jitterdodge(jitter.width=0.3)) +
+#   labs(x = "", y = "Vaccine effectiveness") +
+#   scale_shape_manual(values=c(15, 0)) +
+#   theme_minimal() +
+#   theme(legend.position = "right") +
+#   scale_color_manual(
+#     name = "GNI quartile",
+#      values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
+#     labels =  c("1 (lower\nincome)", "2" ,"3","4 (higher\nincome)",
+#   drop = FALSE)
+#   ) +
+#   guides(size = "none",
+#   colour = guide_legend(reverse = TRUE, drop = FALSE),
+#   shape = guide_legend(reverse = TRUE, drop = FALSE)) +
+#   geom_hline(yintercept = 1, linetype = "dashed", color = "black") +
+#   coord_flip() +
+#   facet_grid(. ~ clean_vaccine, drop = FALSE) +
+#   scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 1), labels = c(99,90,50,0), trans = reverselog_trans(10)) +
+#   theme(axis.text.x=element_text(angle = 45, hjust = 1),
+#         axis.text.y = element_text(size=10),
+#         strip.text = element_text(size=10))
 ```
 
+```{r}
+# Combine variant and GNI
+variant_levels <- c("delta", "omicron")
+GNI_levels <- 1:4
+combo_levels <- as.vector(outer(GNI_levels, variant_levels, FUN = function(g, v) paste0("G", g, "_", v)))
+
+metareg_collated$GNI_variant <- factor(
+  paste0("G", metareg_collated$GNI, "_", metareg_collated$VoI),
+  levels = combo_levels
+)
+
+VEmetareg$GNI_variant <- factor(
+  paste0("G", VEmetareg$q_GNI_per_c_WB, "_", VEmetareg$variant_clean),
+  levels = combo_levels
+)
+
+# one label
+axis_labels <- rep("", length(combo_levels))
+axis_labels[2] <- "delta"
+axis_labels[6] <- "omicron"
+
+# Plot
+ggplot() +
+  geom_point(
+    data = metareg_collated,
+    aes(x = GNI_variant, y = pred, color = as.factor(GNI), shape = `N studies`),
+    position = position_dodge(width = 0.8), size = 2.5
+  ) +
+  geom_errorbar(
+    data = metareg_collated,
+    aes(x = GNI_variant, y = pred, color = as.factor(GNI), ymin = ci.lb, ymax = ci.ub),
+    width = 0, position = position_dodge(width = 0.8)
+  ) +
+  geom_point(
+    data = VEmetareg,
+    aes(x = GNI_variant, y = RR, size = 1 / SE.ln.RR ^ 2, color = as.factor(q_GNI_per_c_WB)),
+    alpha = 0.3,
+    position = position_jitterdodge(jitter.width = 0.3, dodge.width = 0.8)
+  ) +
+  facet_grid(. ~ clean_vaccine, drop = FALSE) +
+  coord_flip() +
+  scale_x_discrete(labels = axis_labels) +
+  scale_shape_manual(values = c(15, 0)) +
+  scale_color_manual(
+    name = "GNI quartile",
+    values = c("#77AADD", "#44BB99", "#AAAA00", "#EE8866"),
+    labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")
+  ) +
+  scale_y_continuous(
+    breaks = c(0.01, 0.1, 0.5, 1),
+    labels = c(99, 90, 50, 0),
+    trans = reverselog_trans(10)
+  ) +
+  guides(size = "none", 
+         colour = guide_legend(reverse = TRUE), 
+         shape = guide_legend(reverse = TRUE)) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") +
+  labs(x = "", y = "Vaccine effectiveness") +
+  theme_minimal() +
+  theme(
+    legend.position = "right",
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.text.y = element_text(size = 10),
+    strip.text = element_text(size = 10)
+  )
+```
 
 
 

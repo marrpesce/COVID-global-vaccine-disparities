@@ -50,9 +50,15 @@ COVID19VE_ineq_merged <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv")
 
 #Ineq database
 Ineq_merged <- read_csv("Data/Processed/Ineq_merged_with_vaccine_data.csv") 
+
 ```
 
-## Fig xxx. Global inequities in the evaluation of vaccine effectiveness. (A) Map of the distribution of available VE studies across different countries. 
+###########################################################################################################################################################
+## Fig 1. maps: Global inequities in the evaluation of vaccine effectiveness. (A) Map of the distribution of available VE studies across different countries.## 
+###########################################################################################################################################################
+
+
+
 
 ```{r data for map}
 #Create table with study counts and introduction dates by country
@@ -105,14 +111,61 @@ world_ineq_gral <-
   
 world_ineq_gral <- st_as_sf(world_ineq_gral)
 
-#Plot map
-fig2_map<- ggplot(data = world_ineq_gral) +
+```
+
+
+```{r}
+#Map A: vaccine introduction dates
+
+map1_a<- ggplot(data = world_ineq_gral) +
+  geom_sf(aes(fill = as.factor(V1_date_group)), position = "identity") + 
+  scale_fill_manual(values = c("#2e73b8","#75b2d8","#9dd5ea", "#d7e0f4","#A2B1A4"),
+                    labels = c("<Jan\n2021", "Jan\n2021", "Feb\n2021", ">Mar\n2021", "not\nreached"),
+                    breaks = c("before jan/2021", "jan/2021", "feb/2021", "march/2021 +", "not reached"),
+                    na.value = "#F0F3F0") +
+  labs(
+    title= "(A)\nVaccine introduction date",
+    fill = "Month") +
+  theme_void()+
+  guides(color = guide_legend(title.position = "bottom", nrow = 1))+
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),  # Adjust text size
+    legend.title = element_text(size = 8),  # Adjust legend title size
+    plot.title = element_text(size = 10) 
+  )
+
+map1_a
+
+#Map 1.B: scale-up dates
+map1_b<- ggplot(data = world_ineq_gral) +
+  geom_sf(aes(fill = as.factor(V40_date_group)), position = "identity") + 
+  scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#A2B1A4"),
+                    breaks = c("before Jun/2021", "Jun-Aug/2021", "Sep-Nov/2021", "Dec/2021 +", "not reached"),
+                    labels = c("<Jun\n2021", "Jun-Aug\n2021", "Sep-Nov\n2021", ">Dec\n2021", "not\nreached"),
+                    na.value = "#F0F3F0") +
+  labs(
+           title= "(B)\nTime of vaccine scale-up (40%)",
+    fill = "Month") +
+  theme_void()+ 
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 9),  # Adjust text size
+    legend.title = element_text(size = 8),  # Adjust legend title size
+    plot.title = element_text(size = 10) # Adjust plot title size
+  ) 
+
+map1_b
+
+#Map 1.C: number of VE studies by country
+
+map1_c<- ggplot(data = world_ineq_gral) +
   geom_sf(aes(fill = n_VE_studies_g), 
           position = "identity") + 
   scale_fill_manual(values = c("#F0F0F0", "#C8E6A4", "#79C77A", "#3D8B62", "#005147"),
                     labels = c("0","01-05", "06-10", "11-15", "16+"))+ 
   labs(
-    title= "(A)",
+    title= "(C)",
     fill = 'Number of\nVE studies') +
   theme_void() +
   theme(
@@ -123,8 +176,207 @@ fig2_map<- ggplot(data = world_ineq_gral) +
     plot.title = element_text(size = 10) 
   )
 
-fig2_map
+map1_c
+
+
+map_1 <- map1_a / map1_b / map1_c
+map_1
+
+
 ```
+
+
+#######################################
+# Figure 2
+#############
+
+```{r}
+
+## Fig 2.a:  Percentage of countries achieving vaccine introduction (left) and scale-up to 40% primary series coverage by 31 December 2021 (right) by GNIpc
+
+summary_milestone_achieved <- Ineq_merged %>% 
+  group_by(q_GNI_per_c_WB) %>% 
+  summarise(
+    V1_per = round(sum(V1_dummy == "yes", na.rm = TRUE) / n() * 100, 1),
+    V40_per = round(sum(V40_dummy == "yes", na.rm = TRUE) / 
+                    sum(V1_dummy == "yes", na.rm = TRUE) * 100, 1),
+        study_per = round(sum(study_dummy == "yes")/ sum(V1_dummy == "yes", na.rm = TRUE) * 100, 1))
+
+summary_milestone_achieved
+
+summary_milestone_achieved_l <- summary_milestone_achieved %>% 
+    pivot_longer(
+    cols = c(V1_per, V40_per, study_per),
+    names_to = "milestone",
+    values_to = "Value"
+  )
+
+summary_milestone_achieved_l$milestone <- factor(
+  summary_milestone_achieved_l$milestone,
+  levels = c("V1_per", "V40_per", "study_per")
+)
+summary_milestone_achieved_l
+
+# Plot
+Fig_2_a_vac_achiev <- ggplot(summary_milestone_achieved_l, aes(x = as.factor(q_GNI_per_c_WB), y = Value, fill = as.factor(q_GNI_per_c_WB))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
+  coord_flip()+
+facet_wrap(~ milestone, labeller = labeller(milestone = c(
+  "V1_per" = "Vaccine introduction (31/12/2021)", 
+  "V40_per" = "Vaccine scale-up (40%, 31/12/2021)",
+  "study_per" = "% countries with ≥1 VE studies (07/01/2024)"
+))) +
+  labs(title = "(A)",
+       x = "",
+       y = "% countries achieving milestone") +
+    guides(fill = "none") +  # Remove the fill legend
+  theme_minimal() +
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  theme_minimal() + 
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 8),# Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10) # Adjust plot title size
+  ) 
+
+Fig_2_a_vac_achiev
+
+
+
+```
+
+
+```{r}
+#Fig 2.b:  Time to vaccine introduction (left) and scale-up (right) by GNIpc
+
+#Data for plot
+intro_scale_delay<- Ineq_merged %>%
+  mutate(
+    owid_vac_F40 = as.Date(owid_vac_F40)  ) %>% 
+  select(Country.Name, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40, min_VE_pub_date) %>%
+  filter(!is.na(min_vac_intro)) %>%
+  pivot_longer(
+    cols = c(min_vac_intro, owid_vac_F40, min_VE_pub_date),
+    names_to = "Date",
+    values_to = "Value"
+  ) 
+
+# Set factor levels
+ intro_scale_delay$Date = factor(intro_scale_delay$Date, levels = unique(intro_scale_delay$Date))
+
+#Plot
+Fig_2_b_vac_delay <- ggplot(intro_scale_delay) +
+  geom_boxplot(aes(x = Value, y = as.factor(q_GNI_per_c_WB)), outlier.shape = NA) +
+   geom_point(
+    aes(
+     x = Value, 
+     y = as.factor(q_GNI_per_c_WB),
+      #size = studies,
+      color = as.factor(q_GNI_per_c_WB)
+    ),
+    alpha = 0.5,
+    position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
+  )+
+  scale_x_date(limits = c(as.Date("2020-12-01"), NA),
+               date_labels = "%b/%Y") +
+  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
+  facet_wrap(~Date, scales = "free_x", labeller = labeller(Date = c("min_vac_intro" = "Date of vaccine introduction", "owid_vac_F40" = "Date of vaccine scale-up (40%)", "min_VE_pub_date"= "Date of first VE study")), nrow=1)+
+  labs(title = "(B)",
+       x = "Date", 
+       y = "GNI quartile")  +
+  guides(color = "none") +
+  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  theme_minimal() + 
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 8),# Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10) # Adjust plot title size
+  ) 
+ 
+Fig_2_b_vac_delay 
+```
+
+
+
+```{r}
+#Pivot longer + plat classification
+owid_vaccine_country_g <- Ineq_merged %>% 
+    pivot_longer(
+    cols = `CIGB CIGB-66/Abdala`: `Valneva VLA2001`,
+    names_to = "vaccine",
+    values_to = "check",
+    values_drop_na = TRUE) %>% 
+  filter(
+    check== 1
+  ) %>% 
+  select(-check) %>%
+  mutate(
+    vac_type = case_when(
+      vaccine %in% c("BioNTech/Pfizer BNT162b2", "Moderna mRNA-1273") ~ "mRNA",
+      vaccine %in% c("Oxford/AstraZeneca ChAdOx1-S", "Janssen Ad26.COV2.S", "Gamaleya Gam-COVID-Vac/Sputnik V", "Cansino Ad5-nCoV") ~ "Vectored",
+      vaccine %in% c("Beijing/Sinopharm BBIBP-CorV", "Sinovac CoronaVac", "Bharat Covaxin/BBV152", "Wuhan/Sinopharm vaccine", "RIBSP Kazakhstan QazCovid-in", "Shifa Pharmed COVIran", "Erciyes TURKOVAC", "Shenzhen Kangtai KCONVAC", "Institute of Medical Biology CAMS vaccine", "Chumakov Center CoviVac", "Valneva VLA2001") ~ "Inactivated",
+      vaccine %in% c("Novavax NVX-CoV2373", "CIGB CIGB-66/Abdala", "Instituto Finlay de Vacunas Soberana 02", "AZLB ZF2001", "Vector Institute EpiVacCorona", "Medigen MVC-COV1901", "Instituto Finlay de Vacunas Soberana 01", "Biological E Corbevax", "Sanofi/GSK CoV2 preS dTM", "Medicago CoVLP") ~ "Protein",
+      TRUE ~ "Unknown"
+    )
+  ) 
+
+unique(owid_vaccine_country_g$vaccine)
+
+#Vaccine platform by GNI quartile
+summary_vac_plat_distrib_GNI <-owid_vaccine_country_g %>% 
+  select(
+    Country.Code, q_GNI_per_c_WB, vac_type
+  ) %>% 
+  distinct() %>% 
+  filter(
+    !is.na(q_GNI_per_c_WB)
+  ) %>%  
+  group_by(q_GNI_per_c_WB, vac_type) %>% 
+  summarise(total=n()) %>% 
+  filter(
+    vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored" |vac_type=="Protein"
+  ) %>% 
+  mutate(
+    countries_quartile=case_when(
+      q_GNI_per_c_WB == 1 ~ 50,
+      q_GNI_per_c_WB == 2 ~ 51,
+      q_GNI_per_c_WB == 3 ~ 51,
+      q_GNI_per_c_WB == 4 ~ 51
+    )
+  ) %>% 
+  mutate(
+    vac_type_per = round(total / countries_quartile * 100, 1),
+    ) 
+
+summary_vac_plat_distrib_GNI
+
+summary_vac_plat_distrib_GNI$vac_type <- factor(summary_vac_plat_distrib_GNI$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Protein"))
+
+# Plot
+Fig_2_c_plat <- ggplot(summary_vac_plat_distrib_GNI, aes(x = as.factor(q_GNI_per_c_WB), y = vac_type_per, fill = as.factor(q_GNI_per_c_WB))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  coord_flip()+
+  facet_wrap(~ vac_type, ncol=4) +
+  labs(title = "(C)",
+       x = "",
+       y = " % countries using platform (07/01/2024)") +
+    guides(fill = "none") +  # Remove the fill legend
+  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
+  theme_minimal() +
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  theme(
+    legend.position = "bottom",
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
+    plot.title = element_text(size = 10) 
+  )
+
+Fig_2_c_plat
+```
+
 
 
 #??? here????
@@ -199,10 +451,10 @@ eff_study_perc <-Ineq_merged %>%
     study = sum(study_dummy == "yes"))%>%
   mutate(
     countries_quartile=case_when(
-      q_GNI_per_c_WB == 1 ~ 48,
-      q_GNI_per_c_WB == 2 ~ 49,
-      q_GNI_per_c_WB == 3 ~ 49,
-      q_GNI_per_c_WB == 4 ~ 48
+      q_GNI_per_c_WB == 1 ~ 50,
+      q_GNI_per_c_WB == 2 ~ 51,
+      q_GNI_per_c_WB == 3 ~ 51,
+      q_GNI_per_c_WB == 4 ~ 51
     ),
   ) %>% 
   mutate(
@@ -289,10 +541,10 @@ plat_summary <- COVID19VE_ineq_merged %>%
 plat_summary$vac_type <- factor(plat_summary$vac_type, levels = c("Protein subunit","Multiple", "Inactivated","Vectored","mRNA"))
 
 #Plot
-plot2_e<- ggplot(plat_summary[plat_summary$vac_type != "Protein subunit", ], aes(x = vac_type, y =per_papers_vac_type , fill = vac_type)) +
+Fig_2_d_stu_plat<- ggplot(plat_summary, aes(x = vac_type, y =per_papers_vac_type , fill = vac_type)) +
   geom_bar(stat = "identity", position = "dodge") +
   coord_flip()+
-  labs(title = "(E)",
+  labs(title = "(D)",
        x = "",
        y = "% VE studies") +
     guides(fill = "none") +  # Remove the fill legend
@@ -302,11 +554,11 @@ plot2_e<- ggplot(plat_summary[plat_summary$vac_type != "Protein subunit", ], aes
     legend.title = element_text(size = 9),  # Adjust legend title size
     plot.title = element_text(size = 10)
   ) +
-  scale_fill_manual(values = c("grey", "#6699CC","#EE99AA", "#EECC66"))+
-  scale_x_discrete(labels = c("Multiple", "Inactivated", "Vectored", "mRNA")) +
+  scale_fill_manual(values = c("#0072B2","#009E73", "#D55E00","#CC79A7", "#F0E442"))+
+  scale_x_discrete(labels = c("Protein","Multiple", "Inactivated", "Vectored", "mRNA")) +
   scale_y_continuous(limits = c(0, 100), breaks = c(0, 25, 50, 75, 100))
 
-plot2_e
+Fig_2_d_stu_plat
 
 ```
 
@@ -402,24 +654,10 @@ plot2_f
 
 
 ```{r}
-#Need to run the figures from script 2
-# Option A:
-map_3 <- map1_a / map1_b / fig2_map
-map_3
+# FIg 2
+Fig_2_l3 <- (Fig_2_c_plat | Fig_2_d_stu_plat) + plot_layout(widths = c(2, 1))
+Fig_2 <- (Fig_2_a_vac_achiev / Fig_2_b_vac_delay / Fig_2_l3)
 
-Fig_2a <- (Fig_2_a_vac_achiev / Fig_2_b_vac_delay / Fig_2_c_plat)
-Fig_2b <- (plot2_c / plot2_d / plot2_e)
-
-# Wrap both sides of the "|" in parentheses
-Fig_2 <- (Fig_2a | Fig_2b) + plot_layout(widths = c(2, 1))
-
-Fig_2
-
-
-# #Option b:
-# 
-# 
-# Fig_3 <-  (plot2_d | plot2_b | plot2_c) /  (plot2_e | plot2_f) 
 
 ```
 
@@ -506,15 +744,15 @@ data_F3$vac_type <- factor(data_F3$vac_type, levels = c("Protein subunit","Multi
 
 
 # (B) vaccine platform. In the upper panels, each point represents a study. 
-timeB_a<- data_F3[data_F3$vac_type != "Protein subunit", ] %>%
+timeB_a<- data_F3 %>%
   ggplot(aes(x = as.Date(min_pub_date), y = as.factor(vac_type))) +
   geom_boxplot() +
   geom_jitter(aes(color = as.factor(vac_type),alpha = 0.5)) +
   guides(alpha = "none") +
-  scale_color_manual(values = c("grey", "#6699CC","#EE99AA", "#EECC66"))+
+  scale_color_manual(values = c("#0072B2","#009E73", "#D55E00","#CC79A7", "#F0E442"))+
   labs(x = "Publication Date", y = "Vaccine platform")  +
   guides(color = FALSE) +
-  scale_y_discrete(labels = c("Multiple", "Inactivated", "Vectored", "mRNA")) + 
+  scale_y_discrete(labels = c("Protein","Multiple", "Inactivated", "Vectored", "mRNA")) + 
   theme_minimal()
 
 paper_sem_quart <- data_F3 %>%
@@ -524,13 +762,13 @@ paper_sem_quart <- data_F3 %>%
   ) 
   
   
-timeB_b <- ggplot(paper_sem_quart[paper_sem_quart$vac_type != "Protein subunit", ], aes(x = semester, y = total_papers, fill = as.factor(vac_type))) +
+timeB_b <- ggplot(paper_sem_quart, aes(x = semester, y = total_papers, fill = as.factor(vac_type))) +
   geom_bar(stat = "identity") +
   labs(x = "", y = "N VE studies", fill = "Vaccine platform") +
   theme_minimal() +
   theme(legend.position = "bottom", axis.text.x = element_text(angle = 45, hjust = 1)) +
-  scale_fill_manual(values = c("grey", "#6699CC","#EE99AA", "#EECC66"),
-    labels = c("Multiple", "Inactivated", "Vectored", "mRNA"))
+  scale_fill_manual(values = c("#0072B2","#009E73", "#D55E00","#CC79A7", "#F0E442"),
+    labels = c("Protein","Multiple", "Inactivated", "Vectored", "mRNA"))
 
 
 # Extended Data Fig. 3. Distribution of vaccine effectiveness papers over time.
@@ -731,3 +969,62 @@ supp_data <- Ineq_merged %>%
 
 write.csv(supp_data, "Data/Processed/supplementary_data.csv")
 ```
+
+
+
+```{r}
+
+#Scatter plot + smooth line
+# x= GNI + y = date
+scatter_milestone_country <- Ineq_merged %>%
+  select(Country.Name, GNI_per_c_WB, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40, min_VE_pub_date) %>%
+  mutate(
+    owid_vac_F40 = as.Date(owid_vac_F40)
+  ) %>% 
+  pivot_longer(
+    cols = c(min_vac_intro, owid_vac_F40, min_VE_pub_date),
+    names_to = "milestone",
+    values_to = "date"
+  )
+
+  
+ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
+  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB))) +
+  geom_smooth(aes(
+    x = log(GNI_per_c_WB), y = date),
+    color = "black", 
+    linetype = "dotted", 
+    size = 0.5,     
+    se = TRUE,       
+    alpha = 0.3)+       
+  facet_wrap(~ milestone, 
+             scales = "free", 
+             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" , "min_VE_pub_date"= "min_VE_pub_date"))) + 
+  scale_y_date(
+    limits = c(as.Date("2020-12-01"), NA),
+               date_labels = "%b/%Y") +
+  labs(
+    title = "Vaccine Milestones by GNI per Capita",
+    x = "GNI per capita (log)",
+    y = "Date",
+    color = "GNI quartile"
+  ) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(face = "bold"),
+    legend.position = "bottom"
+  )+
+  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))
+
+ED_F0_scatterplot_GNI_milestone
+
+#Correlation test: for adding to the legend
+spearman_corr <- scatter_milestone_country %>%
+  group_by(milestone) %>%
+  summarise(
+    cor = cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$estimate
+  )
+
+spearman_corr
+```
+
