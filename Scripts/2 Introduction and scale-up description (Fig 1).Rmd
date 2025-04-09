@@ -1269,6 +1269,8 @@ table(Ineq_vaccine_coverage$q_GNI_per_c_WB, Ineq_vaccine_coverage$`pol_age_old_2
 table(Ineq_vaccine_coverage$q_GNI_per_c_WB, Ineq_vaccine_coverage$`pol_age_old_2023-12-01`)
 
 # Tabulate N reporting
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_hcw_cps_2021-12-01`))
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_hcw_cps_2023-12-01`))
 table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_old_cps_2021-12-01`))
 table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_old_cps_2023-12-01`))
 ```
