@@ -1024,9 +1024,11 @@ ED_F0_scatterplot_GNI_milestone
 
 #Correlation test: for adding to the legend
 spearman_corr <- scatter_milestone_country %>%
+  filter(!is.na(date)) %>% 
   group_by(milestone) %>%
   summarise(
-    cor = cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$estimate
+    cor = cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$estimate,
+    p_value = round(cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$p.value, 3)
   )
 
 spearman_corr
