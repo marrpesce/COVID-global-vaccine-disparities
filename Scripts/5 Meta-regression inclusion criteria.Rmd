@@ -32,8 +32,9 @@ library(xlsx)
 
 
 # Data
-VEmetareg_data <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv") %>%
-  select(`study ID`:variant_clean, -owid_who)
+VEmetareg_data0 <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv") %>%
+  select(`study ID`:variant_clean, -owid_who) 
+
 VE_populations <- read_csv("Data/Input/meta_effect/VE_population_list.csv") 
 
 ```
@@ -42,11 +43,11 @@ VE_populations <- read_csv("Data/Input/meta_effect/VE_population_list.csv")
 
 ```{r, inclusion criteria}
 #Studies populations included in View-Hub primary series
-nrow(VEmetareg_data)  #3599 estimates
-n_distinct(VEmetareg_data$Study_id_f) #423 studies
+nrow(VEmetareg_data0)  #3599 estimates
+n_distinct(VEmetareg_data0$Study_id_f) #423 studies
 
 ## Step 1: exclude studies of infection
-VEmetareg_data <- VEmetareg_data %>% 
+VEmetareg_data <- VEmetareg_data0 %>% 
   filter(outcome_final=="severe" | outcome_final=="death") 
 nrow(VEmetareg_data)  #1643 estimates
 n_distinct(VEmetareg_data$Study_id_f) #250 studies
@@ -383,7 +384,9 @@ write.csv(sensitivity_model_check, "Data/Processed/VE_sensitivity_model_check.cs
 
 ```{r}
 #Supplementary table 4
-metareg_selected <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected.csv") %>% 
+metareg_elegible <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected.csv") 
+
+metareg_selected <- metareg_elegible %>% 
   filter(include=="yes")
 
 # vaccine study distribution
@@ -492,5 +495,68 @@ table_GNI2 <- metareg_selected %>%
   
 combined_GNI <- left_join(table_GNI1, table_GNI2)
 combined_GNI
+```
+
+
+
+
+
+```{r}
+# Extended Data Table X
+# A table listing all VE estimates by study would improve reproducibility and indicate which estimates were used or excluded.
+
+metareg <- VEmetareg_data0 %>%
+  select(
+    # Study Identification
+    Study_id_f,
+    `first author`,
+    `study design`,
+    n_row,
+    publication_date,
+    # Vaccination Details
+    clean_vaccine,
+    vac_type,
+    dose_number,
+    dose,
+    `dose interval`,
+    timing_of_dose_days,
+    # Population & Exposure
+    population_detail,
+    population_category,
+    historyofCOVID,
+    `max duration follow-up`,
+    # Outcomes
+    outcome_detail,
+    outcome_category,
+    outcome_final,
+    # Variant
+    variant_clean,
+    # Vaccine Effectiveness (VE)
+    VE,
+    LCL,
+    UCL,
+    # Country & Region Info
+    country_clean,
+    Country.Code,
+    continent,
+    Region,
+    # Economic Indicators
+    GNI_per_c_WB,
+    year_GNI,
+    Economy,
+    `Income group`,
+    q_GNI_per_c_WB
+  )
+  
+selected_studies_info <- metareg_elegible %>% 
+  select  (Study_id_f, n_row, min_period_days:sensitivity) %>% 
+  unique()
+
+
+metareg_selected_info <- left_join(metareg, selected_studies_info)
+
+
+write.csv(metareg_selected_info, "Data/Curated_datasets/Extended_Data_all_VE_estimates.csv")
+
 ```
 

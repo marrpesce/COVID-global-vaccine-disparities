@@ -51,6 +51,9 @@ COVID19VE_ineq_merged <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv")
 #Ineq database
 Ineq_merged <- read_csv("Data/Processed/Ineq_merged_with_vaccine_data.csv") 
 
+#Vaccine info priority groups
+Ineq_merged_prior_group <- read_csv("Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv")
+
 ```
 
 ###########################################################################################################################################################
@@ -987,7 +990,8 @@ scatter_milestone_country <- Ineq_merged %>%
     values_to = "date"
   )
 
-  
+scatter_milestone_country$milestone = factor(scatter_milestone_country$milestone, levels=c("min_vac_intro" , "owid_vac_F40" , "min_VE_pub_date"))
+
 ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
   geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB))) +
   geom_smooth(aes(
@@ -999,7 +1003,7 @@ ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
     alpha = 0.3)+       
   facet_wrap(~ milestone, 
              scales = "free", 
-             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" , "min_VE_pub_date"= "min_VE_pub_date"))) + 
+             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" , "min_VE_pub_date"= "1st VE research publication"))) + 
   scale_y_date(
     limits = c(as.Date("2020-12-01"), NA),
                date_labels = "%b/%Y") +
@@ -1026,5 +1030,26 @@ spearman_corr <- scatter_milestone_country %>%
   )
 
 spearman_corr
+```
+
+
+
+
+```{r}
+# Supplementary table Intro+Scale-up
+ineq_intro_scale_VE <- Ineq_merged %>%
+  select(
+    Country.Name, Country.Code, Region, continent, GNI_per_c_WB, 
+    year_GNI, q_GNI_per_c_WB, `Income group`, min_vac_intro, owid_who, owid_vac_F40, 
+    owid_vac_F70, vaccines, mRNA:Protein, min_VE_pub_date, n_VE_studies
+  ) %>% 
+  rename(
+    min_vac_intro_owid_or_who = owid_who
+  )
+
+curated_dataset_ineq_intro_scale_VE_prior_group<- left_join(ineq_intro_scale_VE, Ineq_merged_prior_group)
+
+write.csv(curated_dataset_ineq_intro_scale_VE_prior_group, "Data/Curated_datasets/Ineq_merged_with_vaccine_intro_scale_plat_priority_groups_VE.csv")
+
 ```
 
