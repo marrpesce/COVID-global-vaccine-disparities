@@ -16,7 +16,6 @@ editor_options:
 #### Outputs
 - Processed/Ineq_merged_with_vaccine_data.csv: Country-level income data with vaccine introduction and scale-up metrics 
 - Descriptive statistics on vaccine introduction and scale-up
-- Figure 1
 
 
 ```{r setup, include=FALSE}
@@ -213,61 +212,6 @@ world_ineq_gral <- st_as_sf(world_ineq_gral)
 ```
 
 
-```{r}
-#Map A: vaccine introduction dates
-
-map1_a<- ggplot(data = world_ineq_gral) +
-  geom_sf(aes(fill = as.factor(V1_date_group)), position = "identity") + 
-  scale_fill_manual(values = c("#2e73b8","#75b2d8","#9dd5ea", "#d7e0f4","#A2B1A4"),
-                    labels = c("<Jan\n2021", "Jan\n2021", "Feb\n2021", ">Mar\n2021", "not\nreached"),
-                    breaks = c("before jan/2021", "jan/2021", "feb/2021", "march/2021 +", "not reached"),
-                    na.value = "#F0F3F0") +
-  labs(
-    title= "(A)\nVaccine introduction date",
-    fill = "Month") +
-  theme_void()+
-  guides(color = guide_legend(title.position = "bottom", nrow = 1))+
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 9),  # Adjust text size
-    legend.title = element_text(size = 8),  # Adjust legend title size
-    plot.title = element_text(size = 10) 
-  )
-
-map1_a
-
-#Map 1.B: scale-up dates
-map1_b<- ggplot(data = world_ineq_gral) +
-  geom_sf(aes(fill = as.factor(V40_date_group)), position = "identity") + 
-  scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#A2B1A4"),
-                    breaks = c("before Jun/2021", "Jun-Aug/2021", "Sep-Nov/2021", "Dec/2021 +", "not reached"),
-                    labels = c("<Jun\n2021", "Jun-Aug\n2021", "Sep-Nov\n2021", ">Dec\n2021", "not\nreached"),
-                    na.value = "#F0F3F0") +
-  labs(
-           title= "(B)\nTime of vaccine scale-up (40%)",
-    fill = "Month") +
-  theme_void()+ 
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 9),  # Adjust text size
-    legend.title = element_text(size = 8),  # Adjust legend title size
-    plot.title = element_text(size = 10) # Adjust plot title size
-  ) 
-
-map1_b
-
-```
-
-```{r}
-#Fig 1: composition
-Fig_1 <-map1_a / map1_b
-
-Fig_1
-```
-
-
-
-
 ########################################################################################
 #### Fig 2. Global inequities in COVID-19 vaccine introduction and scale-up charts.#####
 ########################################################################################
@@ -299,19 +243,19 @@ summary_milestone_achieved
 summary_milestone_achieved <- Ineq_vaccine_coverage %>% 
   group_by(q_GNI_per_c_WB) %>% 
   summarise(
-    # V1 = sum(V1_dummy == "yes"),
-    # V40 = sum(V40_dummy == "yes"),
-    # V70 = sum(V70_dummy == "yes"),
-    # V1_nd = sum(V1_dummy_no_date == "yes"),
-    # V40_nd = sum(V40_dummy_no_date == "yes"),
-    # V70_nd = sum(V70_dummy_no_date == "yes"),
-    # total = n(),
+    V1 = sum(V1_dummy == "yes"),
+    V40 = sum(V40_dummy == "yes"),
+    V70 = sum(V70_dummy == "yes"),
+    V1_nd = sum(V1_dummy_no_date == "yes"),
+    V40_nd = sum(V40_dummy_no_date == "yes"),
+    V70_nd = sum(V70_dummy_no_date == "yes"),
+    total = n(),
     V1_per = round(sum(V1_dummy == "yes") / n() * 100, 1),
-    V40_per = round(sum(V40_dummy == "yes") /sum(V1_dummy == "yes") * 100, 1) #,
-    # V70_per = round(sum(V70_dummy == "yes") / V1 * 100, 1),
-    # V1_per_nd = round(sum(V1_dummy_no_date == "yes") / n() * 100, 1),
-    # V40_per_nd = round(sum(V40_dummy_no_date == "yes") / V1_nd * 100, 1),
-    # V70_per_nd = round(sum(V70_dummy_no_date == "yes") / V1_nd * 100, 1),
+    V40_per = round(sum(V40_dummy == "yes") /sum(V1_dummy == "yes") * 100, 1),
+    V70_per = round(sum(V70_dummy == "yes") / V1 * 100, 1),
+    V1_per_nd = round(sum(V1_dummy_no_date == "yes") / n() * 100, 1),
+    V40_per_nd = round(sum(V40_dummy_no_date == "yes") / V1_nd * 100, 1),
+    V70_per_nd = round(sum(V70_dummy_no_date == "yes") / V1_nd * 100, 1),
   )
 
 summary_milestone_achieved
@@ -327,36 +271,13 @@ summary_milestone_achieved_l <- summary_milestone_achieved %>%
 
 summary_milestone_achieved_l
 
-# Plot
-Fig_2_a_vac_achiev <- ggplot(summary_milestone_achieved_l, aes(x = as.factor(q_GNI_per_c_WB), y = Value, fill = as.factor(q_GNI_per_c_WB))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  coord_flip()+
-  facet_wrap(~ milestone, labeller = labeller(milestone = c("V1_per" = "Vaccine introduction (31/12/2021)", "V40_per" = "Vaccine scale-up (40%, 31/12/2021)"))) +
-  labs(title = "(B)",
-       x = "",
-       y = "% countries achieving milestone") +
-    guides(fill = "none") +  # Remove the fill legend
-  theme_minimal() +
-  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
-  theme_minimal() + 
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 8),# Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10) # Adjust plot title size
-  ) 
-
-Fig_2_a_vac_achiev
-
-
 
 ```
 
-## Fig 2.b:  Time to vaccine introduction (left) and scale-up (right) by GNIpc
+## Time to vaccine introduction (left) and scale-up (right) by GNIpc
 
 ```{r}
-#Fig 2.b:  Time to vaccine introduction (left) and scale-up (right) by GNIpc
+# Time to vaccine introduction (left) and scale-up (right) by GNIpc
 
 #Data for plot
 intro_scale_delay<- Ineq_vaccine_coverage %>%
@@ -373,37 +294,6 @@ intro_scale_delay<- Ineq_vaccine_coverage %>%
 # Set factor levels
  intro_scale_delay$Date = factor(intro_scale_delay$Date, levels = unique(intro_scale_delay$Date))
 
-#Plot
-Fig_2_b_vac_delay <- ggplot(intro_scale_delay) +
-  geom_boxplot(aes(x = Value, y = as.factor(q_GNI_per_c_WB)), outlier.shape = NA) +
-   geom_point(
-    aes(
-     x = Value, 
-     y = as.factor(q_GNI_per_c_WB),
-      #size = studies,
-      color = as.factor(q_GNI_per_c_WB)
-    ),
-    alpha = 0.5,
-    position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
-  )+
-  scale_x_date(limits = c(as.Date("2020-12-01"), NA),
-               date_labels = "%b/%Y") +
-  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  facet_wrap(~Date, scales = "free_x", labeller = labeller(Date = c("min_vac_intro" = "Date of vaccine introduction", "owid_vac_F40" = "Date of vaccine scale-up (40%)")), nrow=1)+
-  labs(title = "(A)",
-       x = "Date", 
-       y = "GNI quartile")  +
-  guides(color = "none") +
-  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
-  theme_minimal() + 
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 8),# Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10) # Adjust plot title size
-  ) 
- 
-Fig_2_b_vac_delay 
 ```
 
 ## 2.c Percentage of countries using different vaccine platforms by GNIpc 
@@ -516,39 +406,7 @@ summary_vac_plat_distrib_GNI
 
 summary_vac_plat_distrib_GNI$vac_type <- factor(summary_vac_plat_distrib_GNI$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Protein"))
 
-# Plot
-Fig_2_c_plat <- ggplot(summary_vac_plat_distrib_GNI, aes(x = as.factor(q_GNI_per_c_WB), y = vac_type_per, fill = as.factor(q_GNI_per_c_WB))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  coord_flip()+
-  facet_wrap(~ vac_type, ncol=4) +
-  labs(title = "(C)",
-       x = "",
-       y = " % countries using platform (07/01/2024)") +
-    guides(fill = "none") +  # Remove the fill legend
-  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  theme_minimal() +
-  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
-  theme(
-    legend.position = "bottom",
-    legend.text = element_text(size = 8),  # Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10) 
-  )
-
-Fig_2_c_plat
-
 ```
-
-## Fig 2 composition
-
-```{r}
-#Plot 2 comp
-
-Fig_2 <- Fig_2_a_vac_achiev / Fig_2_b_vac_delay / Fig_2_c_plat
-
-Fig_2
-```
-
 
 ############################
 #Global vaccine platform  #
@@ -582,15 +440,8 @@ summary_perc_by_plat
 
 
 #######################################################################################################
-##Fig 2. Vaccine coverage in high-risk populations (health care workers and older adults) and overall.#
+##Fig 3. Vaccine coverage in high-risk populations (health care workers and older adults) and overall.#
 #######################################################################################################
-
-
-<!-- (A) Coverage in HCWs by GNI as of (top) Dec 2021 and (bottom) Dec 2023 -->
-<!-- (B) Coverage in older adults by GNI as of (top) Dec 2021 and (bottom) Dec 2023 -->
-<!-- (C) Coverage per capita by GNI as of (top) Dec 2021 and (bottom) Dec 2023 -->
-
-<!-- Each would be a box plot in the style of Fig 1C. Or something like that?  -->
 
 
 ```{r}
@@ -740,69 +591,6 @@ ggplot(collated) +
   ) 
 ```
 
-
-
-#############################################################
-# Extended Data Fig. ?. Scatterplot ... + cor test for lable#
-#############################################################
-
-
-
-```{r}
-
-#Scatter plot + smooth line
-# x= GNI + y = date
-scatter_milestone_country <- Ineq_vaccine_coverage %>%
-  select(Country.Name, GNI_per_c_WB, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40) %>%
-  mutate(
-    owid_vac_F40 = as.Date(owid_vac_F40)
-  ) %>% 
-  pivot_longer(
-    cols = c(min_vac_intro, owid_vac_F40),
-    names_to = "milestone",
-    values_to = "date"
-  )
-
-  
-ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
-  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB))) +
-  geom_smooth(aes(
-    x = log(GNI_per_c_WB), y = date),
-    color = "black", 
-    linetype = "dotted", 
-    size = 0.5,     
-    se = TRUE,       
-    alpha = 0.3)+       
-  facet_wrap(~ milestone, 
-             scales = "free", 
-             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" ))) + 
-  scale_y_date(
-    limits = c(as.Date("2020-12-01"), NA),
-               date_labels = "%b/%Y") +
-  labs(
-    title = "Vaccine Milestones by GNI per Capita",
-    x = "GNI per capita (log)",
-    y = "Date",
-    color = "GNI quartile"
-  ) +
-  theme_minimal() +
-  theme(
-    strip.text = element_text(face = "bold"),
-    legend.position = "bottom"
-  )+
-  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))
-
-ED_F0_scatterplot_GNI_milestone
-
-#Correlation test: for adding to the legend
-spearman_corr <- scatter_milestone_country %>%
-  group_by(milestone) %>%
-  summarise(
-    cor = cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$estimate
-  )
-
-spearman_corr
-```
 
 
 ###################################################################################################
@@ -1331,30 +1119,18 @@ summary_overall_cov_21_23
 
 
 #########################
-#Supplementary database#
+#For supplementary database#
 ########################
 
 
 ```{r}
 # Supplementary table Intro+Scale-up
-sup_table_intro_scale_country <- Ineq_vaccine_coverage%>%
+for_sup_table_risk_pop <- Ineq_vaccine_coverage %>%
   select(
-    Country.Name, Country.Code, Region, continent, GNI_per_c_WB, 
-    year_GNI, q_GNI_per_c_WB, `Income group`, owid_vac_intro, 
-    who_vac_intro, min_vac_intro, owid_who, owid_vac_F40, 
-    owid_vac_F70, vac_intro_hcw, vac_F40_hcw, vac_F70_hcw, 
+    Country.Code, vac_intro_hcw, vac_F40_hcw, vac_F70_hcw, 
     vac_intro_old, vac_F40_old, vac_F70_old
-  ) %>% 
-  rename(
-    min_vac_intro_owid_or_who = owid_who
   )
 
-sup_table_plat_country <- Ineq_vaccine_coverage_platform %>% 
-  select(Country.Code, vaccines:source_name, mRNA:Protein) 
-
-sup_table_intro_scale_plat_country<- left_join(sup_table_intro_scale_country, sup_table_plat_country)
-
-write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_intro_scale_plat_plus_priority_groups.csv")
+write.csv(for_sup_table_risk_pop, "Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv")
 ```
-
 

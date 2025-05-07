@@ -38,7 +38,10 @@ library(lubridate)
 ```{r,import database}
 #Vaccine Effectiveness Weekly studies database (11-01-2024)
 
-COVID19VE <- read.xlsx("Data/Input/meta_effect/WeeklySummary_COVID19_VE_Studies_20240111_0.xlsx",sheetName = "Primary Series Studies", check.names=FALSE) 
+COVID19VE <- read.xlsx("Data/Input/meta_effect/WeeklySummary_COVID19_VE_Studies_20240111_0.xlsx",sheetName = "Primary Series Studies", check.names=FALSE) %>% 
+  mutate(
+    n_row = row_number()
+  )
 
 # Update non-standard strings to avoid later issues
 COVID19VE$timing_of_dose_days = str_replace_all(COVID19VE$timing_of_dose_days, "≤", ">=")
