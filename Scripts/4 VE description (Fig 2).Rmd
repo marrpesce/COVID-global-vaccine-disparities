@@ -1027,8 +1027,9 @@ spearman_corr <- scatter_milestone_country %>%
   filter(!is.na(date)) %>% 
   group_by(milestone) %>%
   summarise(
-    cor = cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$estimate,
-    p_value = round(cor.test(log(GNI_per_c_WB), as.numeric(date), method = "spearman")$p.value, 3)
+    cor = cor.test(GNI_per_c_WB, as.numeric(date), method = "spearman")$estimate,
+    p_value = round(cor.test(GNI_per_c_WB, as.numeric(date), method = "spearman")$p.value, 3),
+    nrow = sum(!is.na(as.numeric(date)) & !is.na(GNI_per_c_WB))
   )
 
 spearman_corr
