@@ -52,7 +52,8 @@ COVID19VE_ineq_merged <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv")
 Ineq_merged <- read_csv("Data/Processed/Ineq_merged_with_vaccine_data.csv") 
 
 #Vaccine info priority groups
-Ineq_merged_prior_group <- read_csv("Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv")
+Ineq_merged_prior_group <- read_csv("Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv") %>% 
+  select(-`...1`)
 
 ```
 
@@ -90,7 +91,7 @@ Ineq_merged <- left_join(Ineq_merged, Country_studies, by="Country.Code") %>%
   # add time to publication metrics
    mutate(
     diff_V40_VEpub = as.Date(min_VE_pub_date) - as.Date(owid_vac_F40),
-    diff_intro_VE_pub = as.Date(min_VE_pub_date) - as.Date(min_vac_intro)
+    diff_intro_min_VE_pub = as.Date(min_VE_pub_date) - as.Date(min_vac_intro)
     )
 
 #Geographical information
@@ -382,7 +383,7 @@ Fig_2_c_plat
 
 
 
-#??? here????
+
 ```{r}
 
 #Create table with study counts and introduction dates by GNI quartile
@@ -489,10 +490,10 @@ plot2_c
 ```{r}
 # (D) Time from vaccine introduction to first VE study publication in the country by GNIpc GNI quartile. Note that only countries with at least one available VE study are included
  plot2_d<-ggplot(Ineq_merged) +
-  geom_boxplot(aes(x = diff_intro_VE_pub, y = as.factor(q_GNI_per_c_WB)), outlier.shape=NA) +
+  geom_boxplot(aes(x = diff_intro_min_VE_pub, y = as.factor(q_GNI_per_c_WB)), outlier.shape=NA) +
    geom_point(
     aes(
-     x = diff_intro_VE_pub, y = as.factor(q_GNI_per_c_WB),
+     x = diff_intro_min_VE_pub, y = as.factor(q_GNI_per_c_WB),
       #size = studies,
       color = as.factor(q_GNI_per_c_WB)
     ),
@@ -519,9 +520,9 @@ plot2_d
 summary_vacc_eff_delay <- Ineq_merged %>%
   group_by(q_GNI_per_c_WB) %>%
   summarize(
-    median_value_1 = round(median(as.numeric(diff_intro_VE_pub), na.rm = TRUE),0),
-    q25_1 = round(quantile(as.numeric(diff_intro_VE_pub), 0.25, na.rm = TRUE),0),
-    q75_1 = round(quantile(as.numeric(diff_intro_VE_pub), 0.75, na.rm = TRUE),0)
+    median_value_1 = round(median(as.numeric(diff_intro_min_VE_pub), na.rm = TRUE),0),
+    q25_1 = round(quantile(as.numeric(diff_intro_min_VE_pub), 0.25, na.rm = TRUE),0),
+    q75_1 = round(quantile(as.numeric(diff_intro_min_VE_pub), 0.75, na.rm = TRUE),0)
   )
 summary_vacc_eff_delay
 ```
@@ -933,45 +934,45 @@ table_GNI2 <- COVID19VE_ineq_merged %>%
 combined_GNI <- left_join(table_GNI1, table_GNI2)
 ```
 
-#### Clean supplementary dataset
-```{r}
-supp_data <- Ineq_merged %>%
-  select(
-    Country.Name:source_website,
-    mRNA:Protein,
-    min_VE_pub_date:diff_intro_VE_pub
-  ) %>%
-  select(
-    -c(Economy, `Income group`, perc_VE_studies, study_dummy, 
-       Region, Country.Code, owid_who, diff_V40_VEpub),
-    -starts_with("V1"), -starts_with("V4"), -starts_with("V7")
-  ) %>%
-  relocate(iso3c, .after = Country.Name) %>%
-  relocate(continent, .after = iso3c) %>%
-  relocate(q_GNI_per_c_WB, .after = GNI_per_c_WB) %>%
-  rename(country = Country.Name,
-         iso_code = iso3c,
-         worldbank_GNI_per_capita = GNI_per_c_WB,
-         worldbank_GNI_quartile = q_GNI_per_c_WB,
-         worldbank_GNI_year = year_GNI,
-         owid_vaccines = vaccines,
-         owid_last_observation_date = last_observation_date,
-         any_mRNA = mRNA,
-         any_vectored = Vectored,
-         any_inactivated = Inactivated,
-         any_protein = Protein,
-         owid_source_name = source_name,
-         owid_source_website = source_website,
-         ivac_min_VE_pub_date = min_VE_pub_date,
-         ivac_n_VE_studies = n_VE_studies,
-         diff_intro_min_VE_pub = diff_intro_VE_pub) %>%
-  relocate(diff_intro_min_VE_pub, .after = ivac_n_VE_studies)
+<!-- #### Clean supplementary dataset -->
+<!-- ```{r} -->
+<!-- supp_data <- Ineq_merged %>% -->
+<!--   select( -->
+<!--     Country.Name:source_website, -->
+<!--     mRNA:Protein, -->
+<!--     min_VE_pub_date:diff_intro_min_VE_pub -->
+<!--   ) %>% -->
+<!--   select( -->
+<!--     -c(Economy, `Income group`, perc_VE_studies, study_dummy,  -->
+<!--        Region, Country.Code, owid_who, diff_V40_VEpub), -->
+<!--     -starts_with("V1"), -starts_with("V4"), -starts_with("V7") -->
+<!--   ) %>% -->
+<!--   relocate(iso3c, .after = Country.Name) %>% -->
+<!--   relocate(continent, .after = iso3c) %>% -->
+<!--   relocate(q_GNI_per_c_WB, .after = GNI_per_c_WB) %>% -->
+<!--   rename(country = Country.Name, -->
+<!--          iso_code = iso3c, -->
+<!--          worldbank_GNI_per_capita = GNI_per_c_WB, -->
+<!--          worldbank_GNI_quartile = q_GNI_per_c_WB, -->
+<!--          worldbank_GNI_year = year_GNI, -->
+<!--          owid_vaccines = vaccines, -->
+<!--          owid_last_observation_date = last_observation_date, -->
+<!--          any_mRNA = mRNA, -->
+<!--          any_vectored = Vectored, -->
+<!--          any_inactivated = Inactivated, -->
+<!--          any_protein = Protein, -->
+<!--          owid_source_name = source_name, -->
+<!--          owid_source_website = source_website, -->
+<!--          ivac_min_VE_pub_date = min_VE_pub_date, -->
+<!--          ivac_n_VE_studies = n_VE_studies, -->
+<!--          diff_intro_min_VE_pub = diff_intro_min_VE_pub) %>% -->
+<!--   relocate(diff_intro_min_VE_pub, .after = ivac_n_VE_studies) -->
 
 
 
 
-write.csv(supp_data, "Data/Processed/supplementary_data.csv")
-```
+<!-- write.csv(supp_data, "Data/Processed/supplementary_data.csv") -->
+<!-- ``` -->
 
 
 
@@ -1042,17 +1043,66 @@ spearman_corr
 # Supplementary table Intro+Scale-up
 ineq_intro_scale_VE <- Ineq_merged %>%
   select(
-    Country.Name, Country.Code, Region, continent, GNI_per_c_WB, 
-    year_GNI, q_GNI_per_c_WB, `Income group`, min_vac_intro, owid_who, owid_vac_F40, 
-    owid_vac_F70, vaccines, mRNA:Protein, min_VE_pub_date, n_VE_studies
-  ) %>% 
+    Country.Name,
+    Country.Code,
+    Region,
+    continent,
+    GNI_per_c_WB,
+    year_GNI,
+    q_GNI_per_c_WB,
+    min_vac_intro,
+    owid_who,
+    owid_vac_F40,
+    owid_vac_F70,
+    diff_intro_F40,
+    diff_intro_F70,
+    vaccines,
+    last_observation_date,
+    mRNA:Protein,
+    source_name,
+    source_website,
+    min_VE_pub_date,
+    diff_intro_min_VE_pub,
+    n_VE_studies
+  ) %>%
   rename(
-    min_vac_intro_owid_or_who = owid_who
-  )
+  country = Country.Name,
+  iso_code = Country.Code,
+  region = Region,
+  continent = continent,
+  worldbank_GNI_per_capita = GNI_per_c_WB,
+  worldbank_GNI_year = year_GNI,
+  worldbank_GNI_quartile = q_GNI_per_c_WB,
+  min_vac_intro = min_vac_intro,
+  min_vac_intro_source = owid_who,
+  owid_vac_F40 = owid_vac_F40,
+  owid_vac_F70 = owid_vac_F70,
+  diff_intro_F40 = diff_intro_F40,
+  diff_intro_F70 = diff_intro_F70,
+  owid_vaccines = vaccines,
+  owid_last_observation_date = last_observation_date,
+  any_mRNA = mRNA,
+  any_vectored = Vectored,
+  any_inactivated = Inactivated,
+  any_protein = Protein,
+  owid_source_name = source_name,
+  owid_source_website = source_website,
+  ivac_min_VE_pub_date = min_VE_pub_date,
+  diff_intro_min_VE_pub = diff_intro_min_VE_pub,
+  ivac_n_VE_studies = n_VE_studies
+)
 
-curated_dataset_ineq_intro_scale_VE_prior_group<- left_join(ineq_intro_scale_VE, Ineq_merged_prior_group)
+curated_dataset_ineq_intro_scale_VE_prior_group<- left_join(ineq_intro_scale_VE, Ineq_merged_prior_group, by = c("iso_code"= "Country.Code")) %>%
+  rename_with(.fn = ~ paste0("who_unicef_", .x), 
+              .cols = c("vac_intro_hcw", "vac_F40_hcw", "vac_F70_hcw", 
+                        "vac_intro_old", "vac_F40_old", "vac_F70_old"))
 
 write.csv(curated_dataset_ineq_intro_scale_VE_prior_group, "Data/Curated_datasets/Ineq_merged_with_vaccine_intro_scale_plat_priority_groups_VE.csv")
+
+
+
+
+
 
 ```
 
