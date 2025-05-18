@@ -121,6 +121,36 @@ write.csv(VEmetareg_data, "Data/Processed/COVID19VE_ineq_merged_filtered_eligibl
 ```
 
 
+```{r}
+# Supplementary table Intro+Scale-up
+clean_data <- VEmetareg_data %>%
+  select(
+    `study ID`, `first author`, `study design`, `publication date`, 
+    country_clean, iso3c, continent, GNI_per_c_WB, year_GNI, q_GNI_per_c_WB,
+    clean_vaccine, vac_type, dose_number, 
+    population_detail, historyofCOVID, outcome_detail, outcome_category,
+    variant_clean, timing_of_dose_days, `max duration follow-up`,
+    max_follow_up_days, min_period_days,	max_period_days, 
+    VE, LCL,	UCL, RR, RR.LCL,	RR.UCL,	ln.RR,	SE.ln.RR
+  ) %>% 
+  rename(
+    ivac_study_id = `study ID`,
+    first_author = `first author`,
+    study_design = `study design`,
+    publication_date = `publication date`,
+    country = country_clean,
+    vaccine = clean_vaccine,
+    vaccine_platform = vac_type,
+    history_of_COVID = historyofCOVID,
+    variant = variant_clean,
+    max_follow_up = `max duration follow-up`
+  )
+
+write.csv(clean_data, "Data/Curated_datasets/VE_curated.csv", row.names=F)
+
+```
+
+
 ```{r, session info}
 
 print(sessionInfo())

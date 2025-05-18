@@ -329,6 +329,14 @@ VEmetareg_data <- VEmetareg_data %>%
     )
 nrow(VEmetareg_data) #206
 n_distinct(VEmetareg_data$Study_id_f) #51
+n_distinct(subset(VEmetareg_data, clean_vaccine == "BioNTech/Pfizer BNT162b2")$Study_id_f) #42
+n_distinct(subset(VEmetareg_data, clean_vaccine == "Moderna mRNA-1273")$Study_id_f) #26
+n_distinct(subset(VEmetareg_data, clean_vaccine == "Oxford/AstraZeneca ChAdOx1-S")$Study_id_f) #22
+
+n_distinct(subset(VEmetareg_data, q_GNI_per_c_WB == 4)$Study_id_f) #38
+n_distinct(subset(VEmetareg_data, q_GNI_per_c_WB == 3)$Study_id_f) #9
+n_distinct(subset(VEmetareg_data, q_GNI_per_c_WB == 2)$Study_id_f) #2
+n_distinct(subset(VEmetareg_data, q_GNI_per_c_WB == 1)$Study_id_f) #2
 
 # create max_duration_follow_up_days 
 VEmetareg_data$max_follow_up_days = str_replace_all(VEmetareg_data$`max duration follow-up`, " weeks","")
