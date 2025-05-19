@@ -46,13 +46,13 @@ library(cowplot)
 #Databases
 
 #Eff database
-COVID19VE_ineq_merged <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv") 
+COVID19VE_ineq_merged <- read_csv("../Data/Processed/COVID19VE_ineq_merged.csv") 
 
 #Ineq database
-Ineq_merged <- read_csv("Data/Processed/Ineq_merged_with_vaccine_data.csv") 
+Ineq_merged <- read_csv("../Data/Processed/Ineq_merged_with_vaccine_data.csv") 
 
 #Vaccine info priority groups
-Ineq_merged_prior_group <- read_csv("Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv") %>% 
+Ineq_merged_prior_group <- read_csv("../Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv") %>% 
   select(-`...1`)
 
 ```
@@ -75,7 +75,7 @@ Country_studies <- COVID19VE_ineq_merged %>%
   )
 nrow(Country_studies) # 48 distinct countries with country-specific VE estimates
 nstudies = sum(Country_studies$n_VE_studies) 
-nstudies # 422 unique studies
+nstudies # 423 unique studies
 Country_studies %>% arrange(-n_VE_studies) %>% filter(n_VE_studies>10)
 
 # Check all country iso codes represented in inequity data
@@ -128,14 +128,14 @@ map1_a<- ggplot(data = world_ineq_gral) +
                     breaks = c("before jan/2021", "jan/2021", "feb/2021", "march/2021 +", "not reached"),
                     na.value = "#F0F3F0") +
   labs(
-    title= "(A)\nVaccine introduction date",
-    fill = "Month") +
+    title= "(A)",
+    fill = "Month of\nintroduction") +
   theme_void()+
   guides(color = guide_legend(title.position = "bottom", nrow = 1))+
   theme(
     legend.position = "bottom",
-    legend.text = element_text(size = 9),  # Adjust text size
-    legend.title = element_text(size = 8),  # Adjust legend title size
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
     plot.title = element_text(size = 10) 
   )
 
@@ -149,13 +149,13 @@ map1_b<- ggplot(data = world_ineq_gral) +
                     labels = c("<Jun\n2021", "Jun-Aug\n2021", "Sep-Nov\n2021", ">Dec\n2021", "not\nreached"),
                     na.value = "#F0F3F0") +
   labs(
-           title= "(B)\nTime of vaccine scale-up (40%)",
-    fill = "Month") +
+           title= "(B)",
+    fill = "Month of\nscale-up (40%)") +
   theme_void()+ 
   theme(
     legend.position = "bottom",
-    legend.text = element_text(size = 9),  # Adjust text size
-    legend.title = element_text(size = 8),  # Adjust legend title size
+    legend.text = element_text(size = 8),  # Adjust text size
+    legend.title = element_text(size = 9),  # Adjust legend title size
     plot.title = element_text(size = 10) # Adjust plot title size
   ) 
 
@@ -229,7 +229,7 @@ Fig_2_a_vac_achiev <- ggplot(summary_milestone_achieved_l, aes(x = as.factor(q_G
 facet_wrap(~ milestone, labeller = labeller(milestone = c(
   "V1_per" = "Vaccine introduction (31/12/2021)", 
   "V40_per" = "Vaccine scale-up (40%, 31/12/2021)",
-  "study_per" = "% countries with ≥1 VE studies (07/01/2024)"
+  "study_per" = "% countries with ≥1 VE study (07/01/2024)"
 ))) +
   labs(title = "(A)",
        x = "",
@@ -418,7 +418,7 @@ summ_GNI_eff_study <- Ineq_merged %>%
   ) %>% 
   summarize(
     total_st_GNI = sum(n_VE_studies),
-    perc_st_GNI= sum(n_VE_studies)/422*100, #fix with final value
+    perc_st_GNI= sum(n_VE_studies)/423*100, #fix with final value
     min_VE_pub_date= min(min_VE_pub_date)
   )
 summ_GNI_eff_study
@@ -994,7 +994,7 @@ scatter_milestone_country <- Ineq_merged %>%
 scatter_milestone_country$milestone = factor(scatter_milestone_country$milestone, levels=c("min_vac_intro" , "owid_vac_F40" , "min_VE_pub_date"))
 
 ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
-  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB))) +
+  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB)), alpha=0.8) +
   geom_smooth(aes(
     x = log(GNI_per_c_WB), y = date),
     color = "black", 
@@ -1004,19 +1004,18 @@ ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
     alpha = 0.3)+       
   facet_wrap(~ milestone, 
              scales = "free", 
-             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" , "min_VE_pub_date"= "1st VE research publication"))) + 
+             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" , "min_VE_pub_date"= "1st VE study publication"))) + 
   scale_y_date(
     limits = c(as.Date("2020-12-01"), NA),
                date_labels = "%b/%Y") +
   labs(
-    title = "Vaccine Milestones by GNI per Capita",
     x = "GNI per capita (log)",
     y = "Date",
     color = "GNI quartile"
   ) +
   theme_minimal() +
   theme(
-    strip.text = element_text(face = "bold"),
+    strip.text = element_text(size = 10),
     legend.position = "bottom"
   )+
   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))

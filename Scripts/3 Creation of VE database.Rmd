@@ -224,6 +224,11 @@ length(unique(COVID19VE_ineq_merged$Study_id_f)) #423 unique studies
 ```
 
 ```{r}
+# write unique IDs to cross-check minimum dates
+#dedup = COVID19VE_ineq_merged %>% distinct(`study ID`, .keep_all = TRUE) %>%
+#  select(`study ID`, `first author`, `publication date`)
+#write.csv(dedup, "Data/Input/meta_effect/min_study_dates_to_populate.csv")
+
 # earliest publication date
 studies_min_pub_date <- read_csv("Data/Input/meta_effect/min_study_dates.csv") %>% 
   select(`study ID`, earliest_date) 
@@ -261,7 +266,7 @@ check <- COVID19VE_ineq_merged %>%
     dif_date= publication_date - min_pub_date
   )
 sum(check$dif_date!=0)
-#137 dates fixed 
+#139 dates fixed 
 
 
 
@@ -272,6 +277,33 @@ sum(check$dif_date!=0)
 #Save data the .csv file for the descriptive analysis and metaregression
 
 write.csv(COVID19VE_ineq_merged, "Data/Processed/COVID19VE_ineq_merged.csv")
+
+```
+
+```{r}
+# Supplementary table Intro+Scale-up
+clean_data <- COVID19VE_ineq_merged %>%
+  select(
+    `study ID`, `first author`, `study design`, `publication date`, 
+    country_clean, iso3c, continent, GNI_per_c_WB, year_GNI, q_GNI_per_c_WB,
+    clean_vaccine, vac_type, dose_number, 
+    population_detail, `historyofCOVID `, outcome_detail, outcome_category,
+    variant_clean, timing_of_dose_days, `max duration follow-up`,
+    VE, LCL,	UCL
+  ) %>% 
+  rename(
+    ivac_study_id = `study ID`,
+    first_author = `first author`,
+    study_design = `study design`,
+    publication_date = `publication date`,
+    country = country_clean,
+    vaccine = clean_vaccine,
+    vaccine_platform = vac_type,
+    history_of_COVID = `historyofCOVID `,
+    variant = variant_clean,
+  )
+
+write.csv(clean_data, "Data/Curated_datasets/VE_curated_prefilter.csv", row.names=F)
 
 ```
 
