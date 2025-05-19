@@ -146,30 +146,32 @@ VEmetareg$GNI_variant <- factor(
   levels = combo_levels
 )
 
-# one label
-axis_labels <- rep("", length(combo_levels))
-axis_labels[2] <- "delta"
-axis_labels[6] <- "omicron"
+# labels
+axis_labels <- c("1 (lower\nincome)", "2" ,"3","4 (higher\nincome)")
+VEmetareg$variant_clean = fct_relevel(VEmetareg$variant_clean, c("delta", "omicron"))
+metareg_collated$variant_clean = metareg_collated$VoI
+metareg_collated$variant_clean = fct_relevel(metareg_collated$variant_clean, c("delta", "omicron"))
 
 # Plot
 ggplot() +
   geom_point(
     data = metareg_collated,
-    aes(x = GNI_variant, y = pred, color = as.factor(GNI), shape = `N studies`),
-    position = position_dodge(width = 0.8), size = 2.5
+    aes(x = GNI, y = pred, color = as.factor(GNI), shape = `N studies`),
+    size = 2.5
+    #position = position_dodge(width = 0.8), 
   ) +
   geom_errorbar(
     data = metareg_collated,
-    aes(x = GNI_variant, y = pred, color = as.factor(GNI), ymin = ci.lb, ymax = ci.ub),
-    width = 0, position = position_dodge(width = 0.8)
+    aes(x = GNI, y = pred, color = as.factor(GNI), ymin = ci.lb, ymax = ci.ub),
+    width = 0, #position = position_dodge(width = 0.8)
   ) +
   geom_point(
     data = VEmetareg,
-    aes(x = GNI_variant, y = RR, size = 1 / SE.ln.RR ^ 2, color = as.factor(q_GNI_per_c_WB)),
-    alpha = 0.3,
-    position = position_jitterdodge(jitter.width = 0.3, dodge.width = 0.8)
+    aes(x = q_GNI_per_c_WB, y = RR, size = 1 / SE.ln.RR ^ 2, color = as.factor(q_GNI_per_c_WB)),
+    alpha = 0.25,
+   # position = position_jitterdodge(jitter.width = 0.3, dodge.width = 0.8)
   ) +
-  facet_grid(. ~ clean_vaccine, drop = FALSE) +
+  facet_grid(variant_clean ~ clean_vaccine, drop = FALSE) +
   coord_flip() +
   scale_x_discrete(labels = axis_labels) +
   scale_shape_manual(values = c(15, 0)) +
@@ -184,16 +186,17 @@ ggplot() +
     trans = reverselog_trans(10)
   ) +
   guides(size = "none", 
-         colour = guide_legend(reverse = TRUE), 
+         colour = "none", 
          shape = guide_legend(reverse = TRUE)) +
   geom_hline(yintercept = 1, linetype = "dashed", color = "black") +
-  labs(x = "", y = "Vaccine effectiveness") +
+  labs(x = "GNI quartile", y = "Vaccine effectiveness (%)") +
   theme_minimal() +
   theme(
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1),
-    axis.text.y = element_text(size = 10),
-    strip.text = element_text(size = 10)
+    axis.text.y = element_text(size = 9),
+    strip.text = element_text(size = 10),
+    panel.spacing = unit(0.7, "lines")
   )
 ```
 
