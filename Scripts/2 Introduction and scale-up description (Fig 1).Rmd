@@ -1130,7 +1130,9 @@ summary_overall_cov_21_23
 for_sup_table_risk_pop <- Ineq_vaccine_coverage %>%
   select(
     Country.Code, vac_intro_hcw, vac_F40_hcw, vac_F70_hcw, 
-    vac_intro_old, vac_F40_old, vac_F70_old
+    vac_intro_old, vac_F40_old, vac_F70_old, 
+    perc_HCW, perc_old, 
+    `cov_hcw_cps_2023-12-01`:`pol_age_old_source_2021-12-01`
   )
 
 write.csv(for_sup_table_risk_pop, "Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv")

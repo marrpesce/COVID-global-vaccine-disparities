@@ -46,14 +46,15 @@ library(cowplot)
 #Databases
 
 #Eff database
-COVID19VE_ineq_merged <- read_csv("../Data/Processed/COVID19VE_ineq_merged.csv") 
+COVID19VE_ineq_merged <- read_csv("Data/Processed/COVID19VE_ineq_merged.csv") 
 
 #Ineq database
-Ineq_merged <- read_csv("../Data/Processed/Ineq_merged_with_vaccine_data.csv") 
+Ineq_merged <- read_csv("Data/Processed/Ineq_merged_with_vaccine_data.csv") 
 
 #Vaccine info priority groups
-Ineq_merged_prior_group <- read_csv("../Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv") %>% 
-  select(-`...1`)
+Ineq_merged_prior_group <- read_csv("Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv") %>% 
+  select(-`...1`)%>% 
+  rename_with(~ paste0("who_unicef_", .x), .cols = -Country.Code)
 
 ```
 
@@ -1067,7 +1068,6 @@ ineq_intro_scale_VE <- Ineq_merged %>%
   rename(
   country = Country.Name,
   iso_code = Country.Code,
-  region = Region,
   continent = continent,
   worldbank_GNI_per_capita = GNI_per_c_WB,
   worldbank_GNI_year = year_GNI,
@@ -1091,10 +1091,11 @@ ineq_intro_scale_VE <- Ineq_merged %>%
   ivac_n_VE_studies = n_VE_studies
 )
 
-curated_dataset_ineq_intro_scale_VE_prior_group<- left_join(ineq_intro_scale_VE, Ineq_merged_prior_group, by = c("iso_code"= "Country.Code")) %>%
-  rename_with(.fn = ~ paste0("who_unicef_", .x), 
-              .cols = c("vac_intro_hcw", "vac_F40_hcw", "vac_F70_hcw", 
-                        "vac_intro_old", "vac_F40_old", "vac_F70_old"))
+curated_dataset_ineq_intro_scale_VE_prior_group<- left_join(ineq_intro_scale_VE, Ineq_merged_prior_group, by = c("iso_code"= "Country.Code")) %>% 
+  mutate(
+    who_unicef_perc_old = who_unicef_perc_old*100,
+    who_unicef_perc_HCW = who_unicef_perc_HCW*100) %>% 
+  rename(who_unicef_perc_hcw = who_unicef_perc_HCW)
 
 write.csv(curated_dataset_ineq_intro_scale_VE_prior_group, "Data/Curated_datasets/Ineq_merged_with_vaccine_intro_scale_plat_priority_groups_VE.csv")
 

@@ -92,7 +92,7 @@ studies_countries_models <- VEmetareg_data_clean %>%
   ) %>%
   select(-median_min_period, -q25_min_period, -q75_min_period, -median_max_period, -q25_max_period, -q75_max_period)
 if (fup_sensitivity) {
-  write.csv(studies_countries_models, "../Data/Processed/meta_summary_counts_fup_sensitivity.csv")
+  write.csv(studies_countries_models, "Data/Processed/meta_summary_counts_fup_sensitivity.csv")
 } else {
   write.csv(studies_countries_models, "Data/Processed/meta_summary_counts.csv")
 }

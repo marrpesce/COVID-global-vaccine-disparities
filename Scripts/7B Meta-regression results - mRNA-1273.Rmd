@@ -311,7 +311,7 @@ meta_GNI <- rbind(Sum_omicron_severe.GNI, Sum_delta_severe.GNI )
 meta_GNI$vaccine = selected_vaccine
 meta_GNI$clean_vaccine = simple_name
 if (fup_sensitivity) {
-  write.csv(meta_GNI, paste0("../Data/Processed/meta_summary_",simple_name,"_fup_sensitivity.csv"))
+  write.csv(meta_GNI, paste0("Data/Processed/meta_summary_",simple_name,"_fup_sensitivity.csv"))
 } else {
   write.csv(meta_GNI, paste0("Data/Processed/meta_summary_",simple_name,".csv"))
 }
