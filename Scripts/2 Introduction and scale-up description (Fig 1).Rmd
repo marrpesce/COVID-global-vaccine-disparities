@@ -585,6 +585,8 @@ ggplot(collated) +
   theme(
     panel.spacing = unit(1.5, "lines"),
     legend.position = "bottom",
+    axis.text = element_text(size = 9),# Adjust text size
+    strip.text = element_text(size = 10),# Adjust text size
     legend.text = element_text(size = 8),# Adjust text size
     legend.title = element_text(size = 9),  # Adjust legend title size
     plot.title = element_text(size = 10) # Adjust plot title size
@@ -682,13 +684,13 @@ ED_F8_map_GNI_q <- ggplot(data = world_ineq_gral) +
   scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
                     labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)","no data\navailable")) +
   labs(
-    fill = "GNI per capita quartile") +
+    fill = "GNI quartile") +
   theme_void()+
   guides(color = guide_legend(title.position = "bottom", nrow = 1))+
   theme(
     legend.position = "bottom",
-    legend.text = element_text(size = 9),  # Adjust text size
-    legend.title = element_text(size = 8),  # Adjust legend title size
+    legend.text = element_text(size = 10),  # Adjust text size
+    legend.title = element_text(size = 10),  # Adjust legend title size
     plot.title = element_text(size = 10) 
   )
 
