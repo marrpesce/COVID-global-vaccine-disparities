@@ -27,9 +27,9 @@ VEmetareg_data <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligib
   filter(
     include == "yes"
   )
-n_distinct(VEmetareg_data$Study_id_f)
-#53
 
+nrow(VEmetareg_data) # 123 estimtaes after filtering of sequential or nested estimates
+n_distinct(VEmetareg_data$Study_id_f) # 51
 ```
 
 
@@ -106,6 +106,9 @@ VEmetareg_data <- VEmetareg_data %>%
     )
   ) 
 
+# Review estimates for which lnRR or SE could not be derived 
+excluded_estimates = VEmetareg_data %>% 
+  filter(is.na(ln.RR) | is.na(SE.ln.RR))
 
 VEmetareg_data <- VEmetareg_data %>% 
   filter(ln.RR !="NA" & SE.ln.RR != "NA")

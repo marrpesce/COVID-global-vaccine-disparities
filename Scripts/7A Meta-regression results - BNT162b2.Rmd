@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # select vaccine
 selected_vaccine = "BioNTech/Pfizer BNT162b2" # values: "BioNTech/Pfizer BNT162b2" "Oxford/AstraZeneca ChAdOx1-S" "Moderna mRNA-1273"
 simple_name = "BNT162b2" # for file outputs 
-fup_sensitivity = TRUE # set to true to run sensitivity
+fup_sensitivity = FALSE # set to true to run sensitivity
 ```
 
 
@@ -224,14 +224,30 @@ Sum_delta_severe.GNI <- cbind.data.frame(pred.delta_severe.GNI, I_o_p_delta_seve
              format(round(ci.lb,2),nsmall=2),"-",
              format(round(ci.ub,2),nsmall=2),")"
              ),
-         VE_summary = 
+         VE = (1-pred)*100,
+         VE_lowerCI = (1-ci.ub)*100,
+         VE_upperCI = (1-ci.lb)*100
+         )
+
+# Recalculate negative VE estimates
+for (i in 1:nrow(Sum_delta_severe.GNI)) {
+  if ( Sum_delta_severe.GNI$VE_lowerCI[i] <0 ) {
+    ci.ub = Sum_delta_severe.GNI$ci.ub[i]
+    ci.ub_inv = 1/ci.ub
+    Sum_delta_severe.GNI$VE_lowerCI[i] = -(1-ci.ub_inv)*100
+  }
+}
+
+# Calculate VE summary
+Sum_delta_severe.GNI = Sum_delta_severe.GNI %>% mutate(
+  VE_summary = 
            paste0(
-             format(round((1-pred)*100,0),nsmall=0)," (",
-             format(round((1-ci.ub)*100,0),nsmall=0),"-",
-             format(round((1-ci.lb)*100,0),nsmall=0),")"
+             format(round(VE,0),nsmall=0)," (",
+             format(round(VE_lowerCI,0),nsmall=0),"-",
+             format(round(VE_upperCI,0),nsmall=0),")"
              )
-         ) 
-Sum_delta_severe.GNI 
+) %>% select(-c(VE, VE_lowerCI, VE_upperCI))
+Sum_delta_severe.GNI
 
 # summary metrics for GNI quartile 2
 delta_rr_GNI_2 = Sum_delta_severe.GNI$pred[3]
@@ -307,14 +323,30 @@ Sum_omicron_severe.GNI <- cbind.data.frame(pred.omicron_severe.GNI, I_o_p_omicro
              format(round(ci.lb,2),nsmall=2),"-",
              format(round(ci.ub,2),nsmall=2),")"
              ),
-         VE_summary = 
+         VE = (1-pred)*100,
+         VE_lowerCI = (1-ci.ub)*100,
+         VE_upperCI = (1-ci.lb)*100
+         )
+
+# Recalculate negative VE estimates
+for (i in 1:nrow(Sum_omicron_severe.GNI)) {
+  if ( Sum_omicron_severe.GNI$VE_lowerCI[i] <0 ) {
+    ci.ub = Sum_omicron_severe.GNI$ci.ub[i]
+    ci.ub_inv = 1/ci.ub
+    Sum_omicron_severe.GNI$VE_lowerCI[i] = -(1-ci.ub_inv)*100
+  }
+}
+
+# Calculate VE summary
+Sum_omicron_severe.GNI = Sum_omicron_severe.GNI %>% mutate(
+  VE_summary = 
            paste0(
-             format(round((1-pred)*100,0),nsmall=0)," (",
-             format(round((1-ci.ub)*100,0),nsmall=0),"-",
-             format(round((1-ci.lb)*100,0),nsmall=0),")"
+             format(round(VE,0),nsmall=0)," (",
+             format(round(VE_lowerCI,0),nsmall=0),"-",
+             format(round(VE_upperCI,0),nsmall=0),")"
              )
-         ) 
-Sum_omicron_severe.GNI 
+) %>% select(-c(VE, VE_lowerCI, VE_upperCI))
+Sum_omicron_severe.GNI
 
 # summary metrics for GNI quartile 2
 omicron_rr_GNI_2 = Sum_omicron_severe.GNI$pred[3]
