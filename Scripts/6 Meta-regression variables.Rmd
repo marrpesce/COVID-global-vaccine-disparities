@@ -12,6 +12,7 @@ editor_options:
 
 #### Outputs
 - Processed/COVID19VE_ineq_merged_filtered_eligible_selected_metareg_var.xlsx: Meta-regression database with additional variables
+- Curated_datasets/VE_curated.csv
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

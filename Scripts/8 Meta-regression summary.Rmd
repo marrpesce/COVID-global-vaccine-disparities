@@ -1,5 +1,5 @@
 ---
-title: "7 Meta-regression results"
+title: "8 Meta-regression summary"
 author: "Martina Pesce & Edward P. K. Parker"
 date: "2023-10-12"
 output: html_document
@@ -12,9 +12,8 @@ editor_options:
 
 #### Outputs
 - Meta-regression model results and plots for selected vaccine
+- Fig. 5. Meta-regression of primary series vaccine effectiveness against severe COVID-19 by variant context and income status.
 
-
-#Janssen
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -35,18 +34,18 @@ VEmetareg <- VEmetareg0 %>%
 
 # summarise study counts
 VEmetareg %>% group_by(variant_clean, clean_vaccine, q_GNI_per_c_WB) %>%
-  summarise(n = length(unique(`study ID`)))
-# 1 study:
+  summarise(n = length(unique(country_clean)))
+# 1 country:
 # BNT162b2 delta GNI 2
 # mRNA-1273 delta GNI 2
 # BNT162b2 omicron GNI 2
 # mRNA-1273 omicron GNI 2
 
-# 2 studies:
+# 2 country:
 # ChAdOx delta GNI 1/2
 # ChAdOx omicron GNI 2/3
 # mRNA-1273 omicron GNI 3
-
+# mRNA-1273 delta GNI 3
 # Recode levels
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="BioNTech/Pfizer BNT162b2"] = "BNT162b2"
 VEmetareg$clean_vaccine[VEmetareg$clean_vaccine=="Oxford/AstraZeneca ChAdOx1-S"] = "ChAdOx1-S"
@@ -60,30 +59,31 @@ metareg_collated <- rbind(
 ) 
 metareg_collated$clean_vaccine = factor(metareg_collated$clean_vaccine, levels = c("BNT162b2", "ChAdOx1-S", "mRNA-1273"))
 
-metareg_collated$`N studies` = ">2"
+metareg_collated$`N countries` = ">2"
 
-metareg_collated$`N studies`[metareg_collated$clean_vaccine == "BNT162b2" & 
+metareg_collated$`N countries`[metareg_collated$clean_vaccine == "BNT162b2" & 
                           metareg_collated$GNI %in% c(2)] = "1-2"
 
-metareg_collated$`N studies`[metareg_collated$clean_vaccine == "mRNA-1273" & 
-                          metareg_collated$GNI %in% c(2)] = "1-2"
+metareg_collated$`N countries`[metareg_collated$clean_vaccine == "mRNA-1273" & 
+                          metareg_collated$GNI %in% c(2, 3)] = "1-2"
 
-metareg_collated$`N studies`[metareg_collated$VoI == "delta" & 
+metareg_collated$`N countries`[metareg_collated$VoI == "delta" & 
                           metareg_collated$clean_vaccine == "ChAdOx1-S" & 
                           metareg_collated$GNI %in% c(1,2)] = "1-2"
 
-metareg_collated$`N studies`[metareg_collated$VoI == "omicron" & 
+metareg_collated$`N countries`[metareg_collated$VoI == "omicron" & 
                           metareg_collated$clean_vaccine == "ChAdOx1-S" & 
                           metareg_collated$GNI %in% c(2,3)] = "1-2"
 
-metareg_collated$`N studies`[metareg_collated$VoI == "omicron" & 
-                          metareg_collated$clean_vaccine == "mRNA-1273" & 
-                          metareg_collated$GNI %in% c(3)] = "1-2"
+# metareg_collated$`N countries`[metareg_collated$VoI == "omicron" & 
+#                           metareg_collated$clean_vaccine == "mRNA-1273" & 
+#                           metareg_collated$GNI %in% c(3)] = "1-2"
 
 
 ## set variant levels
-metareg_collated$VoI = factor(metareg_collated$VoI, levels=c("omicron", "delta"))
-VEmetareg$variant_clean = factor(VEmetareg$variant_clean, levels=c("omicron", "delta"))
+metareg_collated$VoI = factor(metareg_collated$VoI, levels=c("delta", "omicron"))
+metareg_collated$variant_clean = metareg_collated$VoI
+VEmetareg$variant_clean = factor(VEmetareg$variant_clean, levels=c("delta", "omicron"))
 
 ## set GNI perc c levels
 metareg_collated$GNI = factor(metareg_collated$GNI, levels=c("1", "2", "3", "4"))
@@ -98,80 +98,39 @@ reverselog_trans <- function(base = exp(1)) {
               domain = c(1e-100, Inf))
 }
 
-# ggplot() +
-#   geom_point(data = metareg_collated, aes(x = VoI, y = pred, color = GNI, shape = `N studies`),
-#     position = position_dodge(width = 0.8), size=2.5) +
-#   geom_errorbar(
-#     data = metareg_collated,
-#     aes(x = VoI, y = pred, color = GNI, ymin = ci.lb, ymax = ci.ub),
-#     width = 0, position = position_dodge(width = 0.8)) +
-#   geom_point(data = VEmetareg,
-#     aes(x = variant_clean,y = RR, size = 1 / SE.ln.RR ^ 2, color = q_GNI_per_c_WB),
-#     alpha = 0.3, position = position_jitterdodge(jitter.width=0.3)) +
-#   labs(x = "", y = "Vaccine effectiveness") +
-#   scale_shape_manual(values=c(15, 0)) +
-#   theme_minimal() +
-#   theme(legend.position = "right") +
-#   scale_color_manual(
-#     name = "GNI quartile",
-#      values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
-#     labels =  c("1 (lower\nincome)", "2" ,"3","4 (higher\nincome)",
-#   drop = FALSE)
-#   ) +
-#   guides(size = "none",
-#   colour = guide_legend(reverse = TRUE, drop = FALSE),
-#   shape = guide_legend(reverse = TRUE, drop = FALSE)) +
-#   geom_hline(yintercept = 1, linetype = "dashed", color = "black") +
-#   coord_flip() +
-#   facet_grid(. ~ clean_vaccine, drop = FALSE) +
-#   scale_y_continuous(breaks = c(0.01, 0.1, 0.5, 1), labels = c(99,90,50,0), trans = reverselog_trans(10)) +
-#   theme(axis.text.x=element_text(angle = 45, hjust = 1),
-#         axis.text.y = element_text(size=10),
-#         strip.text = element_text(size=10))
-```
+# --- labels n=xx por faceta y GNI ---
+labels_df <- VEmetareg %>%
+  filter(!is.na(RR)) %>%
+  transmute(
+    variant_clean = fct_relevel(variant_clean, c("delta","omicron")),
+    clean_vaccine,
+    GNI = as.integer(q_GNI_per_c_WB)
+  ) %>%
+  count(variant_clean, clean_vaccine, GNI, name = "n_points") %>%
+  complete(variant_clean, clean_vaccine, GNI = 1:4, fill = list(n_points = 0L)) %>%
+  mutate(label = paste0("n=", n_points))
 
-```{r}
-# Combine variant and GNI
-variant_levels <- c("delta", "omicron")
-GNI_levels <- 1:4
-combo_levels <- as.vector(outer(GNI_levels, variant_levels, FUN = function(g, v) paste0("G", g, "_", v)))
 
-metareg_collated$GNI_variant <- factor(
-  paste0("G", metareg_collated$GNI, "_", metareg_collated$VoI),
-  levels = combo_levels
-)
-
-VEmetareg$GNI_variant <- factor(
-  paste0("G", VEmetareg$q_GNI_per_c_WB, "_", VEmetareg$variant_clean),
-  levels = combo_levels
-)
-
-# one label
-axis_labels <- rep("", length(combo_levels))
-axis_labels[2] <- "delta"
-axis_labels[6] <- "omicron"
-
-# Plot
-ggplot() +
+# Fig. 5
+fig_5 <- ggplot() +
   geom_point(
     data = metareg_collated,
-    aes(x = GNI_variant, y = pred, color = as.factor(GNI), shape = `N studies`),
-    position = position_dodge(width = 0.8), size = 2.5
+    aes(x = GNI, y = pred, color = as.factor(GNI), shape = `N countries`),
+    size = 2.5
   ) +
   geom_errorbar(
     data = metareg_collated,
-    aes(x = GNI_variant, y = pred, color = as.factor(GNI), ymin = ci.lb, ymax = ci.ub),
-    width = 0, position = position_dodge(width = 0.8)
+    aes(x = GNI, y = pred, color = as.factor(GNI), ymin = ci.lb, ymax = ci.ub),
+    width = 0
   ) +
   geom_point(
     data = VEmetareg,
-    aes(x = GNI_variant, y = RR, size = 1 / SE.ln.RR ^ 2, color = as.factor(q_GNI_per_c_WB)),
-    alpha = 0.3,
-    position = position_jitterdodge(jitter.width = 0.3, dodge.width = 0.8)
+    aes(x = q_GNI_per_c_WB, y = RR, size = 1 / SE.ln.RR ^ 2, color = as.factor(q_GNI_per_c_WB)),
+    alpha = 0.25
   ) +
-  facet_grid(. ~ clean_vaccine, drop = FALSE) +
-  coord_flip() +
-  scale_x_discrete(labels = axis_labels) +
+  facet_grid(variant_clean ~ clean_vaccine, drop = FALSE) +
+  coord_flip(clip = "off") +
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2" ,"3","4 (higher\nincome)")) +
   scale_shape_manual(values = c(15, 0)) +
   scale_color_manual(
     name = "GNI quartile",
@@ -181,24 +140,30 @@ ggplot() +
   scale_y_continuous(
     breaks = c(0.01, 0.1, 0.5, 1),
     labels = c(99, 90, 50, 0),
-    trans = reverselog_trans(10)
+    trans = reverselog_trans(10),
+    expand = expansion(mult = c(0, 0.15))
   ) +
-  guides(size = "none", 
-         colour = guide_legend(reverse = TRUE), 
-         shape = guide_legend(reverse = TRUE)) +
+  guides(size = "none", colour = "none", shape = guide_legend(reverse = TRUE)) +
   geom_hline(yintercept = 1, linetype = "dashed", color = "black") +
-  labs(x = "", y = "Vaccine effectiveness") +
+  labs(x = "GNI quartile", y = "Vaccine effectiveness (%)") +
   theme_minimal() +
   theme(
     legend.position = "right",
     axis.text.x = element_text(angle = 45, hjust = 1),
-    axis.text.y = element_text(size = 10),
-    strip.text = element_text(size = 10)
+    axis.text.y = element_text(size = 9),
+    strip.text = element_text(size = 10),
+    panel.spacing = unit(0.7, "lines")
+  ) +
+  geom_text(
+    data = labels_df,
+    aes(x = GNI, label = label),
+    y = Inf,
+    hjust = 1, vjust = 0,
+    size = 3,
+    inherit.aes = FALSE,
+    color = "#666666"
   )
+
+fig_5
 ```
-
-
-
-
-
 

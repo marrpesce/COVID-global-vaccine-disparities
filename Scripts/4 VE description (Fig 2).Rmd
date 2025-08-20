@@ -10,15 +10,18 @@ editor_options:
 
 #### Inputs
 - Processed/COVID19VE_ineq_merged.csv: View-Hub VE data merged with country income data
-- Processed/Ineq_merged.csv: Combined country-level income data
+- Processed/Ineq_merged_with_vaccine_data.csv:
+- Processed/Ineq_merged_with_vaccine_priority_groups.csv:
 - Input/Vaccine_data/owid-covid-data.csv: Our World in Data COVID-19 database
 - Input/Vaccine_data/owid_vaccine_plat.csv: Our World in Data COVID-19 vaccine platforms
 - Input/Vaccine_data/vaccination-data.csv: WHO COVID-19 vaccine database
 
 #### Outputs
-- Descriptive statistics on VE study distribution
-- Figure 2
-
+- Fig. 1. Global disparities in COVID-19 vaccine introduction, scale-up, and vaccine effectiveness evaluation.
+- Fig. 2. Disparities in COVID-19 vaccine introduction, scale-up and vaccine effectiveness evaluation by income quartile.
+- Table 1. Characteristics of primary series vaccine effectiveness studies reporting on country-specific estimates.
+- Supplementary Fig. 3. Distribution of vaccine effectiveness papers over time.
+- Curated_dataset: Curated_datasets/Ineq_merged_with_vaccine_intro_scale_plat_priority_groups_VE.csv
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -33,8 +36,6 @@ library(tidyverse)
 library(readr)
 library(rnaturalearth)
 library(sf)
-#library(viridisLite)
-#library(viridis)
 library(lubridate)
 library(countrycode)
 library(patchwork) 
@@ -58,12 +59,9 @@ Ineq_merged_prior_group <- read_csv("Data/Processed/Ineq_merged_with_vaccine_pri
 
 ```
 
-###########################################################################################################################################################
-## Fig 1. maps: Global inequities in the evaluation of vaccine effectiveness. (A) Map of the distribution of available VE studies across different countries.## 
-###########################################################################################################################################################
-
-
-
+#################################################################################################################
+## Fig. 1. Global disparities in COVID-19 vaccine introduction, scale-up, and vaccine effectiveness evaluation.## 
+#################################################################################################################
 
 ```{r data for map}
 #Create table with study counts and introduction dates by country
@@ -120,7 +118,7 @@ world_ineq_gral <- st_as_sf(world_ineq_gral)
 
 
 ```{r}
-#Map A: vaccine introduction dates
+#(A) COVID-19 vaccine introduction dates
 
 map1_a<- ggplot(data = world_ineq_gral) +
   geom_sf(aes(fill = as.factor(V1_date_group)), position = "identity") + 
@@ -142,7 +140,7 @@ map1_a<- ggplot(data = world_ineq_gral) +
 
 map1_a
 
-#Map 1.B: scale-up dates
+#Map 1.B) scale-up to 40% population-wide primary series coverage
 map1_b<- ggplot(data = world_ineq_gral) +
   geom_sf(aes(fill = as.factor(V40_date_group)), position = "identity") + 
   scale_fill_manual(values = c("#827717","#afb42b", "#cddc39","#ecebb1","#A2B1A4"),
@@ -162,7 +160,7 @@ map1_b<- ggplot(data = world_ineq_gral) +
 
 map1_b
 
-#Map 1.C: number of VE studies by country
+#Map 1.C: distribution of available VE studies across different countries
 
 map1_c<- ggplot(data = world_ineq_gral) +
   geom_sf(aes(fill = n_VE_studies_g), 
@@ -191,13 +189,13 @@ map_1
 ```
 
 
-#######################################
-# Figure 2
-#############
+##########################################################################################################################
+# Fig. 2. Disparities in COVID-19 vaccine introduction, scale-up and vaccine effectiveness evaluation by income quartile.#
+##########################################################################################################################
 
 ```{r}
 
-## Fig 2.a:  Percentage of countries achieving vaccine introduction (left) and scale-up to 40% primary series coverage by 31 December 2021 (right) by GNIpc
+## Fig 2.a:  (A) Percentage of countries achieving vaccine introduction by 31 December 2021 (left), scale-up to 40% population-wide primary series coverage by 31 December 2021 (middle), and publication of ≥1 VE study by 07 January 2024 (right) by GNI quartile (n countries = 51, 51, 51, 50 for quartiles 4, 3, 2, 1, respectively). 
 
 summary_milestone_achieved <- Ineq_merged %>% 
   group_by(q_GNI_per_c_WB) %>% 
@@ -248,13 +246,47 @@ facet_wrap(~ milestone, labeller = labeller(milestone = c(
 
 Fig_2_a_vac_achiev
 
+# Percentage of VE studies by GNIpc GNI quartile + min pub date
+summ_GNI_eff_study <- Ineq_merged %>%
+  select(Country.Name,q_GNI_per_c_WB, n_VE_studies, min_VE_pub_date) %>%
+  filter(!is.na(n_VE_studies)) %>%  # Exclude rows with NA in the 'n_VE_studies' variable
+  group_by(
+    q_GNI_per_c_WB
+  ) %>%
+  summarize(
+    total_st_GNI = sum(n_VE_studies),
+    perc_st_GNI= sum(n_VE_studies)/423*100, #fix with final value
+    min_VE_pub_date= min(min_VE_pub_date)
+  )
+summ_GNI_eff_study
 
+# Percentage of countries with VE studies available by GNIpc GNI quartile.
+Ineq_merged_introduced <- subset(Ineq_merged,  V1_dummy=="yes")
+
+table(Ineq_merged_introduced$q_GNI_per_c_WB)
+
+eff_study_perc <-Ineq_merged %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarise(
+    study = sum(study_dummy == "yes"))%>%
+  mutate(
+    countries_quartile=case_when(
+      q_GNI_per_c_WB == 1 ~ 50,
+      q_GNI_per_c_WB == 2 ~ 51,
+      q_GNI_per_c_WB == 3 ~ 51,
+      q_GNI_per_c_WB == 4 ~ 51
+    ),
+  ) %>%
+  mutate(
+    study_per = round(study / countries_quartile * 100, 0),
+    )
+eff_study_perc
 
 ```
 
 
 ```{r}
-#Fig 2.b:  Time to vaccine introduction (left) and scale-up (right) by GNIpc
+#Fig 2.b: Date of vaccine introduction (left; n countries = 51, 51, 51, and 50 for quartiles 4, 3, 2, 1, respectively), scale-up to 40% population-wide primary series coverage (middle; n = 49, 43, 32, 22) and first VE study publication (right; n countries= 24, 15, 7, 2) by GNI quartile. Only countries that reached the specified milestones are included. 
 
 #Data for plot
 intro_scale_delay<- Ineq_merged %>%
@@ -302,11 +334,40 @@ Fig_2_b_vac_delay <- ggplot(intro_scale_delay) +
   ) 
  
 Fig_2_b_vac_delay 
+
+# table n
+table_countries_by_gni_date_wide <- intro_scale_delay %>%
+  filter(!is.na(Value)) %>%
+  group_by(q_GNI_per_c_WB, Date) %>%
+  summarise(n_countries = n_distinct(Country.Name), .groups = "drop") %>%
+  pivot_wider(names_from = Date, values_from = n_countries)
+
+table_countries_by_gni_date_wide
+
+summary_vacc_eff_delay <- Ineq_merged %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarize(
+    median_value_1 = round(median(as.numeric(diff_intro_min_VE_pub), na.rm = TRUE),0),
+    q25_1 = round(quantile(as.numeric(diff_intro_min_VE_pub), 0.25, na.rm = TRUE),0),
+    q75_1 = round(quantile(as.numeric(diff_intro_min_VE_pub), 0.75, na.rm = TRUE),0)
+  )
+summary_vacc_eff_delay
+
+#Create table with study counts and introduction dates by GNI quartile
+GNI_studies <- COVID19VE_ineq_merged %>%
+  group_by(q_GNI_per_c_WB) %>%
+  summarise(
+    min_VE_pub_date = min(as.Date(min_pub_date)),
+    n_VE_studies = n_distinct(Study_id_f),
+    perc_VE_studies = round(n_distinct(Study_id_f)/423*100,0)
+  )
 ```
 
 
 
 ```{r}
+# 2.C: Percentage of countries using different vaccine platforms by GNI quartile as of 07 January 2024 (n countries = 51, 51, 51, 50 for quartiles 4, 3, 2, 1, respectively). 
+
 #Pivot longer + plat classification
 owid_vaccine_country_g <- Ineq_merged %>% 
     pivot_longer(
@@ -380,158 +441,35 @@ Fig_2_c_plat <- ggplot(summary_vac_plat_distrib_GNI, aes(x = as.factor(q_GNI_per
   )
 
 Fig_2_c_plat
-```
 
 
-
-
-```{r}
-
-#Create table with study counts and introduction dates by GNI quartile
-GNI_studies <- COVID19VE_ineq_merged %>%
-  group_by(q_GNI_per_c_WB) %>%
-  summarise(
-    min_VE_pub_date = min(as.Date(min_pub_date)),
-    n_VE_studies = n_distinct(Study_id_f),
-    perc_VE_studies = round(n_distinct(Study_id_f)/423*100,0)
-  )
-
-#Create table with study counts and introduction dates by vaccine platform and outcome
-plat_outcome_studies <- COVID19VE_ineq_merged %>%
-  group_by(vac_type, outcome_final) %>%
-  summarise(
-    min_VE_pub_date = min(as.Date(min_pub_date)),
-    n_VE_studies = n_distinct(Study_id_f),
-    perc_VE_studies = round(n_distinct(Study_id_f)/423*100,0)
-  )
-```
-
-
-
-
-```{r}
-# Percentage of VE studies by GNIpc GNI quartile.  
-summ_GNI_eff_study <- Ineq_merged %>%
-  select(Country.Name,q_GNI_per_c_WB, n_VE_studies, min_VE_pub_date) %>% 
-  filter(!is.na(n_VE_studies)) %>%  # Exclude rows with NA in the 'n_VE_studies' variable
-  group_by(
-    q_GNI_per_c_WB
+#Global vaccine platform distribution %
+summary_perc_by_plat <-owid_vaccine_country_g %>% 
+  select(
+    Country.Code, q_GNI_per_c_WB, vac_type
   ) %>% 
-  summarize(
-    total_st_GNI = sum(n_VE_studies),
-    perc_st_GNI= sum(n_VE_studies)/423*100, #fix with final value
-    min_VE_pub_date= min(min_VE_pub_date)
-  )
-summ_GNI_eff_study
-
-# Plot (B)
-plot2_b <- ggplot(summ_GNI_eff_study, aes(x = as.factor(q_GNI_per_c_WB), y = perc_st_GNI, fill = as.factor(q_GNI_per_c_WB))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  coord_flip()+
-  labs(title = "(B)",
-       x = "GNI quartile",
-       y = "% VE studies") +
-    guides(fill = "none") +  # Remove the fill legend
-  theme_minimal() +
-  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))+
-  theme(
-    legend.text = element_text(size = 8),  # Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10)
-  ) +
-  scale_y_continuous(limits = c(0, 100), breaks = c(0, 25, 50, 75, 100))
-plot2_b
-```
-
-```{r}
-# (C) Percentage of countries with VE studies available by GNIpc GNI quartile.
-Ineq_merged_introduced <- subset(Ineq_merged,  V1_dummy=="yes")
-
-table(Ineq_merged_introduced$q_GNI_per_c_WB)
-
-eff_study_perc <-Ineq_merged %>%
-  group_by(q_GNI_per_c_WB) %>%
-  summarise(
-    study = sum(study_dummy == "yes"))%>%
-  mutate(
-    countries_quartile=case_when(
-      q_GNI_per_c_WB == 1 ~ 50,
-      q_GNI_per_c_WB == 2 ~ 51,
-      q_GNI_per_c_WB == 3 ~ 51,
-      q_GNI_per_c_WB == 4 ~ 51
-    ),
+  distinct() %>% 
+  filter(
+    !is.na(q_GNI_per_c_WB)
+  ) %>%  
+  group_by(vac_type) %>% 
+  summarise(total=n()) %>% 
+  filter(
+    vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored" |vac_type=="Protein"
   ) %>% 
   mutate(
-    study_per = round(study / countries_quartile * 100, 0),
-    )
-eff_study_perc
+    vac_type_per = round(total / 203 * 100, 1),
+    ) 
 
-#Plot (C)
-plot2_c<- ggplot(eff_study_perc, aes(x = as.factor(q_GNI_per_c_WB), y = study_per, fill = as.factor(q_GNI_per_c_WB))) +
-  geom_bar(stat = "identity", position = "dodge") +
-  scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  coord_flip()+ labs(title = "(C)",
-       x = "",
-       y = "% countries with VE studies") +
-    guides(fill = "none") +  # Remove the fill legend
-  theme_minimal() +
-  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))+
-  theme(
-    legend.text = element_text(size = 8),  # Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10)
-  )  +
-  scale_y_continuous(limits = c(0, 60))
-
-plot2_c
-```
-
-
-```{r}
-# (D) Time from vaccine introduction to first VE study publication in the country by GNIpc GNI quartile. Note that only countries with at least one available VE study are included
- plot2_d<-ggplot(Ineq_merged) +
-  geom_boxplot(aes(x = diff_intro_min_VE_pub, y = as.factor(q_GNI_per_c_WB)), outlier.shape=NA) +
-   geom_point(
-    aes(
-     x = diff_intro_min_VE_pub, y = as.factor(q_GNI_per_c_WB),
-      #size = studies,
-      color = as.factor(q_GNI_per_c_WB)
-    ),
-    alpha = 0.5,
-    position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
-  )+
-  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"))+
-  labs(
-    title = "(D)",
-    x = "Number of days from introduction to first VE publication", 
-    y = "GNI quartile")  +
-  guides(color = FALSE) +
-  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
-  theme_minimal()  +
-  theme(
-    legend.text = element_text(size = 8),  # Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10) 
-   ) +
-   scale_x_continuous(limits = c(0, 1050), breaks = c(0, 250, 500, 750, 1000)) 
-
-plot2_d
-
-summary_vacc_eff_delay <- Ineq_merged %>%
-  group_by(q_GNI_per_c_WB) %>%
-  summarize(
-    median_value_1 = round(median(as.numeric(diff_intro_min_VE_pub), na.rm = TRUE),0),
-    q25_1 = round(quantile(as.numeric(diff_intro_min_VE_pub), 0.25, na.rm = TRUE),0),
-    q75_1 = round(quantile(as.numeric(diff_intro_min_VE_pub), 0.75, na.rm = TRUE),0)
-  )
-summary_vacc_eff_delay
+summary_perc_by_plat
 ```
 
 
 
+
+
 ```{r}
-# (E) Percentage of VE studies by platform. The ‘Multiple’ category includes one comparative VE study involving the subunit vaccine NVX-CoV2373. Protein subunit with 1 effectiveness vaccine study was excluded
+# 2.D Percentage of primary series VE studies by platform as of 11 January 2024 (n studies = 423).
 
 plat_summary <- COVID19VE_ineq_merged %>% 
   select(Study_id_f, min_pub_date, vac_type, q_GNI_per_c_WB) %>% 
@@ -565,15 +503,34 @@ Fig_2_d_stu_plat<- ggplot(plat_summary, aes(x = vac_type, y =per_papers_vac_type
 
 Fig_2_d_stu_plat
 
+#Create table with study counts and introduction dates by vaccine platform and outcome
+plat_outcome_studies <- COVID19VE_ineq_merged %>%
+  group_by(vac_type, outcome_final) %>%
+  summarise(
+    min_VE_pub_date = min(as.Date(min_pub_date)),
+    n_VE_studies = n_distinct(Study_id_f),
+    perc_VE_studies = round(n_distinct(Study_id_f)/423*100,0)
+  )
 ```
 
+
 ```{r}
-#(F) Percentage of countries with VE studies relating to different vaccine platforms by GNIpc GNI quartile. VE, vaccine effectiveness. Protein subunit with 1 effectiveness vaccine study was excluded
-vac_plat_distrib <- COVID19VE_ineq_merged %>% 
-  select(Country.Code, q_GNI_per_c_WB, vac_type) %>% 
-  distinct() %>%  
-  group_by(q_GNI_per_c_WB, vac_type) %>% 
-  summarise(total=n()) %>% 
+# FIg 2
+Fig_2_l3 <- (Fig_2_c_plat | Fig_2_d_stu_plat) + plot_layout(widths = c(2, 1))
+Fig_2 <- (Fig_2_a_vac_achiev / Fig_2_b_vac_delay / Fig_2_l3)
+
+Fig_2
+
+```
+
+
+```{r}
+# Percentage of countries with VE studies relating to different vaccine platforms by GNIpc GNI quartile. VE, vaccine effectiveness. Protein subunit with 1 effectiveness vaccine study was excluded
+vac_plat_distrib <- COVID19VE_ineq_merged %>%
+  select(Country.Code, q_GNI_per_c_WB, vac_type) %>%
+  distinct() %>%
+  group_by(q_GNI_per_c_WB, vac_type) %>%
+  summarise(total=n()) %>%
   mutate(
     countries_quartile=case_when(
       q_GNI_per_c_WB == 1 ~ 50,
@@ -581,10 +538,10 @@ vac_plat_distrib <- COVID19VE_ineq_merged %>%
       q_GNI_per_c_WB == 3 ~ 51,
       q_GNI_per_c_WB == 4 ~ 51
     )
-  ) %>% 
+  ) %>%
   mutate(
     vac_type_per = round(total / countries_quartile * 100, 0),
-    ) 
+    )
 vac_plat_distrib
 
 #Plot
@@ -601,12 +558,12 @@ plot2_f<- ggplot(vac_plat_distrib[vac_plat_distrib$vac_type != "Protein subunit"
        y = "% countries with VE studies") +
     guides(fill = "none") +  # Remove the fill legend
 scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
+  scale_x_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) +
   theme_minimal()+
   theme(
     legend.text = element_text(size = 8),  # Adjust text size
     legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10) 
+    plot.title = element_text(size = 10)
   )+
   scale_y_continuous(limits = c(0, 50), breaks = c(0, 25, 50))
 plot2_f
@@ -615,61 +572,8 @@ plot2_f
 
 
 ```{r}
-# (fig2_map + plot2_d +
-#   plot_layout(ncol = 1, heights = c(3, 1))) |
-#   # Arrange plot2_b, plot2_c, plot2_e, and plot2_f together
-#   ((plot2_b | plot2_c) /
-#    (plot2_e | plot2_f))
-# 
-# ((fig2_map / plot2_d) |
-#   (plot2_b / plot2_e) |
-#    (plot2_c / plot2_f) +
-#   plot_layout(nrow = 1, widths = c(3, 1, 1))) 
-# 
-# combined_plot <- (
-#   (fig2_map / plot2_d) |
-#   (plot2_b / plot2_e) |
-#   (plot2_c / plot2_f)
-# )
-# 
-# combined_plot + plot_layout(ncol = 3, widths = c(3, 1, 1), heights = c(3,1) )
-
-# 
-# col1<-(fig2_map + plot2_d +
-#   plot_layout(ncol = 1, heights = c(1, 1)))
-# 
-# col2<-(plot2_b | plot2_c) /
-#    (plot2_e | plot2_f)
-# 
-# combined_plot <- col1 | col2
-# 
-# combined_plot + plot_layout(ncol = 3, widths = c(3, 3, 3))
-# 
-# fig2_map
-# plot2_d
-# (plot2_b | plot2_c | plot2_e | plot2_f)
-# Fig3_plot <- 
-#   fig2_map /
-#   (plot2_d | plot2_b | plot2_c) /
-#   (plot2_e | plot2_f) +
-#   plot_layout(heights = c(3, 1, 1))
-# Fig3_plot
-
-```
-
-
-```{r}
-# FIg 2
-Fig_2_l3 <- (Fig_2_c_plat | Fig_2_d_stu_plat) + plot_layout(widths = c(2, 1))
-Fig_2 <- (Fig_2_a_vac_achiev / Fig_2_b_vac_delay / Fig_2_l3)
-
-
-```
-
-
-
-
-```{r}
+#Manuscript data
+# number of papers by outcome
 outcome_summary <- COVID19VE_ineq_merged %>% 
   select(Study_id_f, outcome_final) %>% 
   distinct() %>% 
@@ -679,9 +583,8 @@ outcome_summary <- COVID19VE_ineq_merged %>%
     per_papers_out = round(n()/nstudies*100,0)
   )
 outcome_summary
-```
 
-```{r}
+# number of papers by variant
 variant_summary <- COVID19VE_ineq_merged %>% 
   select(Study_id_f, variant_clean) %>% 
   distinct() %>% 
@@ -695,19 +598,24 @@ variant_summary
 
 
 
-#Supplementary figure
 
-```{r F2}
+##############################################################################
+#Supplementary Fig. 3. Distribution of vaccine effectiveness papers over time.#
+###############################################################################
 
-# Figure 3.A Vaccine effectiveness papers temporal distribution by countries quartile economic inequalities distribution between countries (GNI per capita).  (Upper) Each point represents a paper according to the publication date by GNI per capita quartile. (Lower) Total published papers per year half according to the GNI per capita quartile. Vaccine effectiveness papers included in the 23 June 2023 View-Hub Primary Series Studies database.
 
+```{r }
+
+# Supplementary Fig. 3. Distribution of vaccine effectiveness papers over time. Data are displayed by (A) GNI quartile (n publications =  345, 64, 9, 5 for quartiles 4, 3, 2, 1, respectively). and (B) vaccine platform (n publications = X for mRNA, X for vectored, X for inactivated, X for multiple, and X for protein).
+
+# (A) GNI quartile 
 data_F2 <- COVID19VE_ineq_merged %>% 
   select(country_clean, iso3c, min_pub_date, semester,Study_id_f, q_GNI_per_c_WB) %>% 
   distinct()
 
 time_a<- data_F2 %>%
   ggplot(aes(x = as.Date(min_pub_date), y = as.factor(q_GNI_per_c_WB))) +
-  geom_boxplot() +
+  geom_boxplot(outlier.shape = NA) +
   geom_jitter(aes(color = as.factor(q_GNI_per_c_WB), alpha = 0.5)) +
    guides(alpha = "none") +
   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) + #I dont like the scale
@@ -716,8 +624,17 @@ time_a<- data_F2 %>%
   scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
   theme_minimal()
 
+paper_GNI <- data_F2 %>%
+  group_by(
+    q_GNI_per_c_WB) %>%
+  summarise(
+    total_papers = n()
+  ) 
+
 paper_sem_quart <- data_F2 %>%
-  group_by(semester, q_GNI_per_c_WB) %>%
+  group_by(
+    semester, 
+    q_GNI_per_c_WB) %>%
   summarise(
     total_papers = n()
   ) 
@@ -734,12 +651,10 @@ time_b <- ggplot(paper_sem_quart, aes(x = semester, y = total_papers, fill = as.
 ```
 
 
-## B
-
 
 ```{r }
 
-# Figure 3.B Vaccine effectiveness papers temporal distribution by vaccine type.  (Upper) Each point represents a paper according to the publication date by vaccine type. (Lower) Total published papers per year half according to vaccine type. Vaccine effectiveness papers included in the 23 June 2023 View-Hub Primary Series Studies database.
+# (B) vaccine platform
 
 data_F3 <- COVID19VE_ineq_merged %>% 
   select(country_clean, iso3c, min_pub_date, semester, Study_id_f, q_GNI_per_c_WB, vac_type) %>% 
@@ -751,7 +666,7 @@ data_F3$vac_type <- factor(data_F3$vac_type, levels = c("Protein subunit","Multi
 # (B) vaccine platform. In the upper panels, each point represents a study. 
 timeB_a<- data_F3 %>%
   ggplot(aes(x = as.Date(min_pub_date), y = as.factor(vac_type))) +
-  geom_boxplot() +
+  geom_boxplot(outlier.shape = NA) +
   geom_jitter(aes(color = as.factor(vac_type),alpha = 0.5)) +
   guides(alpha = "none") +
   scale_color_manual(values = c("#0072B2","#009E73", "#D55E00","#CC79A7", "#F0E442"))+
@@ -760,14 +675,19 @@ timeB_a<- data_F3 %>%
   scale_y_discrete(labels = c("Protein","Multiple", "Inactivated", "Vectored", "mRNA")) + 
   theme_minimal()
 
-paper_sem_quart <- data_F3 %>%
+paper_sem_plat <- data_F3 %>%
   group_by(semester, vac_type) %>%
   summarise(
     total_papers = n()
   ) 
+
+paper_plat <- data_F3 %>%
+  group_by(vac_type) %>%
+  summarise(
+    total_papers = n()
+  ) 
   
-  
-timeB_b <- ggplot(paper_sem_quart, aes(x = semester, y = total_papers, fill = as.factor(vac_type))) +
+timeB_b <- ggplot(paper_sem_plat, aes(x = semester, y = total_papers, fill = as.factor(vac_type))) +
   geom_bar(stat = "identity") +
   labs(x = "", y = "N VE studies", fill = "Vaccine platform") +
   theme_minimal() +
@@ -798,12 +718,13 @@ median_labels <- data_F3 %>%
   )
 ```
 
-
-#### Descriptive table (Supplement)
+##########################################################################################################
+# Table 1. Characteristics of primary series vaccine effectiveness studies reporting on country-specific# estimates.
+########################################################################################################
 
 
 ```{r}
-#Supplementary table 2
+#Table 1. Characteristics of primary series vaccine effectiveness studies reporting on country-specific estimates.
 
 # vaccine study distribution
 table_vacc <- COVID19VE_ineq_merged %>%
@@ -974,13 +895,12 @@ combined_GNI <- left_join(table_GNI1, table_GNI2)
 
 <!-- write.csv(supp_data, "Data/Processed/supplementary_data.csv") -->
 <!-- ``` -->
-
-
-
+#############################################################################################################
+# Fig. 3. Correlation between COVID-19 vaccine implementation metrics and per capita Gross National Income.# 
+###########################################################################################################
 ```{r}
-
-#Scatter plot + smooth line
-# x= GNI + y = date
+# Fig. 3. Correlation between COVID-19 vaccine implementation metrics and per capita Gross National Income. 
+# Build table
 scatter_milestone_country <- Ineq_merged %>%
   select(Country.Name, GNI_per_c_WB, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40, min_VE_pub_date) %>%
   mutate(
@@ -994,20 +914,48 @@ scatter_milestone_country <- Ineq_merged %>%
 
 scatter_milestone_country$milestone = factor(scatter_milestone_country$milestone, levels=c("min_vac_intro" , "owid_vac_F40" , "min_VE_pub_date"))
 
+#Correlation test
+spearman_corr0 <- scatter_milestone_country %>%
+  filter(!is.na(date)) %>% 
+  group_by(milestone) %>%
+  summarise(
+    cor_val = round(cor.test(GNI_per_c_WB, as.numeric(date), method = "spearman")$estimate, 2),
+    p_value = cor.test(GNI_per_c_WB, as.numeric(date), method = "spearman")$p.value,
+    nrow = sum(!is.na(as.numeric(date)) & !is.na(GNI_per_c_WB))
+  )
+
+#Label
+label_positions <- scatter_milestone_country %>%
+  group_by(milestone) %>%
+  summarise(
+    x_pos = max(log(GNI_per_c_WB), na.rm = TRUE),
+    y_pos = max(date, na.rm = TRUE),
+    .groups = "drop"
+  )
+
+#Add correlation (+labels) to the long data
+spearman_corr <- spearman_corr0 %>%
+  left_join(label_positions, by = "milestone") %>%
+  mutate(label = paste0("corr = ", cor_val))
+
+
+
+#Plot
 ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
-  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB)), alpha=0.8) +
-  geom_smooth(aes(
-    x = log(GNI_per_c_WB), y = date),
-    color = "black", 
-    linetype = "dotted", 
-    size = 0.5,     
-    se = TRUE,       
-    alpha = 0.3)+       
+  geom_point(aes(x = log(GNI_per_c_WB), y = date, color = as.factor(q_GNI_per_c_WB)), alpha = 0.8) +
+  geom_smooth(aes(x = log(GNI_per_c_WB), y = date),
+              color = "black", linetype = "dotted", size = 0.5,     
+              se = TRUE, alpha = 0.3) +
+  geom_text(data = spearman_corr,
+            aes(x = x_pos, y = y_pos, label = label),
+            inherit.aes = FALSE, hjust = 1, vjust = 1, size = 3) +
   facet_wrap(~ milestone, 
              scales = "free", 
-             labeller = labeller(milestone = c("min_vac_intro" = "Vaccine introduction", "owid_vac_F40" = "Vaccine scale-up (40%)" , "min_VE_pub_date"= "1st VE study publication"))) + 
-  scale_y_date(
-    limits = c(as.Date("2020-12-01"), NA),
+             labeller = labeller(
+               milestone = c("min_vac_intro" = "Vaccine introduction",
+                             "owid_vac_F40" = "Vaccine scale-up (40%)",
+                             "min_VE_pub_date"= "1st VE study publication"))) + 
+  scale_y_date(limits = c(as.Date("2020-12-01"), NA),
                date_labels = "%b/%Y") +
   labs(
     x = "GNI per capita (log)",
@@ -1018,22 +966,13 @@ ED_F0_scatterplot_GNI_milestone <- ggplot(scatter_milestone_country) +
   theme(
     strip.text = element_text(size = 10),
     legend.position = "bottom"
-  )+
-  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))
+  ) +
+  scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
+                     labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)"))
 
 ED_F0_scatterplot_GNI_milestone
 
-#Correlation test: for adding to the legend
-spearman_corr <- scatter_milestone_country %>%
-  filter(!is.na(date)) %>% 
-  group_by(milestone) %>%
-  summarise(
-    cor = cor.test(GNI_per_c_WB, as.numeric(date), method = "spearman")$estimate,
-    p_value = round(cor.test(GNI_per_c_WB, as.numeric(date), method = "spearman")$p.value, 3),
-    nrow = sum(!is.na(as.numeric(date)) & !is.na(GNI_per_c_WB))
-  )
 
-spearman_corr
 ```
 
 
@@ -1099,10 +1038,17 @@ curated_dataset_ineq_intro_scale_VE_prior_group<- left_join(ineq_intro_scale_VE,
 
 write.csv(curated_dataset_ineq_intro_scale_VE_prior_group, "Data/Curated_datasets/Ineq_merged_with_vaccine_intro_scale_plat_priority_groups_VE.csv")
 
+```
 
 
 
 
+```{r, session info}
+
+print(sessionInfo())
 
 ```
+
+
+
 

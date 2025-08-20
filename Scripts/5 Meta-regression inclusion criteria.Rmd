@@ -14,7 +14,8 @@ editor_options:
 
 #### Outputs
 - Final/VEmetareg_data.csv: Database of study groups eligible for meta-regression
-
+- Supplementary Table 4. Selection of comparisons eligible for meta-regression.
+- Supplementary Table 5.  Characteristics of primary series vaccine effectiveness studies included in meta-regression. 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -294,6 +295,10 @@ combined_GNI <- left_join(table_GNI1, table_GNI2)
 
 
 #### Model-specific eligibility checks
+
+#################################################################################
+# Supplementary Table 4. Selection of comparisons eligible for meta-regression. #
+################################################################################
 ```{r}
 model_check <- VEmetareg_data %>%
     group_by(outcome_final, variant_clean, clean_vaccine) %>%
@@ -388,10 +393,11 @@ write.csv(sensitivity_model_check, "Data/Processed/VE_sensitivity_model_check.cs
 # criteria met for 0 models 
 ```
 
-
-
+######################################################################################################
+# Supplementary Table 5.  Characteristics of primary series vaccine effectiveness studies included in meta-regression. 
+#####################################################################################################
 ```{r}
-#Supplementary table 4
+# Supplementary Table 5.  Characteristics of primary series vaccine effectiveness studies included in meta-regression.
 metareg_elegible <- read_csv("Data/Processed/COVID19VE_ineq_merged_filtered_eligible_selected.csv") 
 
 metareg_selected <- metareg_elegible %>% 
@@ -507,64 +513,11 @@ combined_GNI
 
 
 
+```{r, session info}
 
-
-```{r}
-# Extended Data Table X
-# A table listing all VE estimates by study would improve reproducibility and indicate which estimates were used or excluded.
-
-metareg <- VEmetareg_data0 %>%
-  select(
-    # Study Identification
-    Study_id_f,
-    `first author`,
-    `study design`,
-    n_row,
-    publication_date,
-    # Vaccination Details
-    clean_vaccine,
-    vac_type,
-    dose_number,
-    dose,
-    `dose interval`,
-    timing_of_dose_days,
-    # Population & Exposure
-    population_detail,
-    population_category,
-    historyofCOVID,
-    `max duration follow-up`,
-    # Outcomes
-    outcome_detail,
-    outcome_category,
-    outcome_final,
-    # Variant
-    variant_clean,
-    # Vaccine Effectiveness (VE)
-    VE,
-    LCL,
-    UCL,
-    # Country & Region Info
-    country_clean,
-    Country.Code,
-    continent,
-    Region,
-    # Economic Indicators
-    GNI_per_c_WB,
-    year_GNI,
-    Economy,
-    `Income group`,
-    q_GNI_per_c_WB
-  )
-  
-selected_studies_info <- metareg_elegible %>% 
-  select  (Study_id_f, n_row, min_period_days:sensitivity) %>% 
-  unique()
-
-
-metareg_selected_info <- left_join(metareg, selected_studies_info)
-
-
-write.csv(metareg_selected_info, "Data/Curated_datasets/Extended_Data_all_VE_estimates.csv")
+print(sessionInfo())
 
 ```
+
+
 

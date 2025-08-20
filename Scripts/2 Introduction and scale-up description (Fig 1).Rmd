@@ -15,7 +15,15 @@ editor_options:
 
 #### Outputs
 - Processed/Ineq_merged_with_vaccine_data.csv: Country-level income data with vaccine introduction and scale-up metrics 
-- Descriptive statistics on vaccine introduction and scale-up
+- Processed/Ineq_merged_with_vaccine_data_plus_priority_groups.csv: data inequalities OWID/WHO vaccine data + metrics + priority groups
+- Processed/Ineq_merged_with_vaccine_priority_groups.csv: priority groups metrics
+
+- Fig 4. Vaccine coverage in high-risk populations (health care workers and older adults) and overall. 
+- Supplementary Fig. 1. Percentage of countries using different vaccine products by income status.
+- Supplementary Fig. 7. Map of countries by per capita Gross National Income quartile.
+- Supplementary Table 1. Vaccine introduction and scale-up milestones by income status.
+- Supplementary Table 2. Vaccine coverage in high-risk populations and overall according to WHO/UNICEF database.
+- Supplementary Table 3.  Age thresholds for defining older adults.
 
 
 ```{r setup, include=FALSE}
@@ -30,10 +38,10 @@ library(tidyverse)
 library(readr)
 library(sf)
 library(rnaturalearth)
-library(RColorBrewer)
-library(lubridate)
-library(countrycode)
-library(patchwork)
+# library(RColorBrewer)
+# library(lubridate)
+# library(countrycode)
+# library(patchwork)
  
 ```
 
@@ -91,8 +99,8 @@ owid_vaccine_plat$iso_code[owid_vaccine_plat$location=="Kosovo"] = "XKX"
 
 #Data transformation for descriptive analysis
 
-
 ```{r}
+#OWID data country, milestone achievement date
 coverage <- owid_covid_data %>%
   group_by(location) %>%
   mutate(
@@ -106,16 +114,14 @@ coverage <- owid_covid_data %>%
   slice_tail() %>%  
   ungroup()
 
-# Merge data frames and calculate minimum vaccine campaign date (OWID vs WHO)
+# Merge data inequalities/OWID vac data / WHO vaccine data and calculate minimum vaccine campaign date (OWID vs WHO)
 Ineq_vaccine_coverage <- Ineq_merged %>%
   left_join(coverage, by = c("Country.Code" = "iso_code")) %>%
   left_join(WHO_covid_data, by = c("Country.Code" = "ISO3")) %>%
-  # Convert date columns to Date format
   mutate(
     who_vac_intro = as.Date(as.character(FIRST_VACCINE_DATE)),
     owid_vac_intro = as.Date(owid_vac_intro)
   ) %>%
-  # Calculate the date difference and minimum date
   mutate(
     min_vac_intro = pmin(owid_vac_intro, who_vac_intro, na.rm = TRUE),
     diff_owid_who_intro = as.numeric(owid_vac_intro - who_vac_intro)
@@ -132,19 +138,41 @@ Ineq_vaccine_coverage <- Ineq_merged %>%
     ) %>%
   select(-FIRST_VACCINE_DATE, -location)
 
+#Number countries with date in OWID or WHO
 table(Ineq_vaccine_coverage$owid_who)
-  
 
+# Countries with date in both 
+table(!is.na(
+  Ineq_vaccine_coverage[Ineq_vaccine_coverage$owid_who != "no date", "diff_owid_who_intro"]
+))
+
+# WHO/OWID date difference
+Ineq_vaccine_coverage %>%
+  summarise(
+    Q1     = quantile(diff_owid_who_intro, 0.25, na.rm = TRUE),
+    median = median(diff_owid_who_intro, na.rm = TRUE),
+    Q3     = quantile(diff_owid_who_intro, 0.75, na.rm = TRUE),
+    less_7_days = sum(Ineq_vaccine_coverage$diff_owid_who_intro < 8, na.rm = TRUE)
+  )
+
+#check owid-who
+summary_countries_who_owid <- Ineq_vaccine_coverage %>%
+  mutate(non_na = !is.na(diff_owid_who_intro)) %>%
+  group_by(non_na) %>% 
+  summarise(
+    count = n(),
+    median_diff = round(median(diff_owid_who_intro, na.rm = TRUE), 0),
+    q25_diff = round(quantile(diff_owid_who_intro, 0.25, na.rm = TRUE), 0),
+    q75_diff = round(quantile(diff_owid_who_intro, 0.75, na.rm = TRUE), 0),
+    less_7_days = sum(Ineq_vaccine_coverage$diff_owid_who_intro < 8, na.rm = TRUE)
+    )
 ```
 
 
-#################################################################################
-#Fig. 1. Global inequities in COVID-19 vaccine introduction and scale-up maps####
-#################################################################################
 
-
-# Data for Introduction and scale-up map
 ```{r}
+# + Vaccine Introduction and scale-up metrics data (for figures)
+
 #Create groups 
 Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>% 
   mutate(
@@ -195,113 +223,12 @@ Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>%
     )
   )
   
-
-#Geographical information
-
-countries <-  ne_countries(returnclass = "sf") %>% 
-  mutate(iso3c = countrycode(admin, origin = "country.name", destination = "iso3c")) %>% 
-  filter(iso3c!="ATA")
-  
-
-world_ineq_gral <- 
-  merge(countries, Ineq_vaccine_coverage, by.x = "iso3c", by.y = "Country.Code", all = TRUE)
-
-world_ineq_gral <- st_as_sf(world_ineq_gral)
-
-
 ```
 
 
-########################################################################################
-#### Fig 2. Global inequities in COVID-19 vaccine introduction and scale-up charts.#####
-########################################################################################
-
-## Fig 2.a:  Percentage of countries achieving vaccine introduction (left) and scale-up to 40% primary series coverage by 31 December 2021 (right) by GNIpc
-```{r}
-#Fig 2.a:  Percentage of countries achieving vaccine introduction (left) and scale-up to 40% primary series coverage by 31 December 2021 (right) by GNIpc
-
-summary_milestone_achieved <- Ineq_vaccine_coverage %>% 
-  group_by(q_GNI_per_c_WB) %>% 
-  summarise(
-    V1 = sum(V1_dummy == "yes"),
-    V40 = sum(V40_dummy == "yes"),
-    V70 = sum(V70_dummy == "yes"),
-    V1_nd = sum(V1_dummy_no_date == "yes"),
-    V40_nd = sum(V40_dummy_no_date == "yes"),
-    V70_nd = sum(V70_dummy_no_date == "yes"),
-    total = n(),
-    V1_per = round(sum(V1_dummy == "yes") / n() * 100, 1),
-    V40_per = round(sum(V40_dummy == "yes") / V1 * 100, 1),
-    V70_per = round(sum(V70_dummy == "yes") / V1 * 100, 1),
-    V1_per_nd = round(sum(V1_dummy_no_date == "yes") / n() * 100, 1),
-    V40_per_nd = round(sum(V40_dummy_no_date == "yes") / V1_nd * 100, 1),
-    V70_per_nd = round(sum(V70_dummy_no_date == "yes") / V1_nd * 100, 1),
-  )
-
-summary_milestone_achieved
-
-summary_milestone_achieved <- Ineq_vaccine_coverage %>% 
-  group_by(q_GNI_per_c_WB) %>% 
-  summarise(
-    V1 = sum(V1_dummy == "yes"),
-    V40 = sum(V40_dummy == "yes"),
-    V70 = sum(V70_dummy == "yes"),
-    V1_nd = sum(V1_dummy_no_date == "yes"),
-    V40_nd = sum(V40_dummy_no_date == "yes"),
-    V70_nd = sum(V70_dummy_no_date == "yes"),
-    total = n(),
-    V1_per = round(sum(V1_dummy == "yes") / n() * 100, 1),
-    V40_per = round(sum(V40_dummy == "yes") /sum(V1_dummy == "yes") * 100, 1),
-    V70_per = round(sum(V70_dummy == "yes") / V1 * 100, 1),
-    V1_per_nd = round(sum(V1_dummy_no_date == "yes") / n() * 100, 1),
-    V40_per_nd = round(sum(V40_dummy_no_date == "yes") / V1_nd * 100, 1),
-    V70_per_nd = round(sum(V70_dummy_no_date == "yes") / V1_nd * 100, 1),
-  )
-
-summary_milestone_achieved
-
-
-
-summary_milestone_achieved_l <- summary_milestone_achieved %>% 
-    pivot_longer(
-    cols = c(V1_per, V40_per),
-    names_to = "milestone",
-    values_to = "Value"
-  )
-
-summary_milestone_achieved_l
-
-
-```
-
-## Time to vaccine introduction (left) and scale-up (right) by GNIpc
-
-```{r}
-# Time to vaccine introduction (left) and scale-up (right) by GNIpc
-
-#Data for plot
-intro_scale_delay<- Ineq_vaccine_coverage %>%
-  mutate(
-    owid_vac_F40 = as.Date(owid_vac_F40)  ) %>% 
-  select(Country.Name, q_GNI_per_c_WB, min_vac_intro, owid_vac_F40) %>%
-  filter(!is.na(min_vac_intro)) %>%
-  pivot_longer(
-    cols = c(min_vac_intro, owid_vac_F40),
-    names_to = "Date",
-    values_to = "Value"
-  ) 
-
-# Set factor levels
- intro_scale_delay$Date = factor(intro_scale_delay$Date, levels = unique(intro_scale_delay$Date))
-
-```
-
-## 2.c Percentage of countries using different vaccine platforms by GNIpc 
 
 ```{r owid vacc plat}
-## 2.c Percentage of countries using different vaccine platforms by GNIpc
-
-#Data preparation
+# + Vaccine platforms (OWID) by GNIpc
 
 # List vaccines 
 unique(unlist(strsplit(paste(owid_vaccine_plat$vaccines, collapse = ', '), ", ")))
@@ -349,102 +276,19 @@ Ineq_vaccine_coverage_platform <- Ineq_vaccine_coverage %>%
                              `Medigen MVC-COV1901`==1 | `Instituto Finlay de Vacunas Soberana 01`==1 | `Biological E Corbevax`==1 | `Sanofi/GSK CoV2 preS dTM`==1 | `Medicago CoVLP`==1,1,0),
   )
 
-# Save output
+# Save output: data inequalities OWID/WHO vaccine data + metrics + platforms
 write.csv(Ineq_vaccine_coverage_platform, "Data/Processed/Ineq_merged_with_vaccine_data.csv")
 
-
-#Pivot longer + plat classification
-owid_vaccine_country_g <- Ineq_vaccine_coverage_platform %>% 
-    pivot_longer(
-    cols = `CIGB CIGB-66/Abdala`: `Valneva VLA2001`,
-    names_to = "vaccine",
-    values_to = "check",
-    values_drop_na = TRUE) %>% 
-  filter(
-    check== 1
-  ) %>% 
-  select(-check) %>%
-  mutate(
-    vac_type = case_when(
-      vaccine %in% c("BioNTech/Pfizer BNT162b2", "Moderna mRNA-1273") ~ "mRNA",
-      vaccine %in% c("Oxford/AstraZeneca ChAdOx1-S", "Janssen Ad26.COV2.S", "Gamaleya Gam-COVID-Vac/Sputnik V", "Cansino Ad5-nCoV") ~ "Vectored",
-      vaccine %in% c("Beijing/Sinopharm BBIBP-CorV", "Sinovac CoronaVac", "Bharat Covaxin/BBV152", "Wuhan/Sinopharm vaccine", "RIBSP Kazakhstan QazCovid-in", "Shifa Pharmed COVIran", "Erciyes TURKOVAC", "Shenzhen Kangtai KCONVAC", "Institute of Medical Biology CAMS vaccine", "Chumakov Center CoviVac", "Valneva VLA2001") ~ "Inactivated",
-      vaccine %in% c("Novavax NVX-CoV2373", "CIGB CIGB-66/Abdala", "Instituto Finlay de Vacunas Soberana 02", "AZLB ZF2001", "Vector Institute EpiVacCorona", "Medigen MVC-COV1901", "Instituto Finlay de Vacunas Soberana 01", "Biological E Corbevax", "Sanofi/GSK CoV2 preS dTM", "Medicago CoVLP") ~ "Protein",
-      TRUE ~ "Unknown"
-    )
-  ) 
-
-unique(owid_vaccine_country_g$vaccine)
-
-#Vaccine platform by GNI quartile
-summary_vac_plat_distrib_GNI <-owid_vaccine_country_g %>% 
-  select(
-    Country.Code, q_GNI_per_c_WB, vac_type
-  ) %>% 
-  distinct() %>% 
-  filter(
-    !is.na(q_GNI_per_c_WB)
-  ) %>%  
-  group_by(q_GNI_per_c_WB, vac_type) %>% 
-  summarise(total=n()) %>% 
-  filter(
-    vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored" |vac_type=="Protein"
-  ) %>% 
-  mutate(
-    countries_quartile=case_when(
-      q_GNI_per_c_WB == 1 ~ 50,
-      q_GNI_per_c_WB == 2 ~ 51,
-      q_GNI_per_c_WB == 3 ~ 51,
-      q_GNI_per_c_WB == 4 ~ 51
-    )
-  ) %>% 
-  mutate(
-    vac_type_per = round(total / countries_quartile * 100, 1),
-    ) 
-
-summary_vac_plat_distrib_GNI
-
-summary_vac_plat_distrib_GNI$vac_type <- factor(summary_vac_plat_distrib_GNI$vac_type, levels = c("mRNA", "Vectored", "Inactivated", "Protein"))
-
 ```
-
-############################
-#Global vaccine platform  #
-###########################
-
-```{r}
-#Global vaccine platform %
-summary_perc_by_plat <-owid_vaccine_country_g %>% 
-  select(
-    Country.Code, q_GNI_per_c_WB, vac_type
-  ) %>% 
-  distinct() %>% 
-  filter(
-    !is.na(q_GNI_per_c_WB)
-  ) %>%  
-  group_by(vac_type) %>% 
-  summarise(total=n()) %>% 
-  filter(
-    vac_type=="Inactivated" |vac_type=="mRNA" |vac_type=="Vectored" |vac_type=="Protein"
-  ) %>% 
-  mutate(
-    vac_type_per = round(total / 203 * 100, 1),
-    ) 
-
-summary_perc_by_plat
-
-
-```
-
-
 
 
 #######################################################################################################
-##Fig 3. Vaccine coverage in high-risk populations (health care workers and older adults) and overall.#
+##Fig 4. Vaccine coverage in high-risk populations (health care workers and older adults) and overall.#
 #######################################################################################################
 
 
 ```{r}
+#High priority metrics
 high_priority_metrics <- WHO_hcw_old_data %>% 
   arrange(date, iso) %>% 
   group_by(iso) %>% 
@@ -542,15 +386,13 @@ Ineq_vaccine_coverage <- Ineq_vaccine_coverage %>%
   ) %>%
   select(-ends_with('2023-11-01'))
   
-# Save output
+# Save output: data inequalities OWID/WHO vaccine data + metrics + priority groups
 write.csv(Ineq_vaccine_coverage, "Data/Processed/Ineq_merged_with_vaccine_data_plus_priority_groups.csv")
 ```
 
-# plot
-
 
 ```{r}
-#### Boxplot milestone December 2021/2023
+#### Boxplot milestone December 2021/2023 priority
 collated = rbind(
   Ineq_vaccine_coverage %>% mutate(coverage = `cov_hcw_cps_2021-12-01`, date = "December 2021", group = "HCWs"),
   Ineq_vaccine_coverage %>% mutate(coverage = `cov_hcw_cps_2023-12-01`, date = "December 2023", group = "HCWs"),
@@ -562,47 +404,104 @@ collated = rbind(
 
 collated$group = factor(collated$group, levels=unique(collated$group))
 
-ggplot(collated) +
+#Figure 4
+# 1) Labels: one count per quartile x date x group
+labels_df <- collated %>%
+  filter(!is.na(coverage)) %>%
+  mutate(q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels = c(1,2,3,4))) %>%
+  group_by(q_GNI_per_c_WB, date, group) %>%
+  summarise(n_points = n(), .groups = "drop")
+
+
+# 2) Your plot + label layer (placed at x = 105%)
+F4_priority_groups <- ggplot(collated) +
   geom_boxplot(aes(x = coverage*100, y = as.factor(q_GNI_per_c_WB)), outlier.shape = NA) +
-   geom_point(
+  geom_point(
     aes(
-     x = coverage*100, 
-     y = as.factor(q_GNI_per_c_WB),
-      #size = studies,
+      x = coverage*100, 
+      y = as.factor(q_GNI_per_c_WB),
       color = as.factor(q_GNI_per_c_WB)
     ),
     alpha = 0.5,
-    position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1) 
-  )+
+    position = position_jitterdodge(dodge.width = 0.5, jitter.width = 1)
+  ) +
+    geom_text(
+    data = labels_df,
+    aes(
+      y = as.factor(q_GNI_per_c_WB),
+      label = paste0("n=", n_points)
+    ),
+    x = 110,           # place just beyond the 100% tick
+    hjust = 0,
+    size = 3,
+    colour = "grey40", 
+    inherit.aes = FALSE
+  ) +
   scale_color_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866")) +
-  facet_grid(group~date)+
+  scale_x_continuous(breaks = seq(0, 100, 20)) +
+  facet_grid(group ~ date) +
   labs(#title = "Health Care workers",
-       x = "Primary series coverage (%)", 
-       y = "GNI quartile")  +
+    x = "Primary series coverage (%)", 
+    y = "GNI quartile"
+  ) +
   guides(color = "none") +
-  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) + 
-  theme_minimal() + 
+  scale_y_discrete(labels = c("1 (lower\nincome)", "2", "3", "4 (higher\nincome)")) +
+  coord_cartesian(xlim = c(0, 115), clip = "off") +  
+  theme_minimal() +
   theme(
-    panel.spacing = unit(1.5, "lines"),
+    panel.spacing = unit(2.0, "lines"),
     legend.position = "bottom",
-    axis.text = element_text(size = 9),# Adjust text size
-    strip.text = element_text(size = 10),# Adjust text size
-    legend.text = element_text(size = 8),# Adjust text size
-    legend.title = element_text(size = 9),  # Adjust legend title size
-    plot.title = element_text(size = 10) # Adjust plot title size
-  ) 
+    legend.text = element_text(size = 8),
+    legend.title = element_text(size = 9),
+    plot.title = element_text(size = 10),
+    plot.margin = margin(5.5, 40, 5.5, 5.5)
+  )
+
+F4_priority_groups
+
+# Info for manuscript
+n_by_gni_date_group <- collated %>%
+  filter(!is.na(coverage)) %>%
+  mutate(q_GNI_per_c_WB = factor(q_GNI_per_c_WB, levels = c(1,2,3,4))) %>%
+  group_by(q_GNI_per_c_WB, date, group) %>%
+  summarise(n_countries = n_distinct(Country.Name), .groups = "drop") %>%
+  complete(q_GNI_per_c_WB, date, group, fill = list(n_countries = 0)) %>%
+  arrange(group, date, q_GNI_per_c_WB)
+
+n_by_gni_date_group
 ```
 
 
 
 ###################################################################################################
-# Extended Data Fig. 1. Percentage of countries using different vaccine products by income status.#
+# Supplementary Fig. 1. Percentage of countries using different vaccine products by income status.#
 ###################################################################################################
 
 
-```{r Supplementary Figure 2}
-# Extended Data Fig. 1. Percentage of countries using different vaccine products by income status.
+```{r Supplementary Figure 1}
+# Supplementary Fig. 1. Percentage of countries using different vaccine products by income status.
+#Pivot longer + plat classification
+owid_vaccine_country_g <- Ineq_vaccine_coverage_platform %>% 
+    pivot_longer(
+    cols = `CIGB CIGB-66/Abdala`: `Valneva VLA2001`,
+    names_to = "vaccine",
+    values_to = "check",
+    values_drop_na = TRUE) %>% 
+  filter(
+    check== 1
+  ) %>% 
+  select(-check) %>%
+  mutate(
+    vac_type = case_when(
+      vaccine %in% c("BioNTech/Pfizer BNT162b2", "Moderna mRNA-1273") ~ "mRNA",
+      vaccine %in% c("Oxford/AstraZeneca ChAdOx1-S", "Janssen Ad26.COV2.S", "Gamaleya Gam-COVID-Vac/Sputnik V", "Cansino Ad5-nCoV") ~ "Vectored",
+      vaccine %in% c("Beijing/Sinopharm BBIBP-CorV", "Sinovac CoronaVac", "Bharat Covaxin/BBV152", "Wuhan/Sinopharm vaccine", "RIBSP Kazakhstan QazCovid-in", "Shifa Pharmed COVIran", "Erciyes TURKOVAC", "Shenzhen Kangtai KCONVAC", "Institute of Medical Biology CAMS vaccine", "Chumakov Center CoviVac", "Valneva VLA2001") ~ "Inactivated",
+      vaccine %in% c("Novavax NVX-CoV2373", "CIGB CIGB-66/Abdala", "Instituto Finlay de Vacunas Soberana 02", "AZLB ZF2001", "Vector Institute EpiVacCorona", "Medigen MVC-COV1901", "Instituto Finlay de Vacunas Soberana 01", "Biological E Corbevax", "Sanofi/GSK CoV2 preS dTM", "Medicago CoVLP") ~ "Protein",
+      TRUE ~ "Unknown"
+    )
+  ) 
 
+unique(owid_vaccine_country_g$vaccine)
 #Data preparation
 vac_prod_distrib_GNI <-owid_vaccine_country_g %>% 
   select(
@@ -672,13 +571,23 @@ ED_F1_vac_prod_distrib_GNI
 
 
 ########################################################################################
-# Extended Data Fig. 8. Map of countries by Gross National Income per capita quartile###
+# Supplementary Fig. 7. Map of countries by per capita Gross National Income quartile.###
 ########################################################################################
 
 
 ```{r}
-# Extended Data Fig. 8. Map of countries by Gross National Income per capita quartile
+# Supplementary Fig. 7. Map of countries by per capita Gross National Income quartile.
+#Geographical information
+countries <-  ne_countries(returnclass = "sf") %>% 
+  mutate(iso3c = countrycode(admin, origin = "country.name", destination = "iso3c")) %>% 
+  filter(iso3c!="ATA")
+  
 
+world_ineq_gral <- 
+  merge(countries, Ineq_vaccine_coverage, by.x = "iso3c", by.y = "Country.Code", all = TRUE)
+
+world_ineq_gral <- st_as_sf(world_ineq_gral)
+#Plot Map
 ED_F8_map_GNI_q <- ggplot(data = world_ineq_gral) +
   geom_sf(aes(fill = as.factor(q_GNI_per_c_WB)), position = "identity") + 
   scale_fill_manual(values = c("#77AADD","#44BB99","#AAAA00","#EE8866"),
@@ -705,13 +614,31 @@ ED_F8_map_GNI_q
 ##############################
 
 ########################################################################################
-#Extended Data Table 1 | Vaccine introduction and scale-up milestones by income status.#
+#Supplementary Table 1. Vaccine introduction and scale-up milestones by income status.#
 ########################################################################################
 # Summary vaccine introduction and scale-up
 
-
 ```{r}
-#median dates to built groups
+# Summary milestones
+summary_milestone_achieved <- Ineq_vaccine_coverage %>% 
+  group_by(q_GNI_per_c_WB) %>% 
+  summarise(
+    V1 = sum(V1_dummy == "yes"),
+    V40 = sum(V40_dummy == "yes"),
+    V70 = sum(V70_dummy == "yes"),
+    V1_nd = sum(V1_dummy_no_date == "yes"),
+    V40_nd = sum(V40_dummy_no_date == "yes"),
+    V70_nd = sum(V70_dummy_no_date == "yes"),
+    total = n(),
+    V1_per = round(sum(V1_dummy == "yes") / n() * 100, 1),
+    V40_per = round(sum(V40_dummy == "yes") / V1 * 100, 1),
+    V70_per = round(sum(V70_dummy == "yes") / V1 * 100, 1),
+    V1_per_nd = round(sum(V1_dummy_no_date == "yes") / n() * 100, 1),
+    V40_per_nd = round(sum(V40_dummy_no_date == "yes") / V1_nd * 100, 1),
+    V70_per_nd = round(sum(V70_dummy_no_date == "yes") / V1_nd * 100, 1),
+  )
+
+summary_milestone_achieved
 
 #Percentage milestone with and without considering date of achievement
 table_milestone_achieved <- summary_milestone_achieved %>% 
@@ -882,30 +809,123 @@ full_milestone_summary_flip_ordered
 
 ```
 
-########################
-#Metrics#
-############################
 
+
+#################################################################################################################
+#Supplementary Table 2. Vaccine coverage in high-risk populations and overall according to WHO/UNICEF database..#
+#################################################################################################################
 ```{r}
-#check owid-who
-summary_countries_who_owid <- Ineq_vaccine_coverage %>%
-  mutate(non_na = !is.na(diff_owid_who_intro)) %>%
-  group_by(non_na) %>% 
-  summarise(
-    count = n(),
-    median_diff = round(median(diff_owid_who_intro, na.rm = TRUE), 0),
-    q25_diff = round(quantile(diff_owid_who_intro, 0.25, na.rm = TRUE), 0),
-    q75_diff = round(quantile(diff_owid_who_intro, 0.75, na.rm = TRUE), 0),
-    less_7_days = sum(Ineq_vaccine_coverage$diff_owid_who_intro < 8, na.rm = TRUE)
-    )
+#Overall coverage dec 2021/ 2023
+summary_overall_cov_21_23 <- collated %>%
+  select(iso3c, q_GNI_per_c_WB, perc_HCW, perc_old, `cov_hcw_cps_2023-12-01`:`cov_tot_cps_2021-12-01`) %>% 
+  unique() %>% 
+  filter(!is.na(iso3c)) %>% 
+  group_by(q_GNI_per_c_WB) %>%
+  summarize(
+    n = length(q_GNI_per_c_WB),
+    n_hcw_dec21 = sum(!is.na(`cov_hcw_cps_2021-12-01`)),
+    n_hcw_dec23 = sum(!is.na(`cov_hcw_cps_2023-12-01`)),
+    n_old_dec21 = sum(!is.na(`cov_old_cps_2021-12-01`)),
+    n_old_dec23 = sum(!is.na(`cov_old_cps_2023-12-01`)),
+    n_tot_dec21 = sum(!is.na(`cov_tot_cps_2021-12-01`)),
+    n_tot_dec23 = sum(!is.na(`cov_tot_cps_2023-12-01`)),
+    median_hcw_perc = round((median(as.numeric(`perc_HCW`), na.rm = TRUE)*100),1),
+    q25_hcw_perc = round((quantile(as.numeric(`perc_HCW`), 0.25, na.rm = TRUE)*100),1),
+    q75_hcw_perc = round((quantile(as.numeric(`perc_HCW`), 0.75, na.rm = TRUE)*100),1),
+    median_old_perc = round((median(as.numeric(`perc_old`), na.rm = TRUE)*100),0),
+    q25_old_perc = round((quantile(as.numeric(`perc_old`), 0.25, na.rm = TRUE)*100),0),
+    q75_old_perc = round((quantile(as.numeric(`perc_old`), 0.75, na.rm = TRUE)*100),0),
+    median_hcw_dec21 = round((median(as.numeric(`cov_hcw_cps_2021-12-01`), na.rm = TRUE)*100),0),
+    q25_hcw_dec21 = round((quantile(as.numeric(`cov_hcw_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_hcw_dec21 = round((quantile(as.numeric(`cov_hcw_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
+    median_hcw_dec23 = round((median(as.numeric(`cov_hcw_cps_2023-12-01`), na.rm = TRUE)*100),0),
+    q25_hcw_dec23 = round((quantile(as.numeric(`cov_hcw_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_hcw_dec23 = round((quantile(as.numeric(`cov_hcw_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0),
+    median_old_dec21 = round((median(as.numeric(`cov_old_cps_2021-12-01`), na.rm = TRUE)*100),0),
+    q25_old_dec21 = round((quantile(as.numeric(`cov_old_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_old_dec21 = round((quantile(as.numeric(`cov_old_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
+    median_old_dec23 = round((median(as.numeric(`cov_old_cps_2023-12-01`), na.rm = TRUE)*100),0),
+    q25_old_dec23 = round((quantile(as.numeric(`cov_old_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_old_dec23 = round((quantile(as.numeric(`cov_old_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0),
+    median_tot_dec21 = round((median(as.numeric(`cov_tot_cps_2021-12-01`), na.rm = TRUE)*100),0),
+    q25_tot_dec21 = round((quantile(as.numeric(`cov_tot_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_tot_dec21 = round((quantile(as.numeric(`cov_tot_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
+    median_tot_dec23 = round((median(as.numeric(`cov_tot_cps_2023-12-01`), na.rm = TRUE)*100),0),
+    q25_tot_dec23 = round((quantile(as.numeric(`cov_tot_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
+    q75_tot_dec23 = round((quantile(as.numeric(`cov_tot_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0)
+  ) %>% 
+  mutate(
+    hcw_perc = paste0( median_hcw_perc, "% (", q25_hcw_perc, "%-", q75_hcw_perc, "%)"),
+    hcw_dec21 = paste0( median_hcw_dec21, "% (", q25_hcw_dec21, "%-", q75_hcw_dec21, "%)"),
+    hcw_dec23 = paste0( median_hcw_dec23, "% (", q25_hcw_dec23, "%-", q75_hcw_dec23, "%)"),
+    old_perc = paste0( median_old_perc, "% (", q25_old_perc, "%-", q75_old_perc, "%)"),
+    old_dec21 = paste0( median_old_dec21, "% (", q25_old_dec21, "%-", q75_old_dec21, "%)"),
+    old_dec23 = paste0( median_old_dec23, "% (", q25_old_dec23, "%-", q75_old_dec23, "%)"),
+    tot_dec21 = paste0( median_tot_dec21, "% (", q25_tot_dec21, "%-", q75_tot_dec21, "%)"),
+    tot_dec23 = paste0( median_tot_dec23, "% (", q25_tot_dec23, "%-", q75_tot_dec23, "%)")
+  ) %>% 
+  select(q_GNI_per_c_WB:n_tot_dec23, hcw_perc:tot_dec23) 
+summary_overall_cov_21_23
+```
+
+
+###################################################################
+#Supplementary Table 3.  Age thresholds for defining older adults.#
+###################################################################
+
+## Description of definitions for older age by GNI
+```{r}
+# Review unique values used for age criteria
+unique(Ineq_vaccine_coverage$`pol_age_old_2021-12-01`)
+unique(Ineq_vaccine_coverage$`pol_age_old_2023-12-01`)
+
+# Re-assign 0s to NAs
+Ineq_vaccine_coverage$`pol_age_old_2021-12-01`[Ineq_vaccine_coverage$`pol_age_old_2021-12-01`==0] = NA
+Ineq_vaccine_coverage$`pol_age_old_2023-12-01`[Ineq_vaccine_coverage$`pol_age_old_2023-12-01`==0] = NA
+
+# Re-assign to not reported if no coverage data
+Ineq_vaccine_coverage$`pol_age_old_2021-12-01`[is.na(Ineq_vaccine_coverage$`cov_old_cps_2021-12-01`)] = "coverage not reported"
+Ineq_vaccine_coverage$`pol_age_old_2023-12-01`[is.na(Ineq_vaccine_coverage$`cov_old_cps_2023-12-01`)] = "coverage not reported"
+
+# Re-assign to 'not defined' if coverage reported without definition
+Ineq_vaccine_coverage$`pol_age_old_2021-12-01`[!is.na(Ineq_vaccine_coverage$`cov_old_cps_2021-12-01`) & is.na(Ineq_vaccine_coverage$`pol_age_old_2021-12-01`)] = "coverage reported without definition"
+Ineq_vaccine_coverage$`pol_age_old_2023-12-01`[!is.na(Ineq_vaccine_coverage$`cov_old_cps_2023-12-01`) & is.na(Ineq_vaccine_coverage$`pol_age_old_2023-12-01`)] = "coverage reported without definition"
+
+# Tabulate criteria by GNI
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, Ineq_vaccine_coverage$`pol_age_old_2021-12-01`)
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, Ineq_vaccine_coverage$`pol_age_old_2023-12-01`)
+
+# Tabulate N reporting
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_hcw_cps_2021-12-01`))
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_hcw_cps_2023-12-01`))
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_old_cps_2021-12-01`))
+table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_old_cps_2023-12-01`))
 ```
 
 
 
+#########################
+#For supplementary database#
+########################
 
-#################################################################################################################
-#Extended Data Table 2 | Vaccine coverage in high-risk populations and overall according to WHO/UNICEF database.#
-#################################################################################################################
+
+```{r}
+# Supplementary table Intro+Scale-up
+for_sup_table_risk_pop <- Ineq_vaccine_coverage %>%
+  select(
+    Country.Code, vac_intro_hcw, vac_F40_hcw, vac_F70_hcw, 
+    vac_intro_old, vac_F40_old, vac_F70_old, 
+    perc_HCW, perc_old, 
+    `cov_hcw_cps_2023-12-01`:`pol_age_old_source_2021-12-01`
+  )
+
+write.csv(for_sup_table_risk_pop, "Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv")
+```
+
+###############
+#Other metrics#
+###############
+
 
 ```{r}
 # HCW
@@ -1036,107 +1056,10 @@ old_milestone_achieved
 
 ```
 
-## Description of definitions for older age by GNI
-```{r}
-# Review unique values used for age criteria
-unique(Ineq_vaccine_coverage$`pol_age_old_2021-12-01`)
-unique(Ineq_vaccine_coverage$`pol_age_old_2023-12-01`)
 
-# Re-assign 0s to NAs
-Ineq_vaccine_coverage$`pol_age_old_2021-12-01`[Ineq_vaccine_coverage$`pol_age_old_2021-12-01`==0] = NA
-Ineq_vaccine_coverage$`pol_age_old_2023-12-01`[Ineq_vaccine_coverage$`pol_age_old_2023-12-01`==0] = NA
-
-# Re-assign to not reported if no coverage data
-Ineq_vaccine_coverage$`pol_age_old_2021-12-01`[is.na(Ineq_vaccine_coverage$`cov_old_cps_2021-12-01`)] = "coverage not reported"
-Ineq_vaccine_coverage$`pol_age_old_2023-12-01`[is.na(Ineq_vaccine_coverage$`cov_old_cps_2023-12-01`)] = "coverage not reported"
-
-# Re-assign to 'not defined' if coverage reported without definition
-Ineq_vaccine_coverage$`pol_age_old_2021-12-01`[!is.na(Ineq_vaccine_coverage$`cov_old_cps_2021-12-01`) & is.na(Ineq_vaccine_coverage$`pol_age_old_2021-12-01`)] = "coverage reported without definition"
-Ineq_vaccine_coverage$`pol_age_old_2023-12-01`[!is.na(Ineq_vaccine_coverage$`cov_old_cps_2023-12-01`) & is.na(Ineq_vaccine_coverage$`pol_age_old_2023-12-01`)] = "coverage reported without definition"
-
-# Tabulate criteria by GNI
-table(Ineq_vaccine_coverage$q_GNI_per_c_WB, Ineq_vaccine_coverage$`pol_age_old_2021-12-01`)
-table(Ineq_vaccine_coverage$q_GNI_per_c_WB, Ineq_vaccine_coverage$`pol_age_old_2023-12-01`)
-
-# Tabulate N reporting
-table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_hcw_cps_2021-12-01`))
-table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_hcw_cps_2023-12-01`))
-table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_old_cps_2021-12-01`))
-table(Ineq_vaccine_coverage$q_GNI_per_c_WB, !is.na(Ineq_vaccine_coverage$`cov_old_cps_2023-12-01`))
+# Session info
+```{r, session info}
+print(sessionInfo())
 ```
 
-
-```{r}
-#Overall coverage dec 2021/ 2023
-summary_overall_cov_21_23 <- collated %>%
-  select(iso3c, q_GNI_per_c_WB, perc_HCW, perc_old, `cov_hcw_cps_2023-12-01`:`cov_tot_cps_2021-12-01`) %>% 
-  unique() %>% 
-  filter(!is.na(iso3c)) %>% 
-  group_by(q_GNI_per_c_WB) %>%
-  summarize(
-    n = length(q_GNI_per_c_WB),
-    n_hcw_dec21 = sum(!is.na(`cov_hcw_cps_2021-12-01`)),
-    n_hcw_dec23 = sum(!is.na(`cov_hcw_cps_2023-12-01`)),
-    n_old_dec21 = sum(!is.na(`cov_old_cps_2021-12-01`)),
-    n_old_dec23 = sum(!is.na(`cov_old_cps_2023-12-01`)),
-    n_tot_dec21 = sum(!is.na(`cov_tot_cps_2021-12-01`)),
-    n_tot_dec23 = sum(!is.na(`cov_tot_cps_2023-12-01`)),
-    median_hcw_perc = round((median(as.numeric(`perc_HCW`), na.rm = TRUE)*100),1),
-    q25_hcw_perc = round((quantile(as.numeric(`perc_HCW`), 0.25, na.rm = TRUE)*100),1),
-    q75_hcw_perc = round((quantile(as.numeric(`perc_HCW`), 0.75, na.rm = TRUE)*100),1),
-    median_old_perc = round((median(as.numeric(`perc_old`), na.rm = TRUE)*100),0),
-    q25_old_perc = round((quantile(as.numeric(`perc_old`), 0.25, na.rm = TRUE)*100),0),
-    q75_old_perc = round((quantile(as.numeric(`perc_old`), 0.75, na.rm = TRUE)*100),0),
-    median_hcw_dec21 = round((median(as.numeric(`cov_hcw_cps_2021-12-01`), na.rm = TRUE)*100),0),
-    q25_hcw_dec21 = round((quantile(as.numeric(`cov_hcw_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
-    q75_hcw_dec21 = round((quantile(as.numeric(`cov_hcw_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
-    median_hcw_dec23 = round((median(as.numeric(`cov_hcw_cps_2023-12-01`), na.rm = TRUE)*100),0),
-    q25_hcw_dec23 = round((quantile(as.numeric(`cov_hcw_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
-    q75_hcw_dec23 = round((quantile(as.numeric(`cov_hcw_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0),
-    median_old_dec21 = round((median(as.numeric(`cov_old_cps_2021-12-01`), na.rm = TRUE)*100),0),
-    q25_old_dec21 = round((quantile(as.numeric(`cov_old_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
-    q75_old_dec21 = round((quantile(as.numeric(`cov_old_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
-    median_old_dec23 = round((median(as.numeric(`cov_old_cps_2023-12-01`), na.rm = TRUE)*100),0),
-    q25_old_dec23 = round((quantile(as.numeric(`cov_old_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
-    q75_old_dec23 = round((quantile(as.numeric(`cov_old_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0),
-    median_tot_dec21 = round((median(as.numeric(`cov_tot_cps_2021-12-01`), na.rm = TRUE)*100),0),
-    q25_tot_dec21 = round((quantile(as.numeric(`cov_tot_cps_2021-12-01`), 0.25, na.rm = TRUE)*100),0),
-    q75_tot_dec21 = round((quantile(as.numeric(`cov_tot_cps_2021-12-01`), 0.75, na.rm = TRUE)*100),0),
-    median_tot_dec23 = round((median(as.numeric(`cov_tot_cps_2023-12-01`), na.rm = TRUE)*100),0),
-    q25_tot_dec23 = round((quantile(as.numeric(`cov_tot_cps_2023-12-01`), 0.25, na.rm = TRUE)*100),0),
-    q75_tot_dec23 = round((quantile(as.numeric(`cov_tot_cps_2023-12-01`), 0.75, na.rm = TRUE)*100),0)
-  ) %>% 
-  mutate(
-    hcw_perc = paste0( median_hcw_perc, "% (", q25_hcw_perc, "%-", q75_hcw_perc, "%)"),
-    hcw_dec21 = paste0( median_hcw_dec21, "% (", q25_hcw_dec21, "%-", q75_hcw_dec21, "%)"),
-    hcw_dec23 = paste0( median_hcw_dec23, "% (", q25_hcw_dec23, "%-", q75_hcw_dec23, "%)"),
-    old_perc = paste0( median_old_perc, "% (", q25_old_perc, "%-", q75_old_perc, "%)"),
-    old_dec21 = paste0( median_old_dec21, "% (", q25_old_dec21, "%-", q75_old_dec21, "%)"),
-    old_dec23 = paste0( median_old_dec23, "% (", q25_old_dec23, "%-", q75_old_dec23, "%)"),
-    tot_dec21 = paste0( median_tot_dec21, "% (", q25_tot_dec21, "%-", q75_tot_dec21, "%)"),
-    tot_dec23 = paste0( median_tot_dec23, "% (", q25_tot_dec23, "%-", q75_tot_dec23, "%)")
-  ) %>% 
-  select(q_GNI_per_c_WB:n_tot_dec23, hcw_perc:tot_dec23) 
-summary_overall_cov_21_23
-```
-
-
-
-#########################
-#For supplementary database#
-########################
-
-
-```{r}
-# Supplementary table Intro+Scale-up
-for_sup_table_risk_pop <- Ineq_vaccine_coverage %>%
-  select(
-    Country.Code, vac_intro_hcw, vac_F40_hcw, vac_F70_hcw, 
-    vac_intro_old, vac_F40_old, vac_F70_old, 
-    perc_HCW, perc_old, 
-    `cov_hcw_cps_2023-12-01`:`pol_age_old_source_2021-12-01`
-  )
-
-write.csv(for_sup_table_risk_pop, "Data/Processed/Ineq_merged_with_vaccine_priority_groups.csv")
-```
 
