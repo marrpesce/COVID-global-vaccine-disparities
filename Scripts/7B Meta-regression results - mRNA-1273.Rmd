@@ -22,7 +22,7 @@ knitr::opts_chunk$set(echo = TRUE)
 # select vaccine
 selected_vaccine = "Moderna mRNA-1273" # values: "BioNTech/Pfizer BNT162b2" "Oxford/AstraZeneca ChAdOx1-S" "Moderna mRNA-1273"
 simple_name = "mRNA-1273" # for file outputs 
-fup_sensitivity = TRUE # set to true to run sensitivity
+fup_sensitivity = FALSE # set to true to run sensitivity
 ```
 
 

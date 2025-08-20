@@ -16,7 +16,7 @@ editor_options:
 #### Outputs
 - Processed/COVID_VEcleaned.csv: Cleaned View-Hub VE data
 - Processed/COVID19VE_ineq_merged.csv: View-Hub VE data merged with country income data
-
+- Curated_datasets/VE_curated_prefilter.csv: Studies premodel filter
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
