@@ -19,7 +19,7 @@ We linked large public datasets to systematically quantify global disparities in
     - VIEW-hub living literature review (Input/WeeklySummary_COVID19_VE_Studies_20230622.xlsx) as of 11 January 2024
   
   - **Country-level income status (2019):**
-    - World Bank estimates of Gross National Income (GNI) per capita based on purchasing power parity method (Input/inequalities databases/GNI per capita (ppp)/GNI_per_c.csv) 
+    - World Bank estimates of Gross National Income (GNI) per capita based on Atlas method (Input/inequalities databases/WB_GNI_Atlas/GNI_per_c.csv) 
 
 ## Scripts
    
@@ -40,6 +40,5 @@ We linked large public datasets to systematically quantify global disparities in
     - "6 Meta-regression variables.Rmd",
     - "7A Meta-regression results - BNT162b2.Rmd",
     - "7B Meta-regression results - mRNA-1273.Rmd",
-    - "7C Meta-regression results - ChAdOx1-S.Rmd",
-    - "7D Meta-regression results - Ad26.COV2.S.Rmd", and
+    - "7C Meta-regression results - ChAdOx1-S.Rmd", and
     - "8 Meta-regression summary.Rmd"
