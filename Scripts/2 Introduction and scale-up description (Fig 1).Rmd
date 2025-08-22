@@ -412,8 +412,10 @@ labels_df <- collated %>%
   group_by(q_GNI_per_c_WB, date, group) %>%
   summarise(n_points = n(), .groups = "drop")
 
+# Set upper limit at 1 for plotting
+collated$coverage[collated$coverage>1] = 1 
 
-# 2) Your plot + label layer (placed at x = 105%)
+# 2) Plot
 F4_priority_groups <- ggplot(collated) +
   geom_boxplot(aes(x = coverage*100, y = as.factor(q_GNI_per_c_WB)), outlier.shape = NA) +
   geom_point(
